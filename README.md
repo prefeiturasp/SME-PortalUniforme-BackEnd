@@ -10,7 +10,7 @@ Versão: 0.1.0
 
 ## Release Notes
 
-### 0.1.0 - dd/mm/aaaa - Sprint 1
+### 0.1.0 - 31/01/2020 - Sprint 1
 * Portal do programa 
 * Inscrição de proponentes a fornecedor de uniformes
 
