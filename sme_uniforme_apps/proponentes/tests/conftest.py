@@ -41,6 +41,7 @@ def loja_fisica(proponente):
     return baker.make(
         'Loja',
         proponente=proponente,
+        nome_fantasia='Loja Teste',
         cep='27600-000',
         endereco='Rua Teste',
         bairro='Centro',
