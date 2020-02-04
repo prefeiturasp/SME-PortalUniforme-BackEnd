@@ -24,3 +24,4 @@ def test_loja_serializer(loja_fisica):
     assert loja_serializer.data['numero_iptu'] is not None
     assert loja_serializer.data['telefone']
     assert loja_serializer.data['nome_fantasia']
+    assert loja_serializer.data['foto_fachada']

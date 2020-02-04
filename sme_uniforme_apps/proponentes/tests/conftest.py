@@ -37,7 +37,12 @@ def uniforme_camisa():
 
 
 @pytest.fixture
-def loja_fisica(proponente):
+def arquivo():
+    return SimpleUploadedFile(f'anexo_teste.txt', bytes(f'CONTEUDO TESTE TESTE TESTE', encoding="utf-8"))
+
+
+@pytest.fixture
+def loja_fisica(proponente, arquivo):
     return baker.make(
         'Loja',
         proponente=proponente,
@@ -47,14 +52,9 @@ def loja_fisica(proponente):
         bairro='Centro',
         numero='123',
         complemento='loja 1',
-        telefone='(11) 4565-9876'
-
+        telefone='(11) 4565-9876',
+        foto_fachada=arquivo,
     )
-
-
-@pytest.fixture
-def arquivo():
-    return SimpleUploadedFile(f'anexo_teste.txt', bytes(f'CONTEUDO TESTE TESTE TESTE', encoding="utf-8"))
 
 
 @pytest.fixture

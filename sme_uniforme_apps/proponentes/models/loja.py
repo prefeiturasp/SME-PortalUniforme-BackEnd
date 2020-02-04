@@ -30,6 +30,8 @@ class Loja(ModeloBase):
         "Telefone", max_length=20, validators=[phone_validation], blank=True, null=True, default=""
     )
 
+    foto_fachada = models.FileField('Foto da fachada da loja', blank=True, null=True)
+
     def __str__(self):
         return f"{self.nome_fantasia}"
 
