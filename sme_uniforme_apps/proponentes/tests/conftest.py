@@ -58,10 +58,12 @@ def loja_fisica(proponente, arquivo):
 
 
 @pytest.fixture
-def anexo(proponente, arquivo):
+def anexo(proponente, arquivo, tipo_documento):
     return baker.make(
         'Anexo',
-        arquivo=arquivo
+        arquivo=arquivo,
+        proponente=proponente,
+        tipo_documento=tipo_documento
     )
 
 
