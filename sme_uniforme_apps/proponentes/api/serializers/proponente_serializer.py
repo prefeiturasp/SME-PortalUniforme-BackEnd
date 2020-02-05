@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from ...models import Proponente, Anexo
+from ...api.serializers.anexo_serializer import AnexoSerializer
+from ...api.serializers.loja_serializer import LojaSerializer, LojaCreateSerializer
 from ...api.serializers.oferta_de_uniforme_serializer import (OfertaDeUniformeSerializer,
                                                               OfertaDeUniformeCreateSerializer)
-from ...api.serializers.loja_serializer import LojaSerializer, LojaCreateSerializer
-from ...api.serializers.anexo_serializer import AnexoSerializer
+from ...models import Proponente, Anexo
 
 
 class ProponenteSerializer(serializers.ModelSerializer):
@@ -31,7 +31,6 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         arquivos_anexos = validated_data.pop('arquivos_anexos', [])
-        meios_de_recebimento_list = validated_data.pop('meios_de_recebimento', [])
         ofertas_de_uniformes = validated_data.pop('ofertas_de_uniformes')
         lojas = validated_data.pop('lojas')
 
@@ -58,8 +57,6 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
                 raise ValidationError("O tamanho total máximo dos arquivos é 10MB")
 
             Anexo.objects.create(proponente=proponente, arquivo=anexo.get("arquivo"))
-
-        proponente.meios_de_recebimento.set(meios_de_recebimento_list)
 
         return proponente
 
