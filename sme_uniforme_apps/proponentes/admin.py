@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import (Proponente, OfertaDeUniforme, Loja, Anexo, ListaNegra)
-
+from .models import (Proponente, OfertaDeUniforme, Loja, Anexo, ListaNegra, TipoDocumento)
 from .services import cnpj_esta_bloqueado
 
 
@@ -86,3 +85,11 @@ class LojaAdmin(admin.ModelAdmin):
     ordering = ('nome_fantasia',)
     search_fields = ('proponente__uuid', 'nome_fantasia',)
     list_filter = ('bairro',)
+
+
+@admin.register(TipoDocumento)
+class TipoDocumentoAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'obrigatorio',)
+    ordering = ('nome',)
+    search_fields = ('nome',)
+    list_filter = ('obrigatorio',)

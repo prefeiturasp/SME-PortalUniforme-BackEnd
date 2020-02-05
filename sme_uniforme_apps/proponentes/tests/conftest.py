@@ -98,3 +98,12 @@ def proponente_bloqueado(cnpj_bloqueado, lista_negra):
         email='bloqueado@teste.com',
         responsavel='José Bloqueio da Silva',
     )
+
+
+@pytest.fixture
+def tipo_documento():
+    return baker.make(
+        'TipoDocumento',
+        nome='Certidão Negativa',
+        obrigatorio=True,
+    )
