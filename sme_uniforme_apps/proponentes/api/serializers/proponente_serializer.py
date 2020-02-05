@@ -5,7 +5,7 @@ from ...api.serializers.anexo_serializer import AnexoSerializer
 from ...api.serializers.loja_serializer import LojaSerializer, LojaCreateSerializer
 from ...api.serializers.oferta_de_uniforme_serializer import (OfertaDeUniformeSerializer,
                                                               OfertaDeUniformeCreateSerializer)
-from ...models import Proponente, Anexo
+from ...models import Proponente, Anexo, TipoDocumento
 
 
 class ProponenteSerializer(serializers.ModelSerializer):
@@ -21,12 +21,22 @@ class ProponenteSerializer(serializers.ModelSerializer):
 
 
 class ProponenteCreateSerializer(serializers.ModelSerializer):
-
     arquivos_anexos = serializers.ListField(
         child=AnexoSerializer()
     )
     ofertas_de_uniformes = OfertaDeUniformeCreateSerializer(many=True)
     lojas = LojaCreateSerializer(many=True)
+
+    @staticmethod
+    def falta_documento_obrigatorio(arquivos_anexos):
+        tipos_documentos_obrigatorios = TipoDocumento.tipos_obrigatorios()
+        for anexo in arquivos_anexos:
+            tipos_documentos_obrigatorios.discard(anexo.get("tipo_documento").id)
+
+        if tipos_documentos_obrigatorios:
+            return TipoDocumento.objects.get(id=next(iter(tipos_documentos_obrigatorios)))
+        else:
+            return None
 
     def create(self, validated_data):
 
@@ -48,15 +58,22 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
             lojas_lista.append(loja_object)
         proponente.lojas.set(lojas_lista)
 
+        documento_faltante = self.falta_documento_obrigatorio(arquivos_anexos)
+        if documento_faltante:
+            raise ValidationError(f'Não foi enviado o documento {documento_faltante}.')
+
         tamanho_total_dos_arquivos = 0
-        print('inicio', arquivos_anexos)
         for anexo in arquivos_anexos:
             file_size = anexo.get('arquivo').size
             tamanho_total_dos_arquivos += file_size
             if tamanho_total_dos_arquivos > 10485760:
                 raise ValidationError("O tamanho total máximo dos arquivos é 10MB")
 
-            Anexo.objects.create(proponente=proponente, arquivo=anexo.get("arquivo"))
+            Anexo.objects.create(
+                proponente=proponente,
+                arquivo=anexo.get("arquivo"),
+                tipo_documento=anexo.get("tipo_documento")
+            )
 
         return proponente
 

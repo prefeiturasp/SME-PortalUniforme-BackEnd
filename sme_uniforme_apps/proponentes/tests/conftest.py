@@ -109,3 +109,12 @@ def tipo_documento():
         nome='Certidão Negativa',
         obrigatorio=True,
     )
+
+
+@pytest.fixture
+def tipo_documento_nao_obrigatorio():
+    return baker.make(
+        'TipoDocumento',
+        nome='Carta de Recomendação',
+        obrigatorio=False,
+    )
