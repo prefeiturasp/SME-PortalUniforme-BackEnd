@@ -39,15 +39,19 @@ def payload_arquivos_anexos_nao_faltando_documentos_obrigatorios(tipo_documento,
 
 
 @pytest.fixture
-def payload_ofertas_de_uniformes(uniforme_camisa, uniforme_calca):
+def payload_ofertas_de_uniformes(uniforme_camisa, uniforme_calca, uniforme_tenis):
     return [
         {
             "preco": "100.00",
-            "uniforme": uniforme_calca.id
+            "uniforme": uniforme_calca.id,
         },
         {
             "preco": "200.00",
             "uniforme": uniforme_camisa.id
+        },
+        {
+            "preco": "300.00",
+            "uniforme": uniforme_tenis.id
         }
     ]
 

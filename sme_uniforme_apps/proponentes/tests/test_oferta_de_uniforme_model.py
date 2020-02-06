@@ -1,11 +1,8 @@
 import pytest
-
 from django.contrib import admin
-from model_bakery import baker
 
-from ..models import OfertaDeUniforme
 from ..admin import OfertaDeUniformeAdmin
-
+from ..models import OfertaDeUniforme
 
 pytestmark = pytest.mark.django_db
 

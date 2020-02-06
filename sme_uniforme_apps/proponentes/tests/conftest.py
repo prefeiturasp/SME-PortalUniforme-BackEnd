@@ -1,8 +1,8 @@
 import pytest
-
 from django.core.files.uploadedfile import SimpleUploadedFile
-
 from model_bakery import baker
+
+from ...core.models import Uniforme
 
 
 @pytest.fixture
@@ -28,12 +28,46 @@ def cnpj_bloqueado():
 
 @pytest.fixture
 def uniforme_calca():
-    return baker.make('Uniforme', nome='Calça')
+    return baker.make(
+        'Uniforme',
+        nome='Calça',
+        categoria=Uniforme.CATEGORIA_MALHARIA,
+        unidade=Uniforme.UNIDADE_UNIDADE,
+        quantidade=1
+    )
 
 
 @pytest.fixture
 def uniforme_camisa():
-    return baker.make('Uniforme', nome='Camisa')
+    return baker.make(
+        'Uniforme',
+        nome='Camisa',
+        categoria=Uniforme.CATEGORIA_MALHARIA,
+        unidade=Uniforme.UNIDADE_UNIDADE,
+        quantidade=1
+    )
+
+
+@pytest.fixture
+def uniforme_camisa():
+    return baker.make(
+        'Uniforme',
+        nome='Meias',
+        categoria=Uniforme.CATEGORIA_MALHARIA,
+        unidade=Uniforme.UNIDADE_PAR,
+        quantidade=5
+    )
+
+
+@pytest.fixture
+def uniforme_tenis():
+    return baker.make(
+        'Uniforme',
+        nome='Tenis',
+        categoria=Uniforme.CATEGORIA_MALHARIA,
+        unidade=Uniforme.UNIDADE_PAR,
+        quantidade=1
+    )
 
 
 @pytest.fixture
