@@ -11,4 +11,4 @@ class Parametros(SingletonModel, ModeloBase):
 
     class Meta:
         verbose_name = "Parâmetro"
-        verbose_name_plural = "Parâmetros" 
+        verbose_name_plural = "Parâmetros"

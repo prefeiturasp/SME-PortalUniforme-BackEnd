@@ -2,7 +2,6 @@ import pytest
 
 from ...models import Parametros
 
-
 pytestmark = pytest.mark.django_db
 
 

@@ -1,6 +1,5 @@
 import uuid as uuid
 
-from django.utils import timezone
 from django.db import models
 
 
@@ -26,7 +25,7 @@ class TemAtivo(models.Model):
 
 
 class TemCriadoEm(models.Model):
-    criado_em = models.DateTimeField("Criado em", editable=False, default=timezone.now)
+    criado_em = models.DateTimeField("Criado em", editable=False, auto_now_add=True)
 
     class Meta:
         abstract = True

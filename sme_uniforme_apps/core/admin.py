@@ -16,4 +16,13 @@ class MeioDeRecebimentoAdmin(admin.ModelAdmin):
     ordering = ('nome',)
     search_fields = ('nome',)
 
-admin.site.register(Parametros)
+
+@admin.register(Parametros)
+class ParametrosAdmin(admin.ModelAdmin):
+
+    def has_add_permission(self, request, obj=None):
+        return not Parametros.objects.exists()
+
+    list_display = ('uuid', 'edital', 'criado_em')
+    readyonly_field = ('criado_em',)
+    fields = ('edital', )

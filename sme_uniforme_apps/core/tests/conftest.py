@@ -1,7 +1,5 @@
 import pytest
-
 from django.core.files.uploadedfile import SimpleUploadedFile
-
 from model_bakery import baker
 
 
