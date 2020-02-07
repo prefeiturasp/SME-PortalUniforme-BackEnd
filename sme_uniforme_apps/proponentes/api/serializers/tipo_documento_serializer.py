@@ -6,4 +6,4 @@ from ...models import TipoDocumento
 class TipoDocumentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoDocumento
-        fields = '__all__'
+        fields = ('id', 'nome', 'obrigatorio')
