@@ -64,3 +64,18 @@ def test_metodo_qtd_itens_por_categoria_as_dict_quando_nao_ha_itens():
         Uniforme.CATEGORIA_CALCADO: 0,
     }
     assert qtd_itens_por_categoria == esperado
+
+
+def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
+    esperado = [
+        {
+            'id': Uniforme.CATEGORIA_MALHARIA,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA]
+        },
+        {
+            'id': Uniforme.CATEGORIA_CALCADO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO]
+        }
+    ]
+    resultado = Uniforme.categorias_to_json()
+    assert esperado == resultado

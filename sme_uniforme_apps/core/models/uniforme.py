@@ -62,6 +62,17 @@ class Uniforme(ModeloBase):
 
         return qtd_itens_por_categoria
 
+    @classmethod
+    def categorias_to_json(cls):
+        result = []
+        for categoria in cls.CATEGORIA_CHOICES:
+            choice = {
+                'id': categoria[0],
+                'nome': categoria[1]
+            }
+            result.append(choice)
+        return result
+
     class Meta:
         verbose_name = "Peça de Uniforme"
         verbose_name_plural = "Peças de Uniforme"
