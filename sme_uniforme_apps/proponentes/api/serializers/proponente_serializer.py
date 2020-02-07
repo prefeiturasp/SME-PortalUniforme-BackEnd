@@ -6,6 +6,7 @@ from ...api.serializers.loja_serializer import LojaSerializer, LojaCreateSeriali
 from ...api.serializers.oferta_de_uniforme_serializer import (OfertaDeUniformeSerializer,
                                                               OfertaDeUniformeCreateSerializer)
 from ...models import Proponente, Anexo, TipoDocumento
+from ....core.models import LimiteCategoria, Uniforme
 
 
 class ProponenteSerializer(serializers.ModelSerializer):
@@ -28,7 +29,7 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
     lojas = LojaCreateSerializer(many=True)
 
     @staticmethod
-    def falta_documento_obrigatorio(arquivos_anexos):
+    def documento_obrigatorio_faltante(arquivos_anexos):
         tipos_documentos_obrigatorios = TipoDocumento.tipos_obrigatorios()
         for anexo in arquivos_anexos:
             tipos_documentos_obrigatorios.discard(anexo.get("tipo_documento").id)
@@ -38,6 +39,29 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    @staticmethod
+    def categoria_acima_limite(ofertas_de_uniformes):
+        limites_por_categoria = LimiteCategoria.limites_por_categoria_as_dict()
+
+        if not limites_por_categoria:
+            return None
+
+        # Inicializa totais por categoria
+        total_por_categoria = {categoria: 0 for categoria in limites_por_categoria.keys()}
+
+        # Sumariza ofertas por categoria
+        for oferta in ofertas_de_uniformes:
+            total_por_categoria[oferta['uniforme'].categoria] += (oferta['preco'] * oferta['uniforme'].quantidade)
+
+        # Encontra e retorna a primeira categoria que ficou acima do limite ou None se nenhuma ficou acima
+        categoria_acima_do_limite = None
+        for categoria in total_por_categoria.keys():
+            if total_por_categoria[categoria] > limites_por_categoria[categoria]:
+                categoria_acima_do_limite = {'categoria': categoria, 'limite': limites_por_categoria[categoria]}
+                break
+
+        return categoria_acima_do_limite
+
     def create(self, validated_data):
 
         arquivos_anexos = validated_data.pop('arquivos_anexos', [])
@@ -45,6 +69,12 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         lojas = validated_data.pop('lojas')
 
         proponente = Proponente.objects.create(**validated_data)
+
+        categoria_acima_limite = self.categoria_acima_limite(ofertas_de_uniformes)
+        if categoria_acima_limite:
+            raise ValidationError(
+                f'Valor total da categoria {Uniforme.CATEGORIA_NOMES[categoria_acima_limite["categoria"]]} '
+                f'está acima do limite de R$ {categoria_acima_limite["limite"]:.2f}.')
 
         ofertas_lista = []
         for oferta in ofertas_de_uniformes:
@@ -58,7 +88,7 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
             lojas_lista.append(loja_object)
         proponente.lojas.set(lojas_lista)
 
-        documento_faltante = self.falta_documento_obrigatorio(arquivos_anexos)
+        documento_faltante = self.documento_obrigatorio_faltante(arquivos_anexos)
         if documento_faltante:
             raise ValidationError(f'Não foi enviado o documento {documento_faltante}.')
 
@@ -83,7 +113,6 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
 
 
 class ProponenteLookUpSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Proponente
         fields = ('uuid', 'razao_social')

@@ -16,6 +16,13 @@ class LimiteCategoria(ModeloBase):
     def __str__(self):
         return f'{Uniforme.CATEGORIA_NOMES[self.categoria_uniforme]} Preço Máximo: R$ {self.preco_maximo:.2f}'
 
+    @classmethod
+    def limites_por_categoria_as_dict(cls):
+        result = {}
+        for categoria in cls.objects.all():
+            result[categoria.categoria_uniforme] = categoria.preco_maximo
+        return result
+
     class Meta:
         verbose_name = "Limite da categoria"
         verbose_name_plural = "Limites de categorias"

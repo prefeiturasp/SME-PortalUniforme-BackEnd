@@ -33,3 +33,12 @@ def test_admin():
     assert model_admin.list_display == ('categoria_uniforme', 'preco_maximo')
     assert model_admin.ordering == ('categoria_uniforme',)
     assert model_admin.list_filter == ('categoria_uniforme',)
+
+
+def test_metodo_limites_por_categoria_as_dict(limite_categoria, limite_categoria_malharia):
+    limites_por_categoria = LimiteCategoria.limites_por_categoria_as_dict()
+    esperado = {
+        limite_categoria.categoria_uniforme: 100.50,
+        limite_categoria_malharia.categoria_uniforme: 50.00
+    }
+    assert limites_por_categoria == esperado
