@@ -62,6 +62,24 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
 
         return categoria_acima_do_limite
 
+    @staticmethod
+    def categoria_faltando_itens(ofertas_de_uniformes):
+        qtd_itens_por_categoria = Uniforme.qtd_itens_por_categoria_as_dict()
+
+        categorias_fornecidas = set()
+
+        for oferta in ofertas_de_uniformes:
+            categorias_fornecidas.add(oferta['uniforme'].categoria)
+            qtd_itens_por_categoria[oferta['uniforme'].categoria] -= 1
+
+        categoria_faltando_itens = None
+        for categoria, quantidade in qtd_itens_por_categoria.items():
+            # Não é obrigatorio fornecer todas as categorias, mas todos os itens das categorias fornecidas
+            if quantidade > 0 and categoria in categorias_fornecidas:
+                categoria_faltando_itens = categoria
+                break
+        return categoria_faltando_itens
+
     def create(self, validated_data):
 
         arquivos_anexos = validated_data.pop('arquivos_anexos', [])
@@ -75,6 +93,12 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 f'Valor total da categoria {Uniforme.CATEGORIA_NOMES[categoria_acima_limite["categoria"]]} '
                 f'está acima do limite de R$ {categoria_acima_limite["limite"]:.2f}.')
+
+        categoria_faltando_itens = self.categoria_faltando_itens(ofertas_de_uniformes)
+        if categoria_faltando_itens:
+            raise ValidationError(
+                f'Não foram fornecidos todos os itens da categoria {Uniforme.CATEGORIA_NOMES[categoria_faltando_itens]}'
+                f'. Não é permitido o fornecimento parcial de uma categoria.')
 
         ofertas_lista = []
         for oferta in ofertas_de_uniformes:

@@ -46,3 +46,21 @@ def test_admin():
     assert model_admin.ordering == ('nome',)
     assert model_admin.search_fields == ('nome',)
     assert model_admin.list_filter == ('categoria', 'unidade')
+
+
+def test_metodo_qtd_itens_por_categoria_as_dict(uniforme_camisa, uniforme_meias, uniforme_tenis):
+    qtd_itens_por_categoria = Uniforme.qtd_itens_por_categoria_as_dict()
+    esperado = {
+        Uniforme.CATEGORIA_MALHARIA: 2,
+        Uniforme.CATEGORIA_CALCADO: 1,
+    }
+    assert qtd_itens_por_categoria == esperado
+
+
+def test_metodo_qtd_itens_por_categoria_as_dict_quando_nao_ha_itens():
+    qtd_itens_por_categoria = Uniforme.qtd_itens_por_categoria_as_dict()
+    esperado = {
+        Uniforme.CATEGORIA_MALHARIA: 0,
+        Uniforme.CATEGORIA_CALCADO: 0,
+    }
+    assert qtd_itens_por_categoria == esperado

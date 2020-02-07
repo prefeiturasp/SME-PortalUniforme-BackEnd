@@ -27,50 +27,6 @@ def cnpj_bloqueado():
 
 
 @pytest.fixture
-def uniforme_calca():
-    return baker.make(
-        'Uniforme',
-        nome='Calça',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
-        unidade=Uniforme.UNIDADE_UNIDADE,
-        quantidade=1
-    )
-
-
-@pytest.fixture
-def uniforme_camisa():
-    return baker.make(
-        'Uniforme',
-        nome='Camisa',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
-        unidade=Uniforme.UNIDADE_UNIDADE,
-        quantidade=1
-    )
-
-
-@pytest.fixture
-def uniforme_meias():
-    return baker.make(
-        'Uniforme',
-        nome='Meias',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
-        unidade=Uniforme.UNIDADE_PAR,
-        quantidade=5
-    )
-
-
-@pytest.fixture
-def uniforme_tenis():
-    return baker.make(
-        'Uniforme',
-        nome='Tenis',
-        categoria=Uniforme.CATEGORIA_CALCADO,
-        unidade=Uniforme.UNIDADE_PAR,
-        quantidade=1
-    )
-
-
-@pytest.fixture
 def arquivo():
     return SimpleUploadedFile(f'anexo_teste.txt', bytes(f'CONTEUDO TESTE TESTE TESTE', encoding="utf-8"))
 
@@ -104,11 +60,11 @@ def anexo(proponente, arquivo, tipo_documento):
 @pytest.fixture
 def oferta_de_uniforme(proponente, uniforme_calca):
     return baker.make(
-            'OfertaDeUniforme',
-            proponente=proponente,
-            uniforme=uniforme_calca,
-            preco=100.35
-        )
+        'OfertaDeUniforme',
+        proponente=proponente,
+        uniforme=uniforme_calca,
+        preco=100.35
+    )
 
 
 @pytest.fixture
@@ -216,6 +172,24 @@ def payload_ofertas_de_uniformes_acima_limite(uniforme_camisa, uniforme_calca, u
         {
             "preco": "80.00",
             "uniforme": uniforme_camisa.id
+        },
+        {
+            "preco": "30.00",
+            "uniforme": uniforme_meias.id
+        },
+        {
+            "preco": "40.00",
+            "uniforme": uniforme_tenis.id
+        }
+    ]
+
+
+@pytest.fixture
+def payload_ofertas_de_uniformes_faltando_a_camisa(uniforme_calca, uniforme_tenis, uniforme_meias):
+    return [
+        {
+            "preco": "10.00",
+            "uniforme": uniforme_calca.id,
         },
         {
             "preco": "30.00",

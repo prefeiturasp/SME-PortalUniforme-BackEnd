@@ -51,6 +51,17 @@ class Uniforme(ModeloBase):
     def __str__(self):
         return f'{self.nome} ({self.quantidade} {self.UNIDADE_NOMES[self.unidade]})'
 
+    @classmethod
+    def qtd_itens_por_categoria_as_dict(cls):
+        # Inicializa totais por categoria
+        qtd_itens_por_categoria = {categoria: 0 for categoria in cls.CATEGORIA_NOMES.keys()}
+
+        # Conta a quantidade de itens de uniforme por categoria
+        for uniforme in cls.objects.all():
+            qtd_itens_por_categoria[uniforme.categoria] += 1
+
+        return qtd_itens_por_categoria
+
     class Meta:
         verbose_name = "Peça de Uniforme"
         verbose_name_plural = "Peças de Uniforme"
