@@ -32,7 +32,8 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
     def documento_obrigatorio_faltante(arquivos_anexos):
         tipos_documentos_obrigatorios = TipoDocumento.tipos_obrigatorios()
         for anexo in arquivos_anexos:
-            tipos_documentos_obrigatorios.discard(anexo.get("tipo_documento").id)
+            if anexo.get("tipo_documento"):
+                tipos_documentos_obrigatorios.discard(anexo.get("tipo_documento").id)
 
         if tipos_documentos_obrigatorios:
             return TipoDocumento.objects.get(id=next(iter(tipos_documentos_obrigatorios)))
