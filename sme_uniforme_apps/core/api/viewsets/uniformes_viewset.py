@@ -21,12 +21,7 @@ class UniformesViewSet(viewsets.ReadOnlyModelViewSet):
         return self.queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return UniformeSerializer
-        elif self.action == 'list':
-            return UniformeLookUpSerializer
-        else:
-            return UniformeSerializer
+        return UniformeSerializer
 
     @action(detail=False)
     def lookup(self, _):

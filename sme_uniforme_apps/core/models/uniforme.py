@@ -66,9 +66,21 @@ class Uniforme(ModeloBase):
     def categorias_to_json(cls):
         result = []
         for categoria in cls.CATEGORIA_CHOICES:
+            uniformes = []
+            for uniforme in cls.objects.filter(categoria=categoria[0]):
+                uniformes.append(
+                    {
+                        "id": uniforme.id,
+                        "nome": uniforme.nome,
+                        "unidade": uniforme.unidade,
+                        "quantidade": uniforme.quantidade,
+                        "descricao": uniforme.__str__()
+                    }
+                )
             choice = {
                 'id': categoria[0],
-                'nome': categoria[1]
+                'nome': categoria[1],
+                'uniformes': uniformes
             }
             result.append(choice)
         return result

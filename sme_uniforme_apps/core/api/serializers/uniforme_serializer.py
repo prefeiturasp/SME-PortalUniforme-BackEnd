@@ -7,7 +7,7 @@ class UniformeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Uniforme
-        fields = '__all__'
+        fields = ('id', 'nome', 'categoria', 'unidade', 'quantidade')
 
 
 class UniformeLookUpSerializer(serializers.ModelSerializer):

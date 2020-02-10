@@ -70,11 +70,21 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
     esperado = [
         {
             'id': Uniforme.CATEGORIA_MALHARIA,
-            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA]
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA],
+            'uniformes': [{'descricao': 'Meias (5 Par(es))',
+                           'id': uniforme_meias.id,
+                           'nome': 'Meias',
+                           'quantidade': 5,
+                           'unidade': 'PAR'}]
         },
         {
             'id': Uniforme.CATEGORIA_CALCADO,
-            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO]
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
+            'uniformes': [{'descricao': 'Tenis (1 Par(es))',
+                           'id': uniforme_tenis.id,
+                           'nome': 'Tenis',
+                           'quantidade': 1,
+                           'unidade': 'PAR'}]
         }
     ]
     resultado = Uniforme.categorias_to_json()
