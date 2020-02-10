@@ -42,7 +42,7 @@ def test_proponente_api_create_valida_limite_categoria(
     result = json.loads(response.content)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert result[0] == 'Valor total da categoria Peças Têxteis está acima do limite de R$ 50.00.'
+    assert result[0] == 'Valor total da categoria Vestuário está acima do limite de R$ 50.00.'
 
 
 def test_proponente_api_create_valida_fornecimento_total_categoria(
@@ -54,5 +54,5 @@ def test_proponente_api_create_valida_fornecimento_total_categoria(
     result = json.loads(response.content)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert result[0] == 'Não foram fornecidos todos os itens da categoria Peças Têxteis. ' \
+    assert result[0] == 'Não foram fornecidos todos os itens da categoria Vestuário. ' \
                         'Não é permitido o fornecimento parcial de uma categoria.'
