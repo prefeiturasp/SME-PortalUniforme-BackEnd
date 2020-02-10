@@ -7,7 +7,7 @@ from .core.models import Uniforme
 @pytest.fixture
 def fake_user(client, django_user_model):
     password = 'teste'
-    email = 'teste@teste.com'
+    email = 'fake@user.com'
     user = django_user_model.objects.create_user(email=email, password=password, validado=True, )
     client.login(email=email, password=password)
     return user

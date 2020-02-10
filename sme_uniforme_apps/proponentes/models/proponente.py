@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 from .validators import phone_validation, cep_validation, cnpj_validation
-from ..services import cnpj_esta_bloqueado
+from ..services import cnpj_esta_bloqueado, cria_usuario_novo_proponente
 from ..tasks import enviar_email_confirmacao_cadastro
 
 
@@ -145,6 +145,9 @@ class Proponente(ModeloBase):
 def proponente_post_save(instance, created, **kwargs):
     if created and instance and instance.email:
         enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
+
+    if created and instance and instance.email and instance.responsavel:
+        cria_usuario_novo_proponente(instance)
 
 
 @receiver(pre_save, sender=Proponente)
