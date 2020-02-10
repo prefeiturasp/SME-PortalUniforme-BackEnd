@@ -30,7 +30,7 @@ def test_instance_model(uniforme):
 
 
 def test_srt_model(uniforme):
-    assert uniforme.__str__() == 'teste (1 Unidade(s))'
+    assert uniforme.__str__() == 'teste (1 unidade)'
 
 
 def test_meta_modelo(uniforme):
@@ -71,7 +71,7 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
         {
             'id': Uniforme.CATEGORIA_MALHARIA,
             'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA],
-            'uniformes': [{'descricao': 'Meias (5 Par(es))',
+            'uniformes': [{'descricao': 'Meias (5 pares)',
                            'id': uniforme_meias.id,
                            'nome': 'Meias',
                            'quantidade': 5,
@@ -80,7 +80,7 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
         {
             'id': Uniforme.CATEGORIA_CALCADO,
             'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
-            'uniformes': [{'descricao': 'Tenis (1 Par(es))',
+            'uniformes': [{'descricao': 'Tenis (1 par)',
                            'id': uniforme_tenis.id,
                            'nome': 'Tenis',
                            'quantidade': 1,

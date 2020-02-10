@@ -49,7 +49,12 @@ class Uniforme(ModeloBase):
     quantidade = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
-        return f'{self.nome} ({self.quantidade} {self.UNIDADE_NOMES[self.unidade]})'
+        if self.unidade == self.UNIDADE_PAR:
+            unidades = 'par' if self.quantidade == 1 else 'pares'
+        else:
+            unidades = 'unidade' if self.quantidade == 1 else 'unidades'
+
+        return f'{self.nome} ({self.quantidade} {unidades})'
 
     @classmethod
     def qtd_itens_por_categoria_as_dict(cls):
