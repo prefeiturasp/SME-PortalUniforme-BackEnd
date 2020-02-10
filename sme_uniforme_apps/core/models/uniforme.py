@@ -9,7 +9,7 @@ class Uniforme(ModeloBase):
     CATEGORIA_CALCADO = 'CALCADO'
 
     CATEGORIA_NOMES = {
-        CATEGORIA_MALHARIA: 'Peças Têxteis',
+        CATEGORIA_MALHARIA: 'Vestuário',
         CATEGORIA_CALCADO: 'Calçados',
     }
 
