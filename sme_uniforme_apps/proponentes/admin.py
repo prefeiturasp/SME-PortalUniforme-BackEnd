@@ -1,7 +1,7 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
-from .models import (Proponente, OfertaDeUniforme, Loja, Anexo, ListaNegra)
-
+from .models import (Proponente, OfertaDeUniforme, Loja, Anexo, ListaNegra, TipoDocumento)
 from .services import cnpj_esta_bloqueado
 
 
@@ -65,3 +65,31 @@ class ListaNegraAdmin(admin.ModelAdmin):
     list_display = ('cnpj', 'razao_social')
     ordering = ('razao_social',)
     search_fields = ('cnpj', 'razao_social')
+
+
+@admin.register(Loja)
+class LojaAdmin(admin.ModelAdmin):
+    @staticmethod
+    def protocolo(loja):
+        return loja.proponente.protocolo
+
+    @staticmethod
+    @mark_safe
+    def fachada(loja):
+        foto = loja.foto_fachada
+        return f'<img src="{foto.url}" width="64px"/>' if foto else ""
+
+    fachada.allow_tags = True
+
+    list_display = ('protocolo', 'nome_fantasia', 'fachada', 'cep', 'endereco', 'numero', 'complemento', 'bairro')
+    ordering = ('nome_fantasia',)
+    search_fields = ('proponente__uuid', 'nome_fantasia',)
+    list_filter = ('bairro',)
+
+
+@admin.register(TipoDocumento)
+class TipoDocumentoAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'obrigatorio',)
+    ordering = ('nome',)
+    search_fields = ('nome',)
+    list_filter = ('obrigatorio',)

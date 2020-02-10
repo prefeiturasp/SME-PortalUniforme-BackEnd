@@ -1,15 +1,16 @@
 from django.db import models
 
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
-
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 from .proponente import Proponente
 from ...core.models.uniforme import Uniforme
 
 
+# from auditlog.models import AuditlogHistoryField
+# from auditlog.registry import auditlog
+
+
 class OfertaDeUniforme(ModeloBase):
-    historico = AuditlogHistoryField()
+    # historico = AuditlogHistoryField()
 
     proponente = models.ForeignKey(Proponente, on_delete=models.CASCADE, related_name='ofertas_de_uniformes',
                                    blank=True, null=True)
@@ -24,5 +25,5 @@ class OfertaDeUniforme(ModeloBase):
         verbose_name_plural = "ofertas de uniforme"
         unique_together = ['proponente', 'uniforme']
 
-
-auditlog.register(OfertaDeUniforme)
+# TODO Corrigir erro que da ao excluir um proponente quando o log da oferta de uniforme está ativo
+# auditlog.register(OfertaDeUniforme)

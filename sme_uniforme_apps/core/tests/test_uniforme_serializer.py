@@ -10,9 +10,10 @@ def test_uniforme_serializer(uniforme):
     uniforme_serializer = UniformeSerializer(uniforme)
 
     assert uniforme_serializer.data is not None
-    assert uniforme_serializer.data['criado_em']
-    assert uniforme_serializer.data['alterado_em']
+    assert uniforme_serializer.data['quantidade']
+    assert uniforme_serializer.data['unidade']
     assert uniforme_serializer.data['nome']
+    assert uniforme_serializer.data['categoria']
 
 
 def test_uniforme_lookup_serializer(uniforme):

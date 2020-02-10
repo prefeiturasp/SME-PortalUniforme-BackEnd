@@ -1,5 +1,4 @@
 import pytest
-
 from django.contrib import admin
 
 from ..admin import ProponenteAdmin
@@ -72,3 +71,9 @@ def test_cnpj_valido_resultado_negativo():
 
 def test_proponente_status_default_inscrito(proponente):
     assert proponente.status == Proponente.STATUS_INSCRITO
+
+
+def test_proponente_delete(proponente, loja_fisica, oferta_de_uniforme, anexo):
+    assert Proponente.objects.exists()
+    proponente.delete()
+    assert not Proponente.objects.exists()

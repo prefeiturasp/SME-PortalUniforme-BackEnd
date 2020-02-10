@@ -15,4 +15,4 @@ def test_anexo_serializer(anexo):
     assert anexo_serializer.data['criado_em']
     assert anexo_serializer.data['id']
     assert anexo_serializer.data['arquivo']
-
+    assert anexo_serializer.data['tipo_documento']
