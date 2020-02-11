@@ -1,3 +1,3 @@
-from .meio_de_recebimento import MeioDeRecebimento
 from .parametros import Parametros
+from .limite_categoria import LimiteCategoria
 from .uniforme import Uniforme

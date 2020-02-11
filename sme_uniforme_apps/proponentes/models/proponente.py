@@ -1,19 +1,14 @@
-from django.db import models
+from auditlog.models import AuditlogHistoryField
+from auditlog.registry import auditlog
+from brazilnum.cnpj import validate_cnpj
 from django.core import validators
+from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from brazilnum.cnpj import validate_cnpj
-
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
-
-from .validators import phone_validation, cep_validation, cnpj_validation
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
-
-from ..services import cnpj_esta_bloqueado
-
-from ...core.models.meio_de_recebimento import MeioDeRecebimento
+from .validators import phone_validation, cep_validation, cnpj_validation
+from ..services import cnpj_esta_bloqueado, cria_usuario_novo_proponente
 from ..tasks import enviar_email_confirmacao_cadastro
 
 
@@ -107,8 +102,6 @@ class Proponente(ModeloBase):
 
     responsavel = models.CharField("Responsável", max_length=255, blank=True, null=True)
 
-    meios_de_recebimento = models.ManyToManyField(MeioDeRecebimento, related_name='proponentes_que_aceitam')
-
     status = models.CharField(
         'status',
         max_length=15,
@@ -152,6 +145,9 @@ class Proponente(ModeloBase):
 def proponente_post_save(instance, created, **kwargs):
     if created and instance and instance.email:
         enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
+
+    if created and instance and instance.email and instance.responsavel:
+        cria_usuario_novo_proponente(instance)
 
 
 @receiver(pre_save, sender=Proponente)
