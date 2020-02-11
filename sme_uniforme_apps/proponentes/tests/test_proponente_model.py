@@ -1,10 +1,13 @@
 import pytest
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 
 from ..admin import ProponenteAdmin
 from ..models import Proponente
 
 pytestmark = pytest.mark.django_db
+
+User = get_user_model()
 
 
 def test_instance_model(proponente):
@@ -77,3 +80,15 @@ def test_proponente_delete(proponente, loja_fisica, oferta_de_uniforme, anexo):
     assert Proponente.objects.exists()
     proponente.delete()
     assert not Proponente.objects.exists()
+
+
+def test_metodo_cria_usuario(proponente):
+    assert User.objects.get(email=proponente.email)
+
+
+def test_metodo_cria_usuario_como_nao_validado(proponente):
+    assert not User.objects.get(email=proponente.email).validado
+
+
+def test_metodo_cria_usuario_senha_inicial_protocolo(proponente):
+    assert User.objects.get(email=proponente.email).check_password(proponente.protocolo)
