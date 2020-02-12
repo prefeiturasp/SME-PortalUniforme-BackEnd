@@ -21,9 +21,12 @@ def arquivo():
 def parametros(arquivo):
     return baker.make(
         'Parametros',
-        edital=arquivo
+        edital=arquivo,
+        instrucao_normativa=arquivo
     )
 
+
+@pytest.fixture
 def limite_categoria():
     return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_CALCADO, preco_maximo=100.50)
 

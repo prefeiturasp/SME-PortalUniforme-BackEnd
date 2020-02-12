@@ -1,7 +1,7 @@
 from django.urls import include, path
-from .viewsets.version_viewset import ApiVersion
-from .viewsets.uniformes_viewset import UniformesViewSet
-from .viewsets.parametros_viewset import ParametrosViewSet
+
+from .viewsets.edital_viewset import EditalViewSet
+from .viewsets.instrucao_normativa_viewset import InstrucaoNormativaViewSet
 from rest_framework import routers
 
 # Importe aqui as rotas das demais aplicações
@@ -14,7 +14,8 @@ router = routers.DefaultRouter()
 
 router.register('api-version', ApiVersion, basename='Version')
 router.register('uniformes', UniformesViewSet)
-router.register('edital', ParametrosViewSet, basename='Edital')
+router.register('edital', EditalViewSet, basename='Edital')
+router.register('instrucao-normativa', InstrucaoNormativaViewSet, basename='InstrucaoNormativa')
 router.register('limites-categorias', LimitesCategoriasViewSet)
 
 # Adicione aqui as rotas das demais aplicações para que as urls sejam exibidas na API Root do DRF
