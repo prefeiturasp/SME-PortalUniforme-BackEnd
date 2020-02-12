@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .viewsets.parametros_viewset import ParametrosViewSet
+from .viewsets.edital_viewset import EditalViewSet
 from .viewsets.instrucao_normativa_viewset import InstrucaoNormativaViewSet
 from rest_framework import routers
 
@@ -14,7 +14,7 @@ router = routers.DefaultRouter()
 
 router.register('api-version', ApiVersion, basename='Version')
 router.register('uniformes', UniformesViewSet)
-router.register('edital', ParametrosViewSet, basename='Edital')
+router.register('edital', EditalViewSet, basename='Edital')
 router.register('instrucao-normativa', InstrucaoNormativaViewSet, basename='InstrucaoNormativa')
 router.register('limites-categorias', LimitesCategoriasViewSet)
 

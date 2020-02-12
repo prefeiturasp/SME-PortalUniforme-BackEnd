@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from ...models import Parametros
 
 
-class ParametrosViewSet(viewsets.ViewSet):
+class EditalViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def get_object(self):
