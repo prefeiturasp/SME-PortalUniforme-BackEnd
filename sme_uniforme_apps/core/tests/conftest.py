@@ -24,6 +24,8 @@ def parametros(arquivo):
         edital=arquivo
     )
 
+
+@pytest.fixture
 def limite_categoria():
     return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_CALCADO, preco_maximo=100.50)
 
