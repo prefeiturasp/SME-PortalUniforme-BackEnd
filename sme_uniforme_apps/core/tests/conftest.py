@@ -21,7 +21,8 @@ def arquivo():
 def parametros(arquivo):
     return baker.make(
         'Parametros',
-        edital=arquivo
+        edital=arquivo,
+        instrucao_normativa=arquivo
     )
 
 
