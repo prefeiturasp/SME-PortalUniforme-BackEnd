@@ -1,0 +1,48 @@
+version: '3.1'
+services:
+
+  db:
+    image: postgres:11.2-alpine
+    container_name: uniforme-postgres-local
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345qw
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: uniformes
+      PGPASSWORD: 12345qw
+    volumes:
+      - ../uniforme-postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: uniforme-pgadmin4-local
+    restart: always
+    volumes:
+      - ./bkp:/var/lib/pgadmin/storage/
+    ports:
+      - 9090:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: weslei.souza@amcom.com.br
+      PGADMIN_DEFAULT_PASSWORD: adminadmin
+    depends_on:
+      - db
+
+  redis:
+    image: redis:5.0.0-alpine
+    container_name: uniforme-redis-local
+    restart: always
+    ports:
+      - "6379:6379"
+
+
+networks:
+  default:
+    external:
+      name: uniforme-network
+
+volumes:
+  redisdata:

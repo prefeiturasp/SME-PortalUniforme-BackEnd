@@ -4,7 +4,7 @@ from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
 
 class TipoDocumento(ModeloBase):
-    nome = models.TextField('Tipo de documento', unique=True, max_length=600)
+    nome = models.TextField('Tipo de documento', unique=True)
     obrigatorio = models.BooleanField(default=True)
 
     def __str__(self):
