@@ -146,8 +146,8 @@ def proponente_post_save(instance, created, **kwargs):
     if created and instance and instance.email:
         enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
 
-    if created and instance and instance.email and instance.responsavel:
-        cria_usuario_novo_proponente(instance)
+    # if created and instance and instance.email and instance.responsavel:
+    #     cria_usuario_novo_proponente(instance)
 
 
 @receiver(pre_save, sender=Proponente)

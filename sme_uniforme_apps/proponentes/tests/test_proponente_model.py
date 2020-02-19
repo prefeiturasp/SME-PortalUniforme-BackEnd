@@ -82,13 +82,13 @@ def test_proponente_delete(proponente, loja_fisica, oferta_de_uniforme, anexo):
     assert not Proponente.objects.exists()
 
 
-def test_metodo_cria_usuario(proponente):
-    assert User.objects.get(email=proponente.email)
-
-
-def test_metodo_cria_usuario_como_nao_validado(proponente):
-    assert not User.objects.get(email=proponente.email).validado
-
-
-def test_metodo_cria_usuario_senha_inicial_protocolo(proponente):
-    assert User.objects.get(email=proponente.email).check_password(proponente.protocolo)
+# def test_metodo_cria_usuario(proponente):
+#     assert User.objects.get(email=proponente.email)
+#
+#
+# def test_metodo_cria_usuario_como_nao_validado(proponente):
+#     assert not User.objects.get(email=proponente.email).validado
+#
+#
+# def test_metodo_cria_usuario_senha_inicial_protocolo(proponente):
+#     assert User.objects.get(email=proponente.email).check_password(proponente.protocolo)
