@@ -15,11 +15,12 @@ class AnexoCreateSerializer(serializers.ModelSerializer):
 
     def validate_anexo(self, anexo):
         file_size = anexo.size
-
-        if file_size > 10485760:
-            raise ValidationError("O tamanho máximo de um arquivo é 10MB")
-        else:
-            return anexo
+        # TODO Rever validação de tamanho de envio de arquivo
+        # if file_size > 10485760:
+        #     raise ValidationError("O tamanho máximo de um arquivo é 10MB")
+        # else:
+        #     return anexo
+        return anexo
 
     class Meta:
         model = Anexo
