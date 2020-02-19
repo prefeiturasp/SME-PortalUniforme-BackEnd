@@ -49,3 +49,5 @@ django-admin-interface==0.12.0
 #django-auditlog==0.4.5
 # Pegando última versão diretamente do repositório oficial.
 -e git://github.com/jjkester/django-auditlog.git##egg=auditlog
+
+sentry-sdk

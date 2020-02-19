@@ -3,6 +3,8 @@ Base settings to build other settings files upon.
 """
 
 import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 ROOT_DIR = (
         environ.Path(__file__) - 3
@@ -73,7 +75,7 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "admin_interface",  # django-admin-interface (tem que ficar antes do django.contrib.admin)
-    "colorfield",       # django-admin-interface (tem que ficar antes do django.contrib.admin)
+    "colorfield",  # django-admin-interface (tem que ficar antes do django.contrib.admin)
     "django.contrib.admin",
 ]
 
@@ -289,7 +291,6 @@ CELERY_TASK_SOFT_TIME_LIMIT = 60
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
-
 # django-allauth
 # ------------------------------------------------------------------------------
 # ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
@@ -341,3 +342,8 @@ CACHES = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+sentry_sdk.init(
+    dsn=env('SENTRY_URL'),
+    integrations=[DjangoIntegration()]
+)
