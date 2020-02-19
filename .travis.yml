@@ -6,7 +6,7 @@ before_script:
   - export AUTHOR_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
 script:
   - docker build -t marcelomaia/portal_uniforme_backend .
-  - docker run -d -p 8000:8000 marcelomaia/portal_uniforme_frontend python manage.py runserver --settings=config.settings.local
+  - docker run -d -p 8000:8000 marcelomaia/portal_uniforme_backend python manage.py runserver --settings=config.settings.local
   - docker ps -a
 
 deploy:

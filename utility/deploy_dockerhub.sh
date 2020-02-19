@@ -5,4 +5,4 @@
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-docker push marcelomaia/portal_uniforme_frontend
+docker push marcelomaia/portal_uniforme_backend
