@@ -72,8 +72,8 @@ def test_cnpj_valido_resultado_negativo():
     assert not Proponente.cnpj_valido(cnpj_invalido)
 
 
-def test_proponente_status_default_inscrito(proponente):
-    assert proponente.status == Proponente.STATUS_INSCRITO
+def test_proponente_status_default_em_processo(proponente):
+    assert proponente.status == Proponente.STATUS_EM_PROCESSO
 
 
 def test_proponente_delete(proponente, loja_fisica, oferta_de_uniforme, anexo):

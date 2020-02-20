@@ -47,15 +47,18 @@ class Proponente(ModeloBase):
     # Status Choice
     STATUS_INSCRITO = 'INSCRITO'
     STATUS_BLOQUEADO = 'BLOQUEADO'
+    STATUS_EM_PROCESSO = 'EM_PROCESSO'
 
     STATUS_NOMES = {
         STATUS_INSCRITO: 'Inscrito',
         STATUS_BLOQUEADO: 'Bloqueado',
+        STATUS_EM_PROCESSO: 'Em processo'
     }
 
     STATUS_CHOICES = (
         (STATUS_INSCRITO, STATUS_NOMES[STATUS_INSCRITO]),
         (STATUS_BLOQUEADO, STATUS_NOMES[STATUS_BLOQUEADO]),
+        (STATUS_EM_PROCESSO, STATUS_NOMES[STATUS_EM_PROCESSO]),
     )
 
     cnpj = models.CharField(
@@ -106,7 +109,7 @@ class Proponente(ModeloBase):
         'status',
         max_length=15,
         choices=STATUS_CHOICES,
-        default=STATUS_INSCRITO
+        default=STATUS_EM_PROCESSO
     )
 
     def __str__(self):
@@ -152,9 +155,10 @@ def proponente_post_save(instance, created, **kwargs):
 
 @receiver(pre_save, sender=Proponente)
 def proponente_pre_save(instance, **kwargs):
-    if instance.cnpj and cnpj_esta_bloqueado(instance.cnpj):
+    if instance.status == Proponente.STATUS_INSCRITO and instance.cnpj and cnpj_esta_bloqueado(instance.cnpj):
         instance.status = Proponente.STATUS_BLOQUEADO
-    else:
+
+    elif instance.status == Proponente.STATUS_BLOQUEADO and instance.cnpj and not cnpj_esta_bloqueado(instance.cnpj):
         instance.status = Proponente.STATUS_INSCRITO
 
 
