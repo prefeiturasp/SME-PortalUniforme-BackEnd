@@ -46,6 +46,7 @@ class ProponenteAdmin(admin.ModelAdmin):
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
     list_filter = ('status',)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
+    readonly_fields = ('uuid', 'id')
 
 
 @admin.register(OfertaDeUniforme)
