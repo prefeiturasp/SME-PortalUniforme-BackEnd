@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from model_bakery import baker
 
 from ...core.models import Uniforme
+from ..models.proponente import Proponente
 
 
 @pytest.fixture
@@ -89,6 +90,7 @@ def proponente_bloqueado(cnpj_bloqueado, lista_negra):
         telefone='(99) 99999-8888',
         email='bloqueado@teste.com',
         responsavel='José Bloqueio da Silva',
+        status=Proponente.STATUS_INSCRITO
     )
 
 
