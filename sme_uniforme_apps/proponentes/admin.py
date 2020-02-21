@@ -90,7 +90,7 @@ class LojaAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDocumento)
 class TipoDocumentoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'obrigatorio',)
+    list_display = ('nome', 'obrigatorio', 'visivel')
     ordering = ('nome',)
     search_fields = ('nome',)
-    list_filter = ('obrigatorio',)
+    list_filter = ('obrigatorio', 'visivel')

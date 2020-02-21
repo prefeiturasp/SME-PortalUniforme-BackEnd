@@ -11,6 +11,7 @@ def test_instancia(tipo_documento):
     assert isinstance(tipo_documento, TipoDocumento)
     assert tipo_documento.nome
     assert tipo_documento.obrigatorio
+    assert tipo_documento.visivel
 
 
 def test_srt_model(tipo_documento):
@@ -26,6 +27,6 @@ def test_admin():
     model_admin = TipoDocumentoAdmin(TipoDocumento, admin.site)
     # pylint: disable=W0212
     assert admin.site._registry[TipoDocumento]
-    assert model_admin.list_display == ('nome', 'obrigatorio')
+    assert model_admin.list_display == ('nome', 'obrigatorio', 'visivel')
     assert model_admin.ordering == ('nome',)
     assert model_admin.search_fields == ('nome',)
