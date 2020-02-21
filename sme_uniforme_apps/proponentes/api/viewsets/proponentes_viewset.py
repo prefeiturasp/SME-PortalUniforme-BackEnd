@@ -53,3 +53,11 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             }
 
         return Response(result)
+
+    @action(detail=True, url_path='concluir-cadastro', methods=['patch'])
+    def concluir_cadastro(self, request, uuid):
+        Proponente.concluir_cadastro(uuid)
+        proponente = Proponente.objects.get(uuid=uuid)
+        serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
+        return Response(serializer.data)
+

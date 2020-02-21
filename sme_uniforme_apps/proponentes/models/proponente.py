@@ -139,6 +139,12 @@ class Proponente(ModeloBase):
     def desbloqueia_por_cnpj(cls, cnpj):
         Proponente.objects.filter(cnpj=cnpj).update(status=Proponente.STATUS_INSCRITO)
 
+    @classmethod
+    def concluir_cadastro(cls, uuid):
+        proponente = Proponente.objects.get(uuid=uuid)
+        proponente.status = Proponente.STATUS_INSCRITO
+        proponente.save()
+
     class Meta:
         verbose_name = "Proponente"
         verbose_name_plural = "Proponentes"

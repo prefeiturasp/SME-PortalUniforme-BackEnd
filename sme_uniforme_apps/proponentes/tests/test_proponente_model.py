@@ -82,6 +82,13 @@ def test_proponente_delete(proponente, loja_fisica, oferta_de_uniforme, anexo):
     assert not Proponente.objects.exists()
 
 
+def test_metodo_concluir_cadastro(proponente):
+    uuid = proponente.uuid
+    assert Proponente.objects.get(uuid=uuid).status == Proponente.STATUS_EM_PROCESSO
+    Proponente.concluir_cadastro(uuid)
+    assert Proponente.objects.get(uuid=uuid).status == Proponente.STATUS_INSCRITO
+
+
 # def test_metodo_cria_usuario(proponente):
 #     assert User.objects.get(email=proponente.email)
 #
