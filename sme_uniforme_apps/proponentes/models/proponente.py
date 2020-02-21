@@ -1,3 +1,5 @@
+import environ
+
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from brazilnum.cnpj import validate_cnpj
@@ -9,7 +11,7 @@ from django.dispatch import receiver
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 from .validators import phone_validation, cep_validation, cnpj_validation
 from ..services import cnpj_esta_bloqueado
-from ..tasks import enviar_email_confirmacao_cadastro
+from ..tasks import enviar_email_confirmacao_cadastro, enviar_email_confirmacao_pre_cadastro
 
 
 class Proponente(ModeloBase):
@@ -115,6 +117,17 @@ class Proponente(ModeloBase):
     def __str__(self):
         return f"{self.responsavel} - {self.email} - {self.telefone}"
 
+    def comunicar_pre_cadastro(self):
+        if self.email:
+            env = environ.Env()
+            url = f'https://{env("SERVER_NAME")}/cadastro/?uuid={self.uuid}'
+            enviar_email_confirmacao_pre_cadastro.delay(self.email,
+                                                        {'protocolo': self.protocolo, 'url_cadastro': url})
+
+    def comunicar_cadastro(self):
+        if self.email:
+            enviar_email_confirmacao_cadastro.delay(self.email, {'protocolo': self.protocolo})
+
     @property
     def protocolo(self):
         return f'{self.uuid.urn[9:17].upper()}'
@@ -144,7 +157,7 @@ class Proponente(ModeloBase):
         proponente = Proponente.objects.get(uuid=uuid)
         proponente.status = Proponente.STATUS_INSCRITO
         proponente.save()
-        enviar_email_confirmacao_cadastro.delay(proponente.email, {'protocolo': proponente.protocolo})
+        proponente.comunicar_cadastro()
 
     class Meta:
         verbose_name = "Proponente"
@@ -153,9 +166,8 @@ class Proponente(ModeloBase):
 
 @receiver(post_save, sender=Proponente)
 def proponente_post_save(instance, created, **kwargs):
-    ...
-    # if created and instance and instance.email:
-    #     enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
+    if created and instance:
+        instance.comunicar_pre_cadastro()
 
 
 @receiver(pre_save, sender=Proponente)
