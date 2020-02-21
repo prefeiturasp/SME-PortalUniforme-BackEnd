@@ -57,3 +57,8 @@ celery  -A config beat --loglevel=info
 ```console
 flower -A config --port=5555
 ```
+
+**Limpar os processos no celery**
+```console
+celery  -A config purge
+```

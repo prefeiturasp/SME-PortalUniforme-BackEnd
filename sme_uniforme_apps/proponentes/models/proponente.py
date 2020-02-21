@@ -144,6 +144,7 @@ class Proponente(ModeloBase):
         proponente = Proponente.objects.get(uuid=uuid)
         proponente.status = Proponente.STATUS_INSCRITO
         proponente.save()
+        enviar_email_confirmacao_cadastro.delay(proponente.email, {'protocolo': proponente.protocolo})
 
     class Meta:
         verbose_name = "Proponente"
@@ -152,11 +153,9 @@ class Proponente(ModeloBase):
 
 @receiver(post_save, sender=Proponente)
 def proponente_post_save(instance, created, **kwargs):
-    if created and instance and instance.email:
-        enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
-
-    # if created and instance and instance.email and instance.responsavel:
-    #     cria_usuario_novo_proponente(instance)
+    ...
+    # if created and instance and instance.email:
+    #     enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
 
 
 @receiver(pre_save, sender=Proponente)
