@@ -9,7 +9,7 @@ from ...models import TipoDocumento
 
 class TiposDocumentoViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'id'
-    queryset = TipoDocumento.objects.all()
+    queryset = TipoDocumento.objects.filter(visivel=True).all()
     serializer_class = TipoDocumentoSerializer
     permission_classes = [AllowAny]
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
