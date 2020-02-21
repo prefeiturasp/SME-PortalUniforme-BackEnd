@@ -17,7 +17,7 @@ env = environ.Env()
 def enviar_email_confirmacao_cadastro(email, contexto):
     print(f'Confirmação de cadastro (Protocolo:{contexto["protocolo"]}) enviada para {email}.')
     return enviar_email_html(
-        'Recebemos o seu cadastro',
+        'Obrigado pelo envio do seu cadastro',
         'email_confirmacao_cadastro',
         contexto,
         email
