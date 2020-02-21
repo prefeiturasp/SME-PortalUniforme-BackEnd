@@ -106,6 +106,7 @@ def tipo_documento():
         'TipoDocumento',
         nome='Certidão Negativa',
         obrigatorio=True,
+        visivel=True
     )
 
 

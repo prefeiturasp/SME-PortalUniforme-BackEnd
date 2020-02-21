@@ -6,6 +6,7 @@ from sme_uniforme_apps.core.models_abstracts import ModeloBase
 class TipoDocumento(ModeloBase):
     nome = models.TextField('Tipo de documento', unique=True)
     obrigatorio = models.BooleanField(default=True)
+    visivel = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.nome} {"(obrigatório)" if self.obrigatorio else ""}'
