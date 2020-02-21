@@ -22,3 +22,18 @@ def enviar_email_confirmacao_cadastro(email, contexto):
         contexto,
         email
     )
+
+
+@shared_task(
+    autoretry_for=(SMTPServerDisconnected,),
+    retry_backoff=2,
+    retry_kwargs={'max_retries': 8},
+)
+def enviar_email_confirmacao_pre_cadastro(email, contexto):
+    print(f'Confirmação de pré-cadastro (Protocolo:{contexto["protocolo"]}) enviada para {email}.')
+    return enviar_email_html(
+        'Pré-cadastro realizado. Finalize seu cadastro!',
+        'email_confirmacao_pre_cadastro',
+        contexto,
+        email
+    )
