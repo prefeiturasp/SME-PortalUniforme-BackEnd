@@ -120,7 +120,7 @@ class Proponente(ModeloBase):
     def comunicar_pre_cadastro(self):
         if self.email:
             env = environ.Env()
-            url = f'https://{env("SERVER_NAME")}/cadastro/?uuid={self.uuid}'
+            url = f'https://{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
             enviar_email_confirmacao_pre_cadastro.delay(self.email,
                                                         {'protocolo': self.protocolo, 'url_cadastro': url})
 
