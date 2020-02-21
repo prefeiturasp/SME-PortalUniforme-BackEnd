@@ -1,9 +1,7 @@
 import pytest
-
 from django.core.exceptions import ValidationError
 
-from ..models import Loja
-
+from ...models import Loja
 
 pytestmark = pytest.mark.django_db
 

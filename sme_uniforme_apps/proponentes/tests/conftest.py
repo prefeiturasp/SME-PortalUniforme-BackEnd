@@ -47,6 +47,12 @@ def loja_fisica(proponente, arquivo):
         foto_fachada=arquivo,
     )
 
+@pytest.fixture
+def payload_update_fachada_loja(arquivo_anexo_base64):
+    return {
+        "foto_fachada": arquivo_anexo_base64,
+    }
+
 
 @pytest.fixture
 def anexo(proponente, arquivo, tipo_documento):
