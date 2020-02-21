@@ -2,8 +2,8 @@ import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 
-from ..admin import ProponenteAdmin
-from ..models import Proponente
+from sme_uniforme_apps.proponentes.admin import ProponenteAdmin
+from sme_uniforme_apps.proponentes.models import Proponente
 
 pytestmark = pytest.mark.django_db
 

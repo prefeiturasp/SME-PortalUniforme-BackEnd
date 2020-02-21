@@ -1,6 +1,6 @@
 import pytest
 
-from ..models import ListaNegra
+from sme_uniforme_apps.proponentes.models import ListaNegra
 
 
 pytestmark = pytest.mark.django_db

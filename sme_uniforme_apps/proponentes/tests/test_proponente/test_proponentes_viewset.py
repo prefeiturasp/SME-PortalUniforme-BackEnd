@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
 
-from ..api.viewsets.proponentes_viewset import ProponentesViewSet
-from ..models.proponente import Proponente
+from sme_uniforme_apps.proponentes.api.viewsets.proponentes_viewset import ProponentesViewSet
+from sme_uniforme_apps.proponentes.models.proponente import Proponente
 
 pytestmark = pytest.mark.django_db
 

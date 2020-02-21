@@ -60,4 +60,3 @@ class ProponentesViewSet(mixins.CreateModelMixin,
         proponente = Proponente.objects.get(uuid=uuid)
         serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
         return Response(serializer.data)
-

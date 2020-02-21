@@ -3,7 +3,7 @@ import json
 import pytest
 from rest_framework import status
 
-from ..models import Uniforme
+from sme_uniforme_apps.core.models import Uniforme
 
 pytestmark = pytest.mark.django_db
 

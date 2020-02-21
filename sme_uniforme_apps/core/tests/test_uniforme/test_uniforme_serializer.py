@@ -1,6 +1,6 @@
 import pytest
 
-from ..api.serializers.uniforme_serializer import UniformeSerializer, UniformeLookUpSerializer
+from sme_uniforme_apps.core.api.serializers.uniforme_serializer import UniformeSerializer, UniformeLookUpSerializer
 
 pytestmark = pytest.mark.django_db
 
