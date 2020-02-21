@@ -5,7 +5,7 @@ from ...api.serializers.anexo_serializer import AnexoSerializer
 from ...api.serializers.loja_serializer import LojaSerializer, LojaCreateSerializer
 from ...api.serializers.oferta_de_uniforme_serializer import (OfertaDeUniformeSerializer,
                                                               OfertaDeUniformeCreateSerializer)
-from ...models import Proponente, Anexo, TipoDocumento
+from ...models import Proponente
 from ....core.models import LimiteCategoria, Uniforme
 
 
