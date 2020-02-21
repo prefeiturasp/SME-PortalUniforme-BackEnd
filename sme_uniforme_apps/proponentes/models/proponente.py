@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 from .validators import phone_validation, cep_validation, cnpj_validation
-from ..services import cnpj_esta_bloqueado, cria_usuario_novo_proponente
+from ..services import cnpj_esta_bloqueado
 from ..tasks import enviar_email_confirmacao_cadastro
 
 

@@ -21,8 +21,13 @@ class Anexo(ModeloBase):
         related_name='anexos'
     )
 
-    # def __str__(self):
-    #     return f"{self.proponente.razao_social} - {self.endereco}"
+    def as_dict(self):
+        return {
+            "proponente": self.proponente.uuid,
+            "arquivo": self.arquivo,
+            "tipo_documento": self.tipo_documento,
+            "uuid": self.uuid
+        }
 
     class Meta:
         verbose_name = "Anexo"

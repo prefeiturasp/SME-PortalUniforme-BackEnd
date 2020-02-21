@@ -27,4 +27,3 @@ class LimiteCategoriaAdmin(admin.ModelAdmin):
     list_display = ('categoria_uniforme', 'preco_maximo')
     ordering = ('categoria_uniforme',)
     list_filter = ('categoria_uniforme',)
-
