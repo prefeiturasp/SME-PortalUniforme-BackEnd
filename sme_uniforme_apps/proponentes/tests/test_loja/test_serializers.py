@@ -1,6 +1,7 @@
 import pytest
 
-from ..api.serializers.loja_serializer import LojaSerializer
+from ...api.serializers.loja_serializer import (LojaSerializer,
+                                                LojaUpdateFachadaSerializer)
 
 pytestmark = pytest.mark.django_db
 
@@ -25,3 +26,7 @@ def test_loja_serializer(loja_fisica):
     assert loja_serializer.data['telefone']
     assert loja_serializer.data['nome_fantasia']
     assert loja_serializer.data['foto_fachada']
+
+def test_loja_fachada_update(payload_update_fachada_loja):
+    loja_partial_update = LojaUpdateFachadaSerializer(data=payload_update_fachada_loja)
+    assert loja_partial_update.is_valid()
