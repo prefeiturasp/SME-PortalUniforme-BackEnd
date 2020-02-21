@@ -1,6 +1,6 @@
 import pytest
 
-from ..models import Anexo
+from ...models import Anexo
 
 pytestmark = pytest.mark.django_db
 

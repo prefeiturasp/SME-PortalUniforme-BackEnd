@@ -1,6 +1,6 @@
 import pytest
 
-from ..api.serializers.anexo_serializer import AnexoSerializer
+from ...api.serializers.anexo_serializer import AnexoSerializer
 
 pytestmark = pytest.mark.django_db
 

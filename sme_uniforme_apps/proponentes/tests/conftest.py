@@ -116,6 +116,13 @@ def tipo_documento_nao_obrigatorio():
 def arquivo_anexo_base64():
     return "data:text/plain/txt;base64,RW5kZXJl528gSVB2NDoJMTAuNDkuMjMuOTANClNlcnZpZG9yZXMgRE5TIElQdjQ6CTEwLjQ5LjE2LjQwCjEwLjQ5LjE2LjQzDQpTdWZpeG8gRE5TIFByaW3hcmlvOgllZHVjYWNhby5pbnRyYW5ldA0KRmFicmljYW50ZToJSW50ZWwNCkRlc2NyaefjbzoJSW50ZWwoUikgRXRoZXJuZXQgQ29ubmVjdGlvbiBJMjE4LUxNDQpWZXJz428gZG8gZHJpdmVyOgkxMi4xMy4xNy40DQpFbmRlcmXnbyBm7XNpY28gKE1BQyk6CTc0LUU2LUUyLUQwLUVDLTNF"
 
+@pytest.fixture
+def payload_anexo(arquivo_anexo_base64, tipo_documento, proponente):
+    return {
+        "arquivo": arquivo_anexo_base64,
+        "proponente": str(proponente.uuid),
+        "tipo_documento": tipo_documento.id
+    }
 
 @pytest.fixture
 def payload_arquivos_anexos_faltando_documentos_obrigatorios(tipo_documento_nao_obrigatorio, arquivo_anexo_base64):
