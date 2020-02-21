@@ -244,6 +244,36 @@ def payload_lojas(arquivo_anexo_base64):
 
 
 @pytest.fixture
+def payload_lojas_sem_fotos_fachada():
+    return [
+        {
+            "nome_fantasia": "Loja A",
+            "cep": "27600-000",
+            "endereco": "Rua ABC",
+            "bairro": "São João",
+            "numero": "565",
+            "complemento": "Teste",
+            "latitude": "",
+            "longitude": "",
+            "numero_iptu": "",
+            "telefone": "(55) 4344-8765",
+        },
+        {
+            "nome_fantasia": "Loja B",
+            "cep": "04120-021",
+            "endereco": "Rua Teste",
+            "bairro": "Centro",
+            "numero": "133",
+            "complemento": "apt 102",
+            "latitude": "",
+            "longitude": "",
+            "numero_iptu": "",
+            "telefone": "(24) 9988-29105",
+        }
+    ]
+
+
+@pytest.fixture
 def payload_proponente(payload_ofertas_de_uniformes, payload_lojas,
                        payload_arquivos_anexos_nao_faltando_documentos_obrigatorios,
                        tipo_documento):
@@ -251,6 +281,23 @@ def payload_proponente(payload_ofertas_de_uniformes, payload_lojas,
         "ofertas_de_uniformes": payload_ofertas_de_uniformes,
         "lojas": payload_lojas,
         "arquivos_anexos": payload_arquivos_anexos_nao_faltando_documentos_obrigatorios,
+        "cnpj": "27.561.647/0001-49",
+        "razao_social": "Postman 3 SA",
+        "end_logradouro": "Rua XPTO, 23 fundos",
+        "end_cidade": "São Paulo",
+        "end_uf": "SP",
+        "end_cep": "12600-000",
+        "telefone": "(11) 99777-5105",
+        "email": "postman3@teste.com",
+        "responsavel": "Ana Postman da Silva"
+    }
+
+
+@pytest.fixture
+def payload_proponente_sem_anexos(payload_ofertas_de_uniformes, payload_lojas_sem_fotos_fachada, tipo_documento):
+    return {
+        "ofertas_de_uniformes": payload_ofertas_de_uniformes,
+        "lojas": payload_lojas_sem_fotos_fachada,
         "cnpj": "27.561.647/0001-49",
         "razao_social": "Postman 3 SA",
         "end_logradouro": "Rua XPTO, 23 fundos",
