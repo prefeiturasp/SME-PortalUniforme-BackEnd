@@ -2,7 +2,7 @@ import pytest
 
 from model_bakery import baker
 
-from ..models import Proponente, ListaNegra
+from sme_uniforme_apps.proponentes.models import Proponente, ListaNegra
 
 
 pytestmark = pytest.mark.django_db

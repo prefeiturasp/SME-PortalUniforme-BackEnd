@@ -1,8 +1,8 @@
 import pytest
 from django.contrib import admin
 
-from ..admin import LimiteCategoriaAdmin
-from ..models import LimiteCategoria
+from sme_uniforme_apps.core.admin import LimiteCategoriaAdmin
+from sme_uniforme_apps.core.models import LimiteCategoria
 
 pytestmark = pytest.mark.django_db
 

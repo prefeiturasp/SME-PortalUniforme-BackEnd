@@ -1,6 +1,6 @@
 import pytest
 
-from ..api.serializers.limite_categoria_serializer import LimiteCategoriaSerializer
+from sme_uniforme_apps.core.api.serializers.limite_categoria_serializer import LimiteCategoriaSerializer
 
 pytestmark = pytest.mark.django_db
 

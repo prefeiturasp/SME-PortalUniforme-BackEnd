@@ -1,8 +1,8 @@
 import pytest
 from django.contrib import admin
 
-from ..admin import TipoDocumentoAdmin
-from ..models import TipoDocumento
+from sme_uniforme_apps.proponentes.admin import TipoDocumentoAdmin
+from sme_uniforme_apps.proponentes.models import TipoDocumento
 
 pytestmark = pytest.mark.django_db
 

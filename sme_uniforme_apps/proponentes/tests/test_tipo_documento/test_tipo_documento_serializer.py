@@ -1,6 +1,6 @@
 import pytest
 
-from ..api.serializers.tipo_documento_serializer import TipoDocumentoSerializer
+from sme_uniforme_apps.proponentes.api.serializers.tipo_documento_serializer import TipoDocumentoSerializer
 
 pytestmark = pytest.mark.django_db
 

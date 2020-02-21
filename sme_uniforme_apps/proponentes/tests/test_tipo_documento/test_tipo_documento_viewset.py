@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
 
-from ..api.viewsets.tipos_documento_viewset import TiposDocumentoViewSet
+from sme_uniforme_apps.proponentes.api.viewsets.tipos_documento_viewset import TiposDocumentoViewSet
 
 pytestmark = pytest.mark.django_db
 

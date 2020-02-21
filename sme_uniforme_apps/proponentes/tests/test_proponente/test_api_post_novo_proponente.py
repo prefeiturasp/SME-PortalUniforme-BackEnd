@@ -3,7 +3,7 @@ import json
 import pytest
 from rest_framework import status
 
-from ..models import Proponente
+from sme_uniforme_apps.proponentes.models import Proponente
 
 pytestmark = pytest.mark.django_db
 
