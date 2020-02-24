@@ -60,3 +60,21 @@ class ProponentesViewSet(mixins.CreateModelMixin,
         proponente = Proponente.objects.get(uuid=uuid)
         serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=False, url_path='verifica-email')
+    def verifica_email(self, request):
+        email = request.query_params.get('email')
+        if email:
+            result = {
+                'result': 'OK',
+                'email_valido': 'Sim' if Proponente.email_valido(email) else 'Não',
+                'email_cadastrado': 'Sim' if Proponente.email_ja_cadastrado(email) else 'Não'
+
+            }
+        else:
+            result = {
+                'result': 'Erro',
+                'mensagem': 'Informe o email na url. Ex: /proponentes/verifica-email/?email=teste@teste.com'
+            }
+
+        return Response(result)
