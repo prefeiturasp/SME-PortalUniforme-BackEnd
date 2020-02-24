@@ -1,5 +1,6 @@
 import environ
 
+
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from brazilnum.cnpj import validate_cnpj
@@ -9,6 +10,8 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
+from sme_uniforme_apps.core.helpers.validar_email import email_valido
+
 from .validators import phone_validation, cep_validation, cnpj_validation
 from ..services import cnpj_esta_bloqueado
 from ..tasks import enviar_email_confirmacao_cadastro, enviar_email_confirmacao_pre_cadastro
@@ -158,6 +161,14 @@ class Proponente(ModeloBase):
         proponente.status = Proponente.STATUS_INSCRITO
         proponente.save()
         proponente.comunicar_cadastro()
+
+    @classmethod
+    def email_ja_cadastrado(cls, email):
+        return cls.objects.filter(email=email).exists()
+
+    @staticmethod
+    def email_valido(email):
+        return email_valido(email)
 
     class Meta:
         verbose_name = "Proponente"

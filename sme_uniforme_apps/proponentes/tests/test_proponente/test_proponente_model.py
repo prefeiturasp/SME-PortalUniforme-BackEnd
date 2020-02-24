@@ -89,13 +89,20 @@ def test_metodo_concluir_cadastro(proponente):
     assert Proponente.objects.get(uuid=uuid).status == Proponente.STATUS_INSCRITO
 
 
-# def test_metodo_cria_usuario(proponente):
-#     assert User.objects.get(email=proponente.email)
-#
-#
-# def test_metodo_cria_usuario_como_nao_validado(proponente):
-#     assert not User.objects.get(email=proponente.email).validado
-#
-#
-# def test_metodo_cria_usuario_senha_inicial_protocolo(proponente):
-#     assert User.objects.get(email=proponente.email).check_password(proponente.protocolo)
+def test_email_ja_cadastrado_resultado_positivo(proponente):
+    assert Proponente.email_ja_cadastrado(proponente.email)
+
+
+def test_email_ja_cadastrado_resultado_negativo(proponente):
+    email_nao_cadastrado = 'esse@nao.tem'
+    assert not Proponente.email_ja_cadastrado(email_nao_cadastrado)
+
+
+def test_email_valido_resultado_positivo():
+    email_valido = 'teste@teste.com'
+    assert Proponente.email_valido(email_valido)
+
+
+def test_email_valido_resultado_negativo():
+    email_invalido = 'gshgdhsgdhsghd'
+    assert not Proponente.email_valido(email_invalido)
