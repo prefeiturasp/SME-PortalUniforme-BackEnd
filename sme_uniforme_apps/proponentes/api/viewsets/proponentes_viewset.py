@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from rest_framework import mixins
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny
@@ -56,8 +56,10 @@ class ProponentesViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, url_path='concluir-cadastro', methods=['patch'])
     def concluir_cadastro(self, request, uuid):
-        Proponente.concluir_cadastro(uuid)
-        proponente = Proponente.objects.get(uuid=uuid)
+        try:
+            proponente = Proponente.concluir_cadastro(uuid)
+        except Exception as e:
+            return Response({"detail": e.__str__()}, status.HTTP_400_BAD_REQUEST)
         serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
         return Response(serializer.data)
 
