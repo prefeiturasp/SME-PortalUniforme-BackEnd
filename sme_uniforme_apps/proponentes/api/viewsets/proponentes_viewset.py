@@ -49,7 +49,7 @@ class ProponentesViewSet(mixins.CreateModelMixin,
         else:
             result = {
                 'result': 'Erro',
-                'mensagem': 'Informe o cnpj na url. Ex: /proponentes/?cnpj=53.894.798/0001-29'
+                'mensagem': 'Informe o cnpj na url. Ex: /proponentes/verifica-cnpj/?cnpj=53.894.798/0001-29'
             }
 
         return Response(result)
