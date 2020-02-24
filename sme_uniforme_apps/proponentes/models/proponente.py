@@ -1,20 +1,20 @@
 import environ
-
-
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
 from brazilnum.cnpj import validate_cnpj
 from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from sme_uniforme_apps.core.models_abstracts import ModeloBase
+from auditlog.models import AuditlogHistoryField
+from auditlog.registry import auditlog
 from sme_uniforme_apps.core.helpers.validar_email import email_valido
+from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
-from .validators import phone_validation, cep_validation, cnpj_validation
 from ..services import cnpj_esta_bloqueado
-from ..tasks import enviar_email_confirmacao_cadastro, enviar_email_confirmacao_pre_cadastro
+from ..tasks import (enviar_email_confirmacao_cadastro,
+                     enviar_email_confirmacao_pre_cadastro)
+from .tipo_documento import TipoDocumento
+from .validators import cep_validation, cnpj_validation, phone_validation
 
 
 class Proponente(ModeloBase):
@@ -156,8 +156,18 @@ class Proponente(ModeloBase):
         Proponente.objects.filter(cnpj=cnpj).update(status=Proponente.STATUS_INSCRITO)
 
     @classmethod
+    def documentos_obrigatorios_enviados(cls, proponente):
+        """Valida se os documentos obrigatórios foram enviados."""
+        tipos_obrigatorios = TipoDocumento.objects.filter(obrigatorio=True)
+        anexos_obrigatorios = proponente.anexos.filter(tipo_documento__obrigatorio=True)
+
+        return tipos_obrigatorios.count() == anexos_obrigatorios.count()
+
+    @classmethod
     def concluir_cadastro(cls, uuid):
         proponente = Proponente.objects.get(uuid=uuid)
+        if not cls.documentos_obrigatorios_enviados(proponente):
+            raise Exception("Documento obrigatório ainda precisa ser enviado!")
         proponente.status = Proponente.STATUS_INSCRITO
         proponente.save()
         proponente.comunicar_cadastro()
