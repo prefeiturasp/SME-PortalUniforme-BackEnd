@@ -1,6 +1,4 @@
-import environ
 import logging
-
 from brazilnum.cnpj import validate_cnpj
 from django.core import validators
 from django.db import models
@@ -9,6 +7,7 @@ from django.dispatch import receiver
 
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
+from decouple import config
 from sme_uniforme_apps.core.helpers.validar_email import email_valido
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
@@ -128,8 +127,7 @@ class Proponente(ModeloBase):
         if self.email:
             log.debug(f'Enviando confirmação de pré-cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
 
-            env = environ.Env()
-            url = f'https://{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
+            url = f'https://{config("SERVER_NAME")}/cadastro?uuid={self.uuid}'
             enviar_email_confirmacao_pre_cadastro.delay(self.email,
                                                         {'protocolo': self.protocolo, 'url_cadastro': url})
 
