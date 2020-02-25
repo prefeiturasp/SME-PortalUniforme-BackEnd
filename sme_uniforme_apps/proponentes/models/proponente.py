@@ -1,4 +1,6 @@
 import environ
+import logging
+
 from brazilnum.cnpj import validate_cnpj
 from django.core import validators
 from django.db import models
@@ -15,6 +17,8 @@ from ..tasks import (enviar_email_confirmacao_cadastro,
                      enviar_email_confirmacao_pre_cadastro)
 from .tipo_documento import TipoDocumento
 from .validators import cep_validation, cnpj_validation, phone_validation
+
+log = logging.getLogger(__name__)
 
 
 class Proponente(ModeloBase):
@@ -122,6 +126,8 @@ class Proponente(ModeloBase):
 
     def comunicar_pre_cadastro(self):
         if self.email:
+            log.debug(f'Enviando confirmação de pré-cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
+
             env = environ.Env()
             url = f'https://{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
             enviar_email_confirmacao_pre_cadastro.delay(self.email,
@@ -129,6 +135,7 @@ class Proponente(ModeloBase):
 
     def comunicar_cadastro(self):
         if self.email:
+            log.debug(f'Enviando confirmação de cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
             enviar_email_confirmacao_cadastro.delay(self.email, {'protocolo': self.protocolo})
 
     @property
@@ -167,9 +174,11 @@ class Proponente(ModeloBase):
     def concluir_cadastro(cls, uuid):
         proponente = Proponente.objects.get(uuid=uuid)
         if not cls.documentos_obrigatorios_enviados(proponente):
+            log.debug(f'Erro na conclusão de Cadastro. Faltam documentos obrigatórios. UUID:{uuid}')
             raise Exception("Documento obrigatório ainda precisa ser enviado!")
         proponente.status = Proponente.STATUS_INSCRITO
         proponente.save()
+        log.debug(f'Cadastro concluído. UUID:{uuid}')
         proponente.comunicar_cadastro()
 
     @classmethod
