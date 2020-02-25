@@ -1,9 +1,13 @@
+import logging
+
 from django.http import Http404
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from ...models import Parametros
+
+log = logging.getLogger(__name__)
 
 
 class InstrucaoNormativaViewSet(viewsets.ViewSet):
@@ -34,4 +38,5 @@ class InstrucaoNormativaViewSet(viewsets.ViewSet):
         """
         parametros = self.get_object()
         instrucao_normativa_url = parametros.instrucao_normativa.url
+        log.debug(f"Url da instrução normativa: {instrucao_normativa_url}")
         return Response(instrucao_normativa_url)

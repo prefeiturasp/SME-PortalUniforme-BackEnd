@@ -1,7 +1,12 @@
+import logging
+
 from django.db import models
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
+
 from .uniforme import Uniforme
+
+log = logging.getLogger(__name__)
 
 
 class LimiteCategoria(ModeloBase):
@@ -21,6 +26,7 @@ class LimiteCategoria(ModeloBase):
         result = {}
         for categoria in cls.objects.all():
             result[categoria.categoria_uniforme] = categoria.preco_maximo
+        log.debug(f"Limites por categoria: {result}")
         return result
 
     class Meta:
