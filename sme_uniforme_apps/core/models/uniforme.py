@@ -1,6 +1,10 @@
+import logging
+
 from django.db import models
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
+
+log = logging.getLogger(__name__)
 
 
 class Uniforme(ModeloBase):
@@ -65,6 +69,7 @@ class Uniforme(ModeloBase):
         for uniforme in cls.objects.all():
             qtd_itens_por_categoria[uniforme.categoria] += 1
 
+        log.debug(f"Quantidade de itens por categoria: {qtd_itens_por_categoria}")
         return qtd_itens_por_categoria
 
     @classmethod
