@@ -30,7 +30,4 @@ RUN apk update && apk add postgresql-dev tzdata && \
   python -m pip --no-cache install -r requirements/production.txt && \
   apk del --purge .build-dependencies
 
-CMD gunicorn config.wsgi:application --bind=0.0.0.0:8001 -w 8 && \
-  celery -A config worker --loglevel=info --concurrency=3 -n worker1@%h
-
 EXPOSE 8001
