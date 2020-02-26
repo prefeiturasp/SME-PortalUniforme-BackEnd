@@ -264,7 +264,7 @@ LOGGING = {
             "formatter": "verbose",
         }
     },
-    "root": {"level": "DEBUG", "handlers": ["console"]},
+    "root": {"level": "INFO", "handlers": ["console"]},
 }
 
 # Celery

@@ -26,7 +26,7 @@ class LimiteCategoria(ModeloBase):
         result = {}
         for categoria in cls.objects.all():
             result[categoria.categoria_uniforme] = categoria.preco_maximo
-        log.debug(f"Limites por categoria: {result}")
+        log.info(f"Limites por categoria: {result}")
         return result
 
     class Meta:
