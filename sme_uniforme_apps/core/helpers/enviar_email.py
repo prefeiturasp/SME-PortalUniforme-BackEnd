@@ -19,7 +19,7 @@ def enviar_email(assunto, mensagem, enviar_para):
             from_email=config.from_email or None,
             recipient_list=[enviar_para]
         )
-        logger.debug(f'Email enviado para {enviar_para}. Assunto:{assunto}.')
+        logger.info(f'Email enviado para {enviar_para}. Assunto:{assunto}.')
     except Exception as err:
         logger.error(str(err))
 
@@ -38,7 +38,7 @@ def enviar_email_html(assunto, template, data, enviar_para):
         msg.content_subtype = "html"  # Main content is now text/html
 
         msg.send()
-        logger.debug(f'Email enviado para {enviar_para}. Assunto:{assunto}. Template:{template}.  ')
+        logger.info(f'Email enviado para {enviar_para}. Assunto:{assunto}. Template:{template}.  ')
 
     except Exception as err:
         logger.error(str(err))

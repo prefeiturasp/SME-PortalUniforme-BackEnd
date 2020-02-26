@@ -38,5 +38,5 @@ class InstrucaoNormativaViewSet(viewsets.ViewSet):
         """
         parametros = self.get_object()
         instrucao_normativa_url = parametros.instrucao_normativa.url
-        log.debug(f"Url da instrução normativa: {instrucao_normativa_url}")
+        log.info(f"Url da instrução normativa: {instrucao_normativa_url}")
         return Response(instrucao_normativa_url)

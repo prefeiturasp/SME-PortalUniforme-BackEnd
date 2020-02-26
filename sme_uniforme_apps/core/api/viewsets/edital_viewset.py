@@ -38,5 +38,5 @@ class EditalViewSet(viewsets.ViewSet):
         """
         parametros = self.get_object()
         edital_url = parametros.edital.url
-        log.debug(f"Url ddo edital: {edital_url}")
+        log.info(f"Url ddo edital: {edital_url}")
         return Response(edital_url)
