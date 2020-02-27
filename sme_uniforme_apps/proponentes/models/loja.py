@@ -38,6 +38,7 @@ class Loja(ModeloBase):
     class Meta:
         verbose_name = "Loja física"
         verbose_name_plural = "Lojas físicas"
+        ordering = ('id', )
 
 
 auditlog.register(Loja)
