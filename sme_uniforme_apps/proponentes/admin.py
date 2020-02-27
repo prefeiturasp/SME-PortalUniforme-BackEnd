@@ -31,15 +31,36 @@ class ProponenteAdmin(admin.ModelAdmin):
 
         self.message_user(request, "Bloqueios verificados.")
 
+    verifica_bloqueio_cnpj.short_description = 'Verifica bloqueio de CNPJs'
+
+    def muda_status_para_inscrito(self, request, queryset):
+        for proponente in queryset.all():
+            if proponente.status != Proponente.STATUS_INSCRITO:
+                proponente.status = Proponente.STATUS_INSCRITO
+                proponente.save()
+
+        self.message_user(request, f'Status alterados para {Proponente.STATUS_NOMES[Proponente.STATUS_INSCRITO]}.')
+
+    muda_status_para_inscrito.short_description = f'Status ==> {Proponente.STATUS_NOMES[Proponente.STATUS_INSCRITO]}.'
+
+    def muda_status_para_em_processo(self, request, queryset):
+        for proponente in queryset.all():
+            if proponente.status != Proponente.STATUS_EM_PROCESSO:
+                proponente.status = Proponente.STATUS_EM_PROCESSO
+                proponente.save()
+
+        self.message_user(request, f'Status alterados para {Proponente.STATUS_NOMES[Proponente.STATUS_EM_PROCESSO]}.')
+
+    muda_status_para_em_processo.short_description = \
+        f'Status ==> {Proponente.STATUS_NOMES[Proponente.STATUS_EM_PROCESSO]}.'
+
     def ultima_alteracao(self, obj):
         return obj.alterado_em.strftime("%d/%m/%Y %H:%M:%S")
 
     ultima_alteracao.admin_order_field = 'alterado_em'
     ultima_alteracao.short_description = 'Última alteração'
 
-    verifica_bloqueio_cnpj.short_description = 'Verifica bloqueio de CNPJs'
-
-    actions = ['verifica_bloqueio_cnpj']
+    actions = ['verifica_bloqueio_cnpj', 'muda_status_para_inscrito', 'muda_status_para_em_processo']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
                     'status')
     ordering = ('-alterado_em',)
