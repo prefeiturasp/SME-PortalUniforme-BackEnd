@@ -14,6 +14,7 @@ class Loja(ModeloBase):
 
     proponente = models.ForeignKey(Proponente, on_delete=models.CASCADE, blank=True, null=True, related_name='lojas')
 
+    nome_fantasia = models.CharField(max_length=100, blank=True, default="")
     cep = models.CharField("CEP", max_length=20, validators=[cep_validation])
     endereco = models.CharField("Logradouro", max_length=255)
     bairro = models.CharField("Bairro", max_length=255)
@@ -29,12 +30,15 @@ class Loja(ModeloBase):
         "Telefone", max_length=20, validators=[phone_validation], blank=True, null=True, default=""
     )
 
+    foto_fachada = models.FileField('Foto da fachada da loja', blank=True, null=True)
+
     def __str__(self):
-        return f"{self.proponente.razao_social if self.proponente else ''} - {self.endereco}"
+        return f"{self.nome_fantasia}"
 
     class Meta:
         verbose_name = "Loja física"
         verbose_name_plural = "Lojas físicas"
+        ordering = ('id', )
 
 
 auditlog.register(Loja)

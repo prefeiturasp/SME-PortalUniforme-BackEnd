@@ -5,6 +5,15 @@ from ....core.models.uniforme import Uniforme
 
 
 class OfertaDeUniformeSerializer(serializers.ModelSerializer):
+    uniforme_categoria = serializers.SerializerMethodField()
+    uniforme_quantidade = serializers.SerializerMethodField()
+
+    def get_uniforme_categoria(self, obj):
+        return obj.uniforme.categoria
+
+    def get_uniforme_quantidade(self, obj):
+        return obj.uniforme.quantidade
+
     class Meta:
         model = OfertaDeUniforme
         fields = '__all__'

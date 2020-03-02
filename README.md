@@ -5,10 +5,14 @@ Portal do programa de captação de fornecedores de uniforme escolar da Secretar
 
 License: MIT
 
-Versão: 0.1.0
+Versão: 1.0.0
 
 
 ## Release Notes
+
+### 1.0.0 - 02/03/2019 - Sprint 2
+* Reformulação do processo de inscrição de fornecedores. Cadastro dividido em duas fases: Pré-cadastro e Cadastro
+
 
 ### 0.1.0 - 31/01/2020 - Sprint 1
 * Portal do programa 
@@ -56,4 +60,9 @@ celery  -A config beat --loglevel=info
 **Monitorar os processos no celery**
 ```console
 flower -A config --port=5555
+```
+
+**Limpar os processos no celery**
+```console
+celery  -A config purge
 ```

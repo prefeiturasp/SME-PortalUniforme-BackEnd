@@ -1,8 +1,11 @@
+import logging
+
 from drf_base64.serializers import ModelSerializer
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from ...models import Anexo
+from ...models import Anexo, Proponente
+
+log = logging.getLogger(__name__)
 
 
 class AnexoSerializer(ModelSerializer):
@@ -12,15 +15,18 @@ class AnexoSerializer(ModelSerializer):
 
 
 class AnexoCreateSerializer(serializers.ModelSerializer):
+    proponente = serializers.UUIDField()
 
-    def validate_anexo(self, anexo):
-        file_size = anexo.size
-
-        if file_size > 10485760:
-            raise ValidationError("O tamanho máximo de um arquivo é 10MB")
-        else:
-            return anexo
+    def create(self, validated_data):
+        log.info("Criando anexo!")
+        proponent_uuid = validated_data.pop('proponente')
+        proponente = Proponente.objects.get(uuid=proponent_uuid)
+        anexo = Anexo.objects.create(
+            proponente=proponente,
+            **validated_data)
+        log.info("Anexo uuid: {} criado!".format(anexo.uuid))
+        return anexo.as_dict()
 
     class Meta:
         model = Anexo
-        exclude = ('id', 'proponente')
+        exclude = ('id',)

@@ -1,20 +1,24 @@
-from django.db import models
+import environ
+import logging
+
+from brazilnum.cnpj import validate_cnpj
 from django.core import validators
+from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from brazilnum.cnpj import validate_cnpj
-
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
-
-from .validators import phone_validation, cep_validation, cnpj_validation
+from sme_uniforme_apps.core.helpers.validar_email import email_valido
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
 from ..services import cnpj_esta_bloqueado
+from ..tasks import (enviar_email_confirmacao_cadastro,
+                     enviar_email_confirmacao_pre_cadastro)
+from .tipo_documento import TipoDocumento
+from .validators import cep_validation, cnpj_validation, phone_validation
 
-from ...core.models.meio_de_recebimento import MeioDeRecebimento
-from ..tasks import enviar_email_confirmacao_cadastro
+log = logging.getLogger(__name__)
 
 
 class Proponente(ModeloBase):
@@ -52,15 +56,18 @@ class Proponente(ModeloBase):
     # Status Choice
     STATUS_INSCRITO = 'INSCRITO'
     STATUS_BLOQUEADO = 'BLOQUEADO'
+    STATUS_EM_PROCESSO = 'EM_PROCESSO'
 
     STATUS_NOMES = {
         STATUS_INSCRITO: 'Inscrito',
         STATUS_BLOQUEADO: 'Bloqueado',
+        STATUS_EM_PROCESSO: 'Em processo'
     }
 
     STATUS_CHOICES = (
         (STATUS_INSCRITO, STATUS_NOMES[STATUS_INSCRITO]),
         (STATUS_BLOQUEADO, STATUS_NOMES[STATUS_BLOQUEADO]),
+        (STATUS_EM_PROCESSO, STATUS_NOMES[STATUS_EM_PROCESSO]),
     )
 
     cnpj = models.CharField(
@@ -107,17 +114,29 @@ class Proponente(ModeloBase):
 
     responsavel = models.CharField("Responsável", max_length=255, blank=True, null=True)
 
-    meios_de_recebimento = models.ManyToManyField(MeioDeRecebimento, related_name='proponentes_que_aceitam')
-
     status = models.CharField(
         'status',
         max_length=15,
         choices=STATUS_CHOICES,
-        default=STATUS_INSCRITO
+        default=STATUS_EM_PROCESSO
     )
 
     def __str__(self):
         return f"{self.responsavel} - {self.email} - {self.telefone}"
+
+    def comunicar_pre_cadastro(self):
+        if self.email:
+            log.info(f'Enviando confirmação de pré-cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
+
+            env = environ.Env()
+            url = f'https://{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
+            enviar_email_confirmacao_pre_cadastro.delay(self.email,
+                                                        {'protocolo': self.protocolo, 'url_cadastro': url})
+
+    def comunicar_cadastro(self):
+        if self.email:
+            log.info(f'Enviando confirmação de cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
+            enviar_email_confirmacao_cadastro.delay(self.email, {'protocolo': self.protocolo})
 
     @property
     def protocolo(self):
@@ -143,6 +162,33 @@ class Proponente(ModeloBase):
     def desbloqueia_por_cnpj(cls, cnpj):
         Proponente.objects.filter(cnpj=cnpj).update(status=Proponente.STATUS_INSCRITO)
 
+    @classmethod
+    def documentos_obrigatorios_enviados(cls, proponente):
+        """Valida se os documentos obrigatórios foram enviados."""
+        tipos_obrigatorios = TipoDocumento.objects.filter(obrigatorio=True)
+        anexos_obrigatorios = proponente.anexos.filter(tipo_documento__obrigatorio=True)
+
+        return tipos_obrigatorios.count() == anexos_obrigatorios.count()
+
+    @classmethod
+    def concluir_cadastro(cls, uuid):
+        proponente = Proponente.objects.get(uuid=uuid)
+        if not cls.documentos_obrigatorios_enviados(proponente):
+            log.info(f'Erro na conclusão de Cadastro. Faltam documentos obrigatórios. UUID:{uuid}')
+            raise Exception("Documento obrigatório ainda precisa ser enviado!")
+        proponente.status = Proponente.STATUS_INSCRITO
+        proponente.save()
+        log.info(f'Cadastro concluído. UUID:{uuid}')
+        proponente.comunicar_cadastro()
+
+    @classmethod
+    def email_ja_cadastrado(cls, email):
+        return cls.objects.filter(email=email).exists()
+
+    @staticmethod
+    def email_valido(email):
+        return email_valido(email)
+
     class Meta:
         verbose_name = "Proponente"
         verbose_name_plural = "Proponentes"
@@ -150,15 +196,16 @@ class Proponente(ModeloBase):
 
 @receiver(post_save, sender=Proponente)
 def proponente_post_save(instance, created, **kwargs):
-    if created and instance and instance.email:
-        enviar_email_confirmacao_cadastro.delay(instance.email, {'protocolo': instance.protocolo})
+    if created and instance:
+        instance.comunicar_pre_cadastro()
 
 
 @receiver(pre_save, sender=Proponente)
 def proponente_pre_save(instance, **kwargs):
-    if instance.cnpj and cnpj_esta_bloqueado(instance.cnpj):
+    if instance.status == Proponente.STATUS_INSCRITO and instance.cnpj and cnpj_esta_bloqueado(instance.cnpj):
         instance.status = Proponente.STATUS_BLOQUEADO
-    else:
+
+    elif instance.status == Proponente.STATUS_BLOQUEADO and instance.cnpj and not cnpj_esta_bloqueado(instance.cnpj):
         instance.status = Proponente.STATUS_INSCRITO
 
 

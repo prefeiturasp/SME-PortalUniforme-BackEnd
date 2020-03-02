@@ -1,11 +1,10 @@
-from django.db import models
-
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
+from django.db import models
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
-
 from .proponente import Proponente
+from .tipo_documento import TipoDocumento
 
 
 class Anexo(ModeloBase):
@@ -15,8 +14,20 @@ class Anexo(ModeloBase):
 
     arquivo = models.FileField()
 
-    # def __str__(self):
-    #     return f"{self.proponente.razao_social} - {self.endereco}"
+    tipo_documento = models.ForeignKey(
+        TipoDocumento,
+        on_delete=models.PROTECT,
+        blank=True, null=True,
+        related_name='anexos'
+    )
+
+    def as_dict(self):
+        return {
+            "proponente": self.proponente.uuid,
+            "arquivo": self.arquivo,
+            "tipo_documento": self.tipo_documento,
+            "uuid": self.uuid
+        }
 
     class Meta:
         verbose_name = "Anexo"
