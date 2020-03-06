@@ -70,6 +70,12 @@ class ProponenteAdmin(admin.ModelAdmin):
 
     muda_status_para_em_analise.short_description = f'Status ==> {Proponente.STATUS_NOMES[Proponente.STATUS_EM_ANALISE]}.'
 
+    def muda_status_para_credenciado(self, request, queryset):
+        muda_status_de_proponentes(queryset, Proponente.STATUS_CREDENCIADO)
+        self.message_user(request, f'Status alterados para {Proponente.STATUS_NOMES[Proponente.STATUS_CREDENCIADO]}.')
+
+    muda_status_para_credenciado.short_description = f'Status ==> {Proponente.STATUS_NOMES[Proponente.STATUS_CREDENCIADO]}.'
+
     def atualiza_coordenadas_action(self, request, queryset):
         atualiza_coordenadas(queryset)
         self.message_user(request, f'Coordenadas das lojas físicas para proponentes APROVADOS foram atualizados.')
@@ -91,6 +97,7 @@ class ProponenteAdmin(admin.ModelAdmin):
         'muda_status_para_em_analise',
         'muda_status_para_inscrito', 
         'muda_status_para_em_processo',
+        'muda_status_para_credenciado',
         'atualiza_coordenadas_action']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
                     'status')

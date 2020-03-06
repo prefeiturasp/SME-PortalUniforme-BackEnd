@@ -14,4 +14,4 @@ SERVER_NAME=localhost
 
 #Sentry
 SENTRY=""
-GEOREF_API_URL=https://georef.sme.prefeitura.sp.gov.br
+GEOREF_API_URL=""
