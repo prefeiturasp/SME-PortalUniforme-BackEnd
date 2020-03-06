@@ -1,13 +1,14 @@
 import logging
+
 import requests
+from django.conf import settings
 
-from .models.lista_negra import ListaNegra
 from ..custom_user.models import User
-
+from .models.lista_negra import ListaNegra
 
 LAYERS = 'address'
 BUNDARY = 'whosonfirst:locality:101965533'
-API_URL = 'https://georef.sme.prefeitura.sp.gov.br/v1/search'
+API_URL = f'{settings.GEOREF_API_URL}/v1/search'
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,9 @@ def muda_status_de_proponentes(queryset, novo_status):
             if novo_status == "APROVADO":
                 atualiza_coordenadas_lojas(proponente.lojas)
 
+def atualiza_coordenadas(queryset):
+    for proponente in queryset.filter(status='APROVADO').all():
+        atualiza_coordenadas_lojas(proponente.lojas)
 
 def atualiza_coordenadas_lojas(lojas):
     log.info("Atualizando coordendas das lojas físicas")
@@ -52,4 +56,3 @@ def busca_latitude_e_longitude(payload):
     # A georef.sme API retorna longitude e latitude
     # mas o retorno será latitude e longitude 
     return payload['features'][0]['geometry']['coordinates'][::-1] 
-
