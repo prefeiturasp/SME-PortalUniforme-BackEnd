@@ -61,7 +61,7 @@ class Proponente(ModeloBase):
     STATUS_NOMES = {
         STATUS_INSCRITO: 'Inscrito',
         STATUS_BLOQUEADO: 'Bloqueado',
-        STATUS_EM_PROCESSO: 'Em processo'
+        STATUS_EM_PROCESSO: 'Pré-cadastro'
     }
 
     STATUS_CHOICES = (
