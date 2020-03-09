@@ -19,6 +19,8 @@ jobs:
         - POSTGRES_HOST=localhost
         - POSTGRES_PORT=5432
         - POSTGRES_DB=uniformes
+        - SENTRY=""
+        - GEOREF_API_URL=""
       script:
         - psql -c "CREATE DATABASE test;" -U postgres
         - psql -c "CREATE USER admin WITH PASSWORD '12345qw';" -U postgres
