@@ -78,7 +78,7 @@ class ProponenteAdmin(admin.ModelAdmin):
 
     def atualiza_coordenadas_action(self, request, queryset):
         atualiza_coordenadas(queryset)
-        self.message_user(request, f'Coordenadas das lojas físicas para proponentes APROVADOS foram atualizados.')
+        self.message_user(request, f'Coordenadas das lojas físicas para proponentes CREDENCIADOS foram atualizados.')
 
     atualiza_coordenadas_action.short_description = f'Atualiza coordenadas.'
 
