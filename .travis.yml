@@ -27,6 +27,7 @@ jobs:
       script:
         - psql -c "CREATE DATABASE test;" -U postgres
         - psql -c "CREATE USER admin WITH PASSWORD '12345qw';" -U postgres
+        - psql -c "ALTER USER admin CREATEDB;" -U postgres
         - pip install -r requirements/local.txt
         - pytest
     - stage: deploy
