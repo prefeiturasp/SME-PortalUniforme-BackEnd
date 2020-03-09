@@ -20,6 +20,9 @@ jobs:
         - POSTGRES_DB=uniformes
         - SENTRY=""
         - GEOREF_API_URL=""
+        - REDIS_LOCATION=redis://127.0.0.1:6379/1
+        - SAFI_VALIDADE_TOKEN_HORAS=24
+        - SERVER_NAME=localhost
       script:
         - psql -c "CREATE DATABASE test;" -U postgres
         - psql -c "CREATE USER admin WITH PASSWORD '12345qw';" -U postgres
