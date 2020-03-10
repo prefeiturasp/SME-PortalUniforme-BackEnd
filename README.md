@@ -10,7 +10,11 @@ Versão: 1.0.0
 
 ## Release Notes
 
-### 1.0.0 - 02/03/2019 - Sprint 2
+### 1.1.0 - 10/03/2020 - Sprint 3
+* Status "Em processo" passa para "Pré-cadastro"
+* São criados os status "em análise", "pendente", "reprovado", "aprovado" e "credenciado"
+
+### 1.0.0 - 02/03/2020 - Sprint 2
 * Reformulação do processo de inscrição de fornecedores. Cadastro dividido em duas fases: Pré-cadastro e Cadastro
 
 
