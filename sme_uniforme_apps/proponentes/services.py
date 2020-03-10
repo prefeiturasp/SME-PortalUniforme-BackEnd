@@ -26,11 +26,11 @@ def muda_status_de_proponentes(queryset, novo_status):
             if proponente.status != novo_status:
                 proponente.status = novo_status
                 proponente.save()
-            if novo_status == "APROVADO":
+            if novo_status == "CREDENCIADO":
                 atualiza_coordenadas_lojas(proponente.lojas)
 
 def atualiza_coordenadas(queryset):
-    for proponente in queryset.filter(status='APROVADO').all():
+    for proponente in queryset.filter(status='CREDENCIADO').all():
         atualiza_coordenadas_lojas(proponente.lojas)
 
 def atualiza_coordenadas_lojas(lojas):
