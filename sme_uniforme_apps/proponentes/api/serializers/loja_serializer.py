@@ -4,9 +4,20 @@ from ...models import Loja
 
 
 class LojaSerializer(serializers.ModelSerializer):
+    email = serializers.SerializerMethodField()
+
+    def get_email(self, obj):
+        return obj.proponente.email
+
     class Meta:
         model = Loja
         fields = '__all__'
+
+
+class LojaLookUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Loja
+        fields = ('uuid', 'nome_fantasia', 'foto_fachada', 'latitude', 'longitude')
 
 
 class LojaCreateSerializer(serializers.ModelSerializer):
