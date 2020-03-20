@@ -12,7 +12,7 @@ router.register('proponentes', ProponentesViewSet)
 router.register('tipos-documento', TiposDocumentoViewSet)
 router.register('anexos', AnexosViewset)
 router.register('lojas', LojaUpdateFachadaViewSet)
-router.register('lojas-autorizadas', LojaViewSet)
+router.register('lojas-credenciadas', LojaViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
