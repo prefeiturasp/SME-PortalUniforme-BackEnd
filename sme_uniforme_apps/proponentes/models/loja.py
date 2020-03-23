@@ -21,8 +21,8 @@ class Loja(ModeloBase):
     numero = models.CharField("Numero", max_length=255, blank=True, default="")
     complemento = models.CharField("Complemento", max_length=255, null=True, blank=True)
 
-    latitude = models.CharField("Latitude", max_length=255, blank=True, default="")
-    longitude = models.CharField("longitude", max_length=255, blank=True, default="")
+    latitude = models.FloatField("Latitude", blank=True, null=True)
+    longitude = models.FloatField("longitude", blank=True, null=True)
 
     numero_iptu = models.CharField("Numero IPTU", max_length=20, blank=True, default="")
 
