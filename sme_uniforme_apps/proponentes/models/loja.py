@@ -8,6 +8,7 @@ from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
 from .proponente import Proponente
 
+import geopy.distance
 
 class Loja(ModeloBase):
     historico = AuditlogHistoryField()
@@ -34,6 +35,11 @@ class Loja(ModeloBase):
 
     def __str__(self):
         return f"{self.nome_fantasia}"
+
+    def distancia(self, lat, long):
+        origem = (lat, long)
+        destino = (self.latitude, self.longitude)
+        return geopy.distance.distance(origem, destino).km
 
     class Meta:
         verbose_name = "Loja física"

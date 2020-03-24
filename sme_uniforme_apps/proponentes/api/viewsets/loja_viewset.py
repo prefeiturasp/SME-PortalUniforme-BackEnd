@@ -2,7 +2,7 @@ from rest_framework import mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from ..serializers.loja_serializer import LojaUpdateFachadaSerializer, LojaSerializer, LojaLookUpSerializer
+from ..serializers.loja_serializer import LojaUpdateFachadaSerializer, LojaSerializer
 from ...models.loja import Loja
 from ...models.proponente import Proponente
 
@@ -38,12 +38,12 @@ class LojaViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewS
                  ORDER BY distance_in_km) as distancias
             """
 
-            return queryset.raw(query)
+            return Loja.objects.raw(query)
 
         return queryset
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return LojaLookUpSerializer
-        else:
-            return LojaSerializer
+    # def get_serializer_class(self):
+    #     if self.action == 'list':
+    #         return LojaLookUpSerializer
+    #     else:
+    #         return LojaSerializer
