@@ -13,17 +13,6 @@ class LojaSerializer(serializers.ModelSerializer):
         model = Loja
         fields = '__all__'
 
-# class LojaLookUpSerializer(serializers.ModelSerializer):
-#     email = serializers.SerializerMethodField()
-#
-#     def get_email(self, obj):
-#         return self.proponente.email
-    # def get_distancia(self, obj):
-    #     return obj.distancia
-
-    # class Meta:
-    #     model = Loja
-    #     fields = ('uuid', 'nome_fantasia', 'email', 'telefone', 'cep', 'foto_fachada', 'latitude', 'longitude')
 
 class LojaCreateSerializer(serializers.ModelSerializer):
 

@@ -2,7 +2,8 @@ from rest_framework import mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from ..serializers.loja_serializer import LojaUpdateFachadaSerializer, LojaSerializer
+from ..serializers.loja_serializer import LojaUpdateFachadaSerializer
+from ..serializers.proponente_serializer import LojaCredenciadaSerializer
 from ...models.loja import Loja
 from ...models.proponente import Proponente
 
@@ -14,10 +15,10 @@ class LojaUpdateFachadaViewSet(mixins.UpdateModelMixin, GenericViewSet):
     permission_classes = [AllowAny]
 
 
-class LojaViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class LojaViewSet(mixins.ListModelMixin, GenericViewSet):
     lookup_field = "uuid"
     queryset = Loja.objects.all()
-    serializer_class = LojaSerializer
+    serializer_class = LojaCredenciadaSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
@@ -41,9 +42,3 @@ class LojaViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewS
             return Loja.objects.raw(query)
 
         return queryset
-
-    # def get_serializer_class(self):
-    #     if self.action == 'list':
-    #         return LojaLookUpSerializer
-    #     else:
-    #         return LojaSerializer
