@@ -1,3 +1,4 @@
+from django.db.models.expressions import RawSQL
 from rest_framework import mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -6,6 +7,7 @@ from ..serializers.loja_serializer import LojaUpdateFachadaSerializer
 from ..serializers.proponente_serializer import LojaCredenciadaSerializer
 from ...models.loja import Loja
 from ...models.proponente import Proponente
+from ...services import haversine
 
 
 class LojaUpdateFachadaViewSet(mixins.UpdateModelMixin, GenericViewSet):
@@ -28,17 +30,11 @@ class LojaViewSet(mixins.ListModelMixin, GenericViewSet):
         if latitude and longitude:
             lat = float(latitude)
             lon = float(longitude)
-            query = f"""SELECT *
-            FROM ( SELECT *,
-                        111.045 * DEGREES(ACOS(COS(RADIANS({lat}))
-                                                   * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS({lon}))
-                                                   + SIN(RADIANS({lat})) * SIN(RADIANS(latitude)))) AS distance_in_km
-                 FROM proponentes_loja loja
-                 INNER JOIN proponentes_proponente proponente on loja.proponente_id = proponente.id
-                 WHERE proponente.status = 'CREDENCIADO'
-                 ORDER BY distance_in_km) as distancias
-            """
+            queryset = queryset.filter(id__in=RawSQL(haversine(lat, lon), params=''))
 
-            return Loja.objects.raw(query)
+            for loja in queryset:
+                loja.distancia = loja.get_distancia(lat, lon)
+
+            return queryset
 
         return queryset

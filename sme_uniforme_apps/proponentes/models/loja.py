@@ -36,8 +36,8 @@ class Loja(ModeloBase):
     def __str__(self):
         return f"{self.nome_fantasia}"
 
-    def distancia(self, lat, long):
-        origem = (lat, long)
+    def get_distancia(self, lat, lon):
+        origem = (lat, lon)
         destino = (self.latitude, self.longitude)
         return geopy.distance.distance(origem, destino).km
 
