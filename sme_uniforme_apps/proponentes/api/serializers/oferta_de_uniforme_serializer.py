@@ -7,12 +7,6 @@ from ....core.models.uniforme import Uniforme
 class OfertaDeUniformeSerializer(serializers.ModelSerializer):
     uniforme_categoria = serializers.SerializerMethodField()
     uniforme_quantidade = serializers.SerializerMethodField()
-    item = serializers.SlugRelatedField(
-        slug_field='nome',
-        required=False,
-        queryset=Uniforme.objects.all(),
-        source='uniforme'
-    )
 
     def get_uniforme_categoria(self, obj):
         return obj.uniforme.categoria
@@ -35,3 +29,20 @@ class OfertaDeUniformeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfertaDeUniforme
         exclude = ('id', 'proponente')
+
+
+class OfertaDeUniformeLookupSerializer(serializers.ModelSerializer):
+    uniforme_categoria = serializers.SerializerMethodField()
+    item = serializers.SlugRelatedField(
+        slug_field='nome',
+        required=False,
+        queryset=Uniforme.objects.all(),
+        source='uniforme'
+    )
+
+    def get_uniforme_categoria(self, obj):
+        return obj.uniforme.categoria
+
+    class Meta:
+        model = OfertaDeUniforme
+        fields = ('uniforme_categoria', 'item', 'preco')

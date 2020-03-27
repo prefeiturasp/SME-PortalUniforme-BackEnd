@@ -8,7 +8,7 @@ from ...api.serializers.anexo_serializer import AnexoSerializer
 from ...api.serializers.loja_serializer import (LojaCreateSerializer,
                                                 LojaSerializer)
 from ...api.serializers.oferta_de_uniforme_serializer import (
-    OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer)
+    OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer, OfertaDeUniformeLookupSerializer)
 from ...models import Proponente, Loja
 
 log = logging.getLogger(__name__)
@@ -134,7 +134,7 @@ class ProponenteLookUpSerializer(serializers.ModelSerializer):
 
 
 class ProponenteOfertaUniformeSerializer(serializers.ModelSerializer):
-    ofertas_de_uniformes = OfertaDeUniformeSerializer(many=True)
+    ofertas_de_uniformes = OfertaDeUniformeLookupSerializer(many=True)
 
     class Meta:
         model = Proponente
@@ -151,4 +151,4 @@ class LojaCredenciadaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Loja
-        fields = '__all__'
+        exclude = ('uuid', 'criado_em', 'alterado_em', 'numero_iptu')

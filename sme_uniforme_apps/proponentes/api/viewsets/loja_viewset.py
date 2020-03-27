@@ -1,4 +1,3 @@
-from django.db.models.expressions import RawSQL
 from rest_framework import mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -30,11 +29,10 @@ class LojaViewSet(mixins.ListModelMixin, GenericViewSet):
         if latitude and longitude:
             lat = float(latitude)
             lon = float(longitude)
-            queryset = queryset.filter(id__in=RawSQL(haversine(lat, lon), params=''))
+            # queryset = queryset.filter(id__in=RawSQL(haversine(lat, lon), params='')) #Eficiente mas quebra ordenação
+            queryset = queryset.raw(haversine(lat, lon))
 
             for loja in queryset:
                 loja.distancia = loja.get_distancia(lat, lon)
 
             return queryset
-
-        return queryset
