@@ -8,8 +8,8 @@ from ...api.serializers.anexo_serializer import AnexoSerializer
 from ...api.serializers.loja_serializer import (LojaCreateSerializer,
                                                 LojaSerializer)
 from ...api.serializers.oferta_de_uniforme_serializer import (
-    OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer)
-from ...models import Proponente
+    OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer, OfertaDeUniformeLookupSerializer)
+from ...models import Proponente, Loja
 
 log = logging.getLogger(__name__)
 
@@ -131,3 +131,24 @@ class ProponenteLookUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proponente
         fields = ('uuid', 'razao_social')
+
+
+class ProponenteOfertaUniformeSerializer(serializers.ModelSerializer):
+    ofertas_de_uniformes = OfertaDeUniformeLookupSerializer(many=True)
+
+    class Meta:
+        model = Proponente
+        fields = ('ofertas_de_uniformes',)
+
+
+class LojaCredenciadaSerializer(serializers.ModelSerializer):
+    proponente = ProponenteOfertaUniformeSerializer(many=False)
+    email = serializers.SerializerMethodField()
+    distancia = serializers.DecimalField(max_digits=4, decimal_places=1)
+
+    def get_email(self, obj):
+        return obj.proponente.email
+
+    class Meta:
+        model = Loja
+        exclude = ('uuid', 'criado_em', 'alterado_em', 'numero_iptu')
