@@ -74,7 +74,6 @@ def haversine(lat, lon):
                     * COS(RADIANS(latitude))
                     * COS(RADIANS(longitude) - RADIANS({lon})) + SIN(RADIANS({lat}))
                     * SIN(RADIANS(latitude)))) AS distance_in_km
-                 FROM proponentes_loja
-                 ORDER BY distance_in_km) as distancias
+                 FROM proponentes_loja) as distancias
 --             WHERE distancias.distance_in_km <= 10
             """
