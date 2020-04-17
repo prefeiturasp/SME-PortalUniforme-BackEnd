@@ -31,7 +31,7 @@ def muda_status_de_proponentes(queryset, novo_status):
 
 
 def atualiza_coordenadas(queryset):
-    for proponente in queryset.filter(status='CREDENCIADO').all():
+    for proponente in queryset.all():
         atualiza_coordenadas_lojas(proponente.lojas)
 
 
