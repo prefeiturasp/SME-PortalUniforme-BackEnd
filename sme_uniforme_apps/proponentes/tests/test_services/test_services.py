@@ -24,10 +24,10 @@ def test_atualiza_coordenadas(mock_get, proponente):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.json.return_value = {
         'features': [
-            {'geometry': {'coordinates': [-47.741721, -23.595295]}}
+            {'geometry': {'coordinates': ['-47.741721', '-23.595295']}}
         ]
     }
     loja_queryset = Loja.objects.filter(id=loja_com_tel_fora_do_formato.id)
     atualiza_coordenadas_lojas(loja_queryset)
     loja = loja_queryset.get()
-    assert [loja.latitude, loja.longitude] == [-23.595295, -47.741721]
+    assert [loja.latitude, loja.longitude] == ['-23.595295', '-47.741721']

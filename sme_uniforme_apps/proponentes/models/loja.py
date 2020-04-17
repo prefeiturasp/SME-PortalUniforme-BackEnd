@@ -8,7 +8,6 @@ from sme_uniforme_apps.core.models_abstracts import ModeloBase
 
 from .proponente import Proponente
 
-import geopy.distance
 
 class Loja(ModeloBase):
     historico = AuditlogHistoryField()
@@ -22,8 +21,8 @@ class Loja(ModeloBase):
     numero = models.CharField("Numero", max_length=255, blank=True, default="")
     complemento = models.CharField("Complemento", max_length=255, null=True, blank=True)
 
-    latitude = models.FloatField("Latitude", blank=True, null=True)
-    longitude = models.FloatField("longitude", blank=True, null=True)
+    latitude = models.CharField("Latitude", max_length=255, blank=True, default="")
+    longitude = models.CharField("longitude", max_length=255, blank=True, default="")
 
     numero_iptu = models.CharField("Numero IPTU", max_length=20, blank=True, default="")
 
@@ -35,11 +34,6 @@ class Loja(ModeloBase):
 
     def __str__(self):
         return f"{self.nome_fantasia}"
-
-    def get_distancia(self, lat, lon):
-        origem = (lat, lon)
-        destino = (self.latitude, self.longitude)
-        return geopy.distance.distance(origem, destino).km
 
     class Meta:
         verbose_name = "Loja física"

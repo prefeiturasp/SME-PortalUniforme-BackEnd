@@ -20,8 +20,8 @@ def test_loja_serializer(loja_fisica):
     assert loja_serializer.data['bairro']
     assert loja_serializer.data['numero']
     assert loja_serializer.data['complemento']
-    assert loja_serializer.data['latitude'] is None
-    assert loja_serializer.data['longitude'] is None
+    assert loja_serializer.data['latitude'] is not None
+    assert loja_serializer.data['longitude'] is not None
     assert loja_serializer.data['numero_iptu'] is not None
     assert loja_serializer.data['telefone']
     assert loja_serializer.data['nome_fantasia']
