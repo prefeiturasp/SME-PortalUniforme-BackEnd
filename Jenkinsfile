@@ -10,11 +10,10 @@ pipeline {
       disableConcurrentBuilds()
       skipDefaultCheckout()  
     }
-           
     stages {
        stage('CheckOut') {
         steps {
-          checkout scm	
+          checkout scm
         }
        }
 
@@ -29,8 +28,8 @@ pipeline {
                 -Dsonar.host.url=http://sonar.sme.prefeitura.sp.gov.br \
                 -Dsonar.login=5fbad66feb37409e0fb1865b761be2255c7fc95e'
             }
-       }  
-      
+       }
+
        stage('Deploy DEV') {
          when {
            branch 'develop'
@@ -54,11 +53,11 @@ pipeline {
               tags: "",
               tailLog: true])
            }
-                
-       
-       
-       
-           //Start JOB de deploy Kubernetes 
+
+
+
+
+           //Start JOB de deploy Kubernetes
           sh 'echo Deploy ambiente desenvolvimento'
           script {
             step([$class: "RundeckNotifier",
@@ -76,9 +75,9 @@ pipeline {
               tags: "",
               tailLog: true])
           }
-        } 
+        }
        }
-       
+
        stage('Deploy homologacao') {
          when {
            branch 'homolog'
@@ -89,13 +88,13 @@ pipeline {
             input message: 'Deseja realizar o deploy?', ok: 'SIM', submitter: 'ebufaino, marcos_nastri, alessandro_fernandes, anderson_morais, calvin_rossinhole, ollyver_ottoboni, kelwy_oliveira'
           }
          sh 'echo Deploying ambiente homologacao'
-                
+
           // Start JOB para build das imagens Docker e push SME Registry
-      
+
           script {
             step([$class: "RundeckNotifier",
               includeRundeckLogs: true,
-                             
+
               //JOB DE BUILD
               jobId: "3a7e4d7c-916f-4f8f-b02a-7b4ebeb517d1",
               nodeFilters: "",
@@ -110,8 +109,8 @@ pipeline {
               tags: "",
               tailLog: true])
           }
-          //Start JOB deploy Kubernetes 
-         
+          //Start JOB deploy Kubernetes
+
           script {
             step([$class: "RundeckNotifier",
               includeRundeckLogs: true,
@@ -142,11 +141,11 @@ pipeline {
           }
             sh 'echo Build image docker Produção'
           // Start JOB para build das imagens Docker e push SME Registry
-      
+
           script {
             step([$class: "RundeckNotifier",
               includeRundeckLogs: true,
-                             
+
               //JOB DE BUILD
               jobId: "0df07033-86bb-4064-a629-174ad58782f2",
               nodeFilters: "",
@@ -161,8 +160,8 @@ pipeline {
               tags: "",
               tailLog: true])
           }
-          //Start JOB deploy kubernetes 
-         
+          //Start JOB deploy kubernetes
+
           script {
             step([$class: "RundeckNotifier",
               includeRundeckLogs: true,
@@ -181,8 +180,8 @@ pipeline {
           }
         }
        }
-    } 
-  	   
+    }
+
   post {
     always {
       echo 'One way or another, I have finished'

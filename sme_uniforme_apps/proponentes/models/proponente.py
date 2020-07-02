@@ -62,6 +62,7 @@ class Proponente(ModeloBase):
     STATUS_PENDENTE = 'PENDENTE'
     STATUS_EM_ANALISE = 'EM_ANALISE'
     STATUS_CREDENCIADO = 'CREDENCIADO'
+    STATUS_DESCREDENCIADO = 'DESCREDENCIADO'
 
     STATUS_NOMES = {
         STATUS_INSCRITO: 'Inscrito',
@@ -71,7 +72,8 @@ class Proponente(ModeloBase):
         STATUS_REPROVADO: 'Reprovado',
         STATUS_PENDENTE: 'Pendente',
         STATUS_EM_ANALISE: 'Em análise',
-        STATUS_CREDENCIADO: 'Credenciado'
+        STATUS_CREDENCIADO: 'Credenciado',
+        STATUS_DESCREDENCIADO: 'Descredenciado'
     }
 
     STATUS_CHOICES = (
@@ -83,6 +85,7 @@ class Proponente(ModeloBase):
         (STATUS_PENDENTE, STATUS_NOMES[STATUS_PENDENTE]),
         (STATUS_EM_ANALISE, STATUS_NOMES[STATUS_EM_ANALISE]),
         (STATUS_CREDENCIADO, STATUS_NOMES[STATUS_CREDENCIADO]),
+        (STATUS_DESCREDENCIADO, STATUS_NOMES[STATUS_DESCREDENCIADO]),
     )
 
     cnpj = models.CharField(
