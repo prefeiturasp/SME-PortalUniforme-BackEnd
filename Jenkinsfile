@@ -10,7 +10,6 @@ pipeline {
       disableConcurrentBuilds()
       skipDefaultCheckout()  
     }
-
     stages {
        stage('CheckOut') {
         steps {
