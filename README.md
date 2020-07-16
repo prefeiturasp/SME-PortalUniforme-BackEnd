@@ -5,7 +5,7 @@ Portal do programa de captação de fornecedores de uniforme escolar da Secretar
 
 License: MIT
 
-Versão: 1.0.0
+Versão: 1.1.0
 
 
 ## Release Notes
