@@ -1,12 +1,13 @@
+from decouple import config
+
 from .base import *  # noqa
-from .base import env
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env(
+SECRET_KEY = config(
     "DJANGO_SECRET_KEY",
     default="1p4zZf8vZxg90TrmkNkSwpgO5RPNKsOHyxrB4g2XDunnrty68S3geIsnGaRPOcJH",
 )

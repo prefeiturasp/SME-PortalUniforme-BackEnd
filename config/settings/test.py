@@ -2,13 +2,14 @@
 With these settings, tests run faster.
 """
 
+from decouple import config
+
 from .base import *  # noqa
-from .base import env
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env(
+SECRET_KEY = config(
     "DJANGO_SECRET_KEY",
     default="E7Iqy2cuflaU7ySHYLSvaACZhluer5iaW7KL0CbodMUXhtEoBODRZFurv1sOO94f",
 )

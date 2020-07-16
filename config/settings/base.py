@@ -3,6 +3,7 @@ Base settings to build other settings files upon.
 """
 
 import environ
+from decouple import config
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -11,17 +12,11 @@ ROOT_DIR = (
 )  # (sme_uniforme_apps/config/settings/base.py - 3 = sme_uniforme_apps/)
 APPS_DIR = ROOT_DIR.path("sme_uniforme_apps")
 
-env = environ.Env()
-
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
-if READ_DOT_ENV_FILE:
-    # OS environment variables take precedence over variables from .env
-    env.read_env(str(ROOT_DIR.path(".env")))
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = env.bool("DJANGO_DEBUG", False)
+DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 # Local time zone. Choices are
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # though not all of them may be available with every OS.
@@ -47,11 +42,11 @@ LOCALE_PATHS = [ROOT_DIR.path("locale")]
 DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('POSTGRES_HOST', default='localhost'),
+        'PORT': config('POSTGRES_PORT', default=5432, cast=int),
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -267,13 +262,15 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
+REDIS_LOCATION = config("REDIS_LOCATION", default='redis://127.0.0.1:6379/1')
+
 # Celery
 # ------------------------------------------------------------------------------
 if USE_TZ:
     # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-timezone
     CELERY_TIMEZONE = TIME_ZONE
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-broker_url
-CELERY_BROKER_URL = env("REDIS_LOCATION")
+CELERY_BROKER_URL = REDIS_LOCATION
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_backend
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-accept_content
@@ -331,7 +328,7 @@ REST_FRAMEWORK = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env('REDIS_LOCATION'),
+        "LOCATION": REDIS_LOCATION,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             # Mimicing memcache behavior.
@@ -344,7 +341,7 @@ CACHES = {
 CORS_ORIGIN_ALLOW_ALL = True
 
 sentry_sdk.init(
-    dsn=env('SENTRY_URL'),
+    dsn=config('SENTRY_URL', default=""),
     integrations=[DjangoIntegration()]
 )
 

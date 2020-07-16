@@ -8,7 +8,6 @@ pytestmark = pytest.mark.django_db
 def test_proponente_api_valida_email_ja_cadastrado(client, proponente):
     response = client.get(f'/proponentes/verifica-email/?email={proponente.email}', content_type='application/json')
     result = json.loads(response.content)
-    print('Result', result)
 
     assert response.status_code == status.HTTP_200_OK
     assert result == {
@@ -21,7 +20,6 @@ def test_proponente_api_valida_email_ja_cadastrado(client, proponente):
 def test_proponente_api_valida_email_nao_cadastrado(client, proponente):
     response = client.get('/proponentes/verifica-email/?email=esse@nao.tem', content_type='application/json')
     result = json.loads(response.content)
-    print('Result', result)
 
     assert response.status_code == status.HTTP_200_OK
     assert result == {
@@ -34,7 +32,6 @@ def test_proponente_api_valida_email_nao_cadastrado(client, proponente):
 def test_proponente_api_valida_email_invalido(client, proponente):
     response = client.get('/proponentes/verifica-email/?email=assimnaopode', content_type='application/json')
     result = json.loads(response.content)
-    print('Result', result)
 
     assert response.status_code == status.HTTP_200_OK
     assert result == {
@@ -47,7 +44,6 @@ def test_proponente_api_valida_email_invalido(client, proponente):
 def test_proponente_api_valida_email_erro(client, proponente):
     response = client.get('/proponentes/verifica-email/', content_type='application/json')
     result = json.loads(response.content)
-    print('Result', result)
 
     assert response.status_code == status.HTTP_200_OK
     assert result == {
