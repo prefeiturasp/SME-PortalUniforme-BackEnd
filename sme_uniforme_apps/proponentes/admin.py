@@ -34,12 +34,22 @@ class ExportXlsxMixin:
         ws = wb.active
         ws.title = "fornecedores"
 
-        field_names = ['Cnpj', 'Razão Social', 'Logradouro', 'Cidade', 'UF', 'Cep', 'Telefone', 'Email', 'Responsável', 'Status']
+        field_names = [
+            'Cnpj', 'Razão Social', 'Logradouro proponente', 'Cidade proponente', 
+            'UF proponente', 'Cep proponente', 'Telefone proponente', 'Email', 
+            'Responsável', 'Status', 'Nome fantasia loja', 'Cep loja', 'Endereço loja',
+            'Bairro loja', 'Número loja', 'Complemento loja', 'Telefone loja'
+        ]
         ws.append(field_names)
 
         for obj in queryset:
-            linha = [obj.cnpj, obj.razao_social, obj.end_logradouro, obj.end_cidade, obj.end_uf, obj.end_cep, obj.telefone, obj.email, obj.responsavel, obj.status]
-            ws.append(linha)
+            for loja in obj.lojas:
+                linha = [
+                    obj.cnpj, obj.razao_social, obj.end_logradouro, obj.end_cidade, 
+                    obj.end_uf, obj.end_cep, obj.telefone, obj.email, obj.responsavel,
+                    obj.status, loja.nome_fantasia, loja.cep, loja.endereco, loja.bairro,
+                    loja.numero, loja.complemento, loja.telefone]
+                ws.append(linha)
 
         result = BytesIO(save_virtual_workbook(wb))
 
