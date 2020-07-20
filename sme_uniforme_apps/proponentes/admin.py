@@ -2,6 +2,7 @@ import csv
 from io import BytesIO
 
 from django.contrib import admin
+from django.db.models import Count
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from openpyxl import Workbook
@@ -40,15 +41,25 @@ class ExportXlsxMixin:
             'Responsável', 'Status', 'Nome fantasia loja', 'Cep loja', 'Endereço loja',
             'Bairro loja', 'Número loja', 'Complemento loja', 'Telefone loja'
         ]
+
+        count_de_ofertas_de_uniformes = queryset.annotate(count_ofertas=Count('ofertas_de_uniformes')).all()
+        fields_uniformes = ['Nome uniforme', 'Preço', 'Categoria', 'Quantidade'] * max(count_de_ofertas_de_uniformes.values_list('count_ofertas'))[0]
+        field_names += fields_uniformes
+        
         ws.append(field_names)
 
         for obj in queryset:
-            for loja in obj.lojas:
+            for loja in obj.lojas.all():
                 linha = [
                     obj.cnpj, obj.razao_social, obj.end_logradouro, obj.end_cidade, 
                     obj.end_uf, obj.end_cep, obj.telefone, obj.email, obj.responsavel,
                     obj.status, loja.nome_fantasia, loja.cep, loja.endereco, loja.bairro,
                     loja.numero, loja.complemento, loja.telefone]
+
+                for oferta in obj.ofertas_de_uniformes.all():
+                    linha_oferta = [oferta.uniforme.nome, oferta.preco, oferta.uniforme.categoria, oferta.uniforme.quantidade]
+                    linha += linha_oferta
+
                 ws.append(linha)
 
         result = BytesIO(save_virtual_workbook(wb))
