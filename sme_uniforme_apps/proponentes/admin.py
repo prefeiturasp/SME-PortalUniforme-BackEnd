@@ -1,8 +1,17 @@
-from django.contrib import admin
-from django.utils.safestring import mark_safe
+import csv
+from io import BytesIO
 
-from .models import (Proponente, OfertaDeUniforme, Loja, Anexo, ListaNegra, TipoDocumento)
-from .services import cnpj_esta_bloqueado, muda_status_de_proponentes, atualiza_coordenadas
+from django.contrib import admin
+from django.db.models import Count
+from django.http import HttpResponse
+from django.utils.safestring import mark_safe
+from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook
+
+from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
+                     TipoDocumento)
+from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
+                       muda_status_de_proponentes)
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -20,8 +29,55 @@ class AnexosInLine(admin.TabularInline):
     extra = 1  # Quantidade de linhas que serão exibidas.
 
 
+class ExportXlsxMixin:
+    def export_as_xlsx(self, request, queryset):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "fornecedores"
+
+        field_names = [
+            'Cnpj', 'Razão Social', 'Logradouro proponente', 'Cidade proponente', 
+            'UF proponente', 'Cep proponente', 'Telefone proponente', 'Email', 
+            'Responsável', 'Status', 'Nome fantasia loja', 'Cep loja', 'Endereço loja',
+            'Bairro loja', 'Número loja', 'Complemento loja', 'Telefone loja'
+        ]
+
+        count_de_ofertas_de_uniformes = queryset.annotate(count_ofertas=Count('ofertas_de_uniformes')).all()
+        fields_uniformes = ['Nome uniforme', 'Preço', 'Categoria', 'Quantidade'] * max(count_de_ofertas_de_uniformes.values_list('count_ofertas'))[0]
+        field_names += fields_uniformes
+        
+        ws.append(field_names)
+
+        for obj in queryset:
+            for loja in obj.lojas.all():
+                linha = [
+                    obj.cnpj, obj.razao_social, obj.end_logradouro, obj.end_cidade, 
+                    obj.end_uf, obj.end_cep, obj.telefone, obj.email, obj.responsavel,
+                    obj.status, loja.nome_fantasia, loja.cep, loja.endereco, loja.bairro,
+                    loja.numero, loja.complemento, loja.telefone]
+
+                for oferta in obj.ofertas_de_uniformes.all():
+                    linha_oferta = [oferta.uniforme.nome, oferta.preco, oferta.uniforme.categoria, oferta.uniforme.quantidade]
+                    linha += linha_oferta
+
+                ws.append(linha)
+
+        result = BytesIO(save_virtual_workbook(wb))
+
+        filename = 'fornecedores.xlsx'
+        response = HttpResponse(
+            result,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        
+        return response
+
+    export_as_xlsx.short_description = "Exportar Proponentes"
+
+
 @admin.register(Proponente)
-class ProponenteAdmin(admin.ModelAdmin):
+class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     def verifica_bloqueio_cnpj(self, request, queryset):
         for proponente in queryset.all():
             bloqueado = cnpj_esta_bloqueado(proponente.cnpj)
@@ -104,7 +160,8 @@ class ProponenteAdmin(admin.ModelAdmin):
         'muda_status_para_em_processo',
         'muda_status_para_credenciado',
         'muda_status_para_descredenciado',
-        'atualiza_coordenadas_action']
+        'atualiza_coordenadas_action',
+        'export_as_xlsx']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
                     'status')
     ordering = ('-alterado_em',)
