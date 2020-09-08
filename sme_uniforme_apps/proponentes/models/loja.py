@@ -33,6 +33,8 @@ class Loja(ModeloBase):
 
     foto_fachada = models.FileField('Foto da fachada da loja', blank=True, null=True)
 
+    site = models.URLField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.nome_fantasia}"
 
