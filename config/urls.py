@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from rest_framework_swagger.views import get_swagger_view
-from rest_framework_jwt.views import verify_jwt_token, refresh_jwt_token,obtain_jwt_token
+from rest_framework_jwt.views import verify_jwt_token, refresh_jwt_token, obtain_jwt_token
 
 from sme_uniforme_apps.core.api.urls import urlpatterns as core_url
 from sme_uniforme_apps.proponentes.urls import urlpatterns as proponentes_url
@@ -18,7 +18,7 @@ urlpatterns = [
                   path(settings.ADMIN_URL, admin.site.urls),
                   path("docs/", schema_view),
                   path("api-token-auth/", obtain_jwt_token),
-                  path("refresh-token-auth/", refresh_jwt_token),
+                  path("api-token-refresh/", refresh_jwt_token),
                   path("verify-token-auth/", verify_jwt_token),
                   path("django-des/", include(des_url)),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

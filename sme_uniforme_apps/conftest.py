@@ -18,8 +18,6 @@ def authenticated_client(client, django_user_model):
     email = 'teste@teste.com'
     password = '@987654321'
     u = django_user_model.objects.create_user(email=email, password=password)
-    u.validado = True
-    u.save()
     client.login(email=email, password=password)
     return client
 
