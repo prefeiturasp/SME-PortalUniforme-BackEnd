@@ -2,10 +2,10 @@ import datetime
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin, ListModelMixin, UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -26,7 +26,7 @@ class UsuarioViewset(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Gener
         serializer = UsuarioSerializer(request.user, context={"request": request})
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    @action(detail=False, methods=['POST'], url_path='atualizar-senha/(?P<usuario_id>.*)/(?P<token_reset>.*)')  # noqa
+    @action(detail=False, methods=['POST'], permission_classes=(AllowAny,), url_path='atualizar-senha/(?P<usuario_id>.*)/(?P<token_reset>.*)')  # noqa
     def atualizar_senha(self, request, usuario_id=None, token_reset=None):
         # TODO: melhorar este método
         senha1 = request.data.get('senha1')
