@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from django.contrib.auth import get_user_model
+from sme_uniforme_apps.proponentes.models import Proponente
 
 from ..serializers.usuario_serializer import UsuarioSerializer
 
@@ -46,3 +47,18 @@ class UsuarioViewset(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Gener
             return Response({'sucesso': 'senha atualizada com sucesso'}, status.HTTP_200_OK)
         else:
             return Response({'detail': 'Token inválido'}, status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['POST'], url_path='atualizar-senha-logado',
+            permission_classes=(IsAuthenticated,))  # noqa
+    def atualizar_senha_logado(self, request, pk=None):
+        try:
+            usuario = Proponente.objects.get(uuid=pk).usuario
+            assert usuario.check_password(request.data.get('senha_atual')) is True, 'Senha atual divergente'
+            senha1 = request.data.get('senha1')
+            senha2 = request.data.get('senha2')
+            assert senha1 == senha2, 'Senha e confirmar senha divergem'
+            usuario.set_password(senha1)
+            usuario.save()
+            return Response({'detail': 'Senha atualizada com sucesso'}, status=status.HTTP_200_OK)
+        except AssertionError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

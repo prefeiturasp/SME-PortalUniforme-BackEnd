@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+import datetime
 
 import environ
 import sentry_sdk
@@ -326,6 +327,11 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 
 }
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_ALLOW_REFRESH': True,
+}
 
 # REDIS
 CACHES = {
@@ -348,4 +354,4 @@ sentry_sdk.init(
     integrations=[DjangoIntegration()]
 )
 
-GEOREF_API_URL=env('GEOREF_API_URL')
+GEOREF_API_URL = env('GEOREF_API_URL')
