@@ -10,7 +10,9 @@ from ...api.serializers.loja_serializer import (LojaCreateSerializer,
 from ...api.serializers.oferta_de_uniforme_serializer import (
     OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer, OfertaDeUniformeLookupSerializer)
 from ...models import Proponente, Loja
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 log = logging.getLogger(__name__)
 
 
@@ -119,6 +121,15 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         proponente.lojas.set(lojas_lista)
         log.info("Proponente {}, lojas: {}".format(proponente.uuid, ofertas_lista))
         log.info("Criação de proponente finalizada!")
+        log.info("Criação de usuário do proponente")
+        usuario = User.objects.create_user(
+            email=proponente.email,
+            password="".join([n for n in proponente.cnpj if n.isdigit()])[:5],
+            first_name=proponente.responsavel
+        )
+        proponente.usuario = usuario
+        proponente.save()
+        log.info("Criação de usuário do proponente finalizada")
 
         return proponente
 

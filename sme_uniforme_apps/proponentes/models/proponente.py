@@ -17,7 +17,9 @@ from ..tasks import (enviar_email_confirmacao_cadastro,
                      enviar_email_confirmacao_pre_cadastro)
 from .tipo_documento import TipoDocumento
 from .validators import cep_validation, cnpj_validation, phone_validation
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 log = logging.getLogger(__name__)
 
 
@@ -138,6 +140,8 @@ class Proponente(ModeloBase):
         choices=STATUS_CHOICES,
         default=STATUS_EM_PROCESSO
     )
+
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.responsavel} - {self.email} - {self.telefone}"
