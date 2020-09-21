@@ -11,7 +11,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
-                       muda_status_de_proponentes)
+                       muda_status_de_proponentes, cria_usuario_proponentes_existentes)
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -150,6 +150,18 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     ultima_alteracao.admin_order_field = 'alterado_em'
     ultima_alteracao.short_description = 'Última alteração'
 
+    def cria_usuario_proponente_sem_usuario(self, request, queryset):
+        cria_usuario_proponentes_existentes(queryset)
+        self.message_user(request, f'Caso não exista, foram criados usuários para os proponentes selecionados.')
+    cria_usuario_proponente_sem_usuario.short_description = 'Criar usuários para proponentes sem usuários.'
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser:
+            if 'cria_usuario_proponente_sem_usuario' in actions:
+                del actions['cria_usuario_proponente_sem_usuario']
+        return actions
+
     actions = [
         'verifica_bloqueio_cnpj',
         'muda_status_para_aprovado',
@@ -161,6 +173,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'muda_status_para_credenciado',
         'muda_status_para_descredenciado',
         'atualiza_coordenadas_action',
+        'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
                     'status')
@@ -168,7 +181,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
     list_filter = ('status',)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
-    readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social')
+    readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social', 'usuario')
 
 
 @admin.register(OfertaDeUniforme)

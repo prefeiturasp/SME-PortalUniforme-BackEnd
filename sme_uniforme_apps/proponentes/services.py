@@ -17,8 +17,14 @@ def cnpj_esta_bloqueado(cnpj):
     return ListaNegra.cnpj_bloqueado(cnpj)
 
 
-def cria_usuario_novo_proponente(proponente):
-    User.cria_usuario(email=proponente.email, nome=proponente.responsavel, senha=proponente.protocolo)
+def cria_usuario_proponentes_existentes(queryset):
+    for proponente in queryset.all():
+        if not proponente.usuario:
+            novo_usuario = User.objects.create_user(email=proponente.email,
+                                                    first_name=proponente.responsavel,
+                                                    password="".join([n for n in proponente.cnpj if n.isdigit()])[:5])
+            proponente.usuario = novo_usuario
+            proponente.save()
 
 
 def muda_status_de_proponentes(queryset, novo_status):
