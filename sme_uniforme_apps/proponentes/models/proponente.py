@@ -158,7 +158,7 @@ class Proponente(ModeloBase):
     def comunicar_cadastro(self):
         if self.email:
             log.info(f'Enviando confirmação de cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
-            enviar_email_confirmacao_cadastro.delay(self.email, {'protocolo': self.protocolo})
+            enviar_email_confirmacao_cadastro.delay(self.email, {'protocolo': self.protocolo, 'email': self.email})
 
     @property
     def protocolo(self):
