@@ -10,7 +10,7 @@ from django.dispatch import receiver
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from sme_uniforme_apps.core.helpers.validar_email import email_valido
-from sme_uniforme_apps.core.models_abstracts import ModeloBase
+from sme_uniforme_apps.core.models_abstracts import ModeloBase, TemObservacao
 
 from ..services import cnpj_esta_bloqueado
 from ..tasks import (enviar_email_confirmacao_cadastro,
@@ -23,7 +23,7 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-class Proponente(ModeloBase):
+class Proponente(ModeloBase, TemObservacao):
     historico = AuditlogHistoryField()
 
     UF_CHOICES = (
