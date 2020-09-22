@@ -20,7 +20,6 @@ User = get_user_model()
 class UsuarioViewset(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UsuarioSerializer
     queryset = User.objects.all()
-    lookup_field = 'username'
 
     @action(detail=False, methods=["GET"], permission_classes=(IsAuthenticated,))
     def me(self, request):
@@ -29,7 +28,6 @@ class UsuarioViewset(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Gener
 
     @action(detail=False, methods=['POST'], permission_classes=(AllowAny,), url_path='atualizar-senha/(?P<usuario_id>.*)/(?P<token_reset>.*)')  # noqa
     def atualizar_senha(self, request, usuario_id=None, token_reset=None):
-        # TODO: melhorar este método
         senha1 = request.data.get('senha1')
         senha2 = request.data.get('senha2')
         if senha1 != senha2:
