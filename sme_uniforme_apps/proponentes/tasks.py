@@ -40,3 +40,18 @@ def enviar_email_confirmacao_pre_cadastro(email, contexto):
         contexto,
         email
     )
+
+
+@shared_task(
+    autoretry_for=(SMTPServerDisconnected,),
+    retry_backoff=2,
+    retry_kwargs={'max_retries': 8},
+)
+def enviar_email_recuperar_senha(email, contexto):
+    log.info(f'Recuperar senha enviada para {email}.')
+    return enviar_email_html(
+        'Recupere sua senha',
+        'email_recuperar_senha',
+        contexto,
+        email
+    )
