@@ -9,7 +9,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from sme_uniforme_apps.core.models import Uniforme
 from sme_uniforme_apps.proponentes.api.serializers.loja_serializer import LojaCreateSerializer
+from sme_uniforme_apps.proponentes.models import OfertaDeUniforme
 from sme_uniforme_apps.proponentes.services import atualiza_coordenadas_lojas
 from ..serializers.proponente_serializer import ProponenteSerializer, ProponenteCreateSerializer
 
@@ -46,10 +48,28 @@ class ProponentesViewSet(mixins.CreateModelMixin,
     def atualiza_lojas(self, request, uuid):
         proponente = self.get_object()
         lojas = request.data.pop('lojas')
+        ofertas_de_uniformes = request.data.pop('ofertas_de_uniformes')
+
         if not lojas:
             msgError = "Pelo menos uma loja precisa ser enviada!"
             log.info(msgError)
             raise ValidationError(msgError)
+
+        if not ofertas_de_uniformes:
+            msgError = "Pelo menos um oferta deve ser enviada!"
+            log.info(msgError)
+            raise ValidationError(msgError)
+        proponente.ofertas_de_uniformes.all().delete()
+
+        for oferta in ofertas_de_uniformes:
+            uniforme = Uniforme.objects.get(nome=oferta.get('nome'))
+            oferta_uniforme = OfertaDeUniforme(
+                proponente=proponente,
+                uniforme=uniforme,
+                preco=oferta.get('valor')
+            )
+            oferta_uniforme.save()
+
         lojas_ids = []
         for loja in lojas:
             if loja.get('id', ''):
