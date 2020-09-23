@@ -10,6 +10,13 @@ class Descritivel(models.Model):
         abstract = True
 
 
+class TemObservacao(models.Model):
+    observacao = models.TextField('Observação', blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
 class TemNome(models.Model):
     nome = models.CharField('Nome', max_length=160)
 
