@@ -38,5 +38,7 @@ class LojaViewSet(mixins.ListModelMixin, GenericViewSet):
 
             for loja in queryset:
                 loja.distancia = loja.get_distancia(lat, lon)
-
-            return queryset
+        else:
+            for loja in queryset:
+                loja.distancia = 0
+        return queryset
