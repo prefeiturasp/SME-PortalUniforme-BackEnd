@@ -3,12 +3,15 @@ import logging
 from drf_base64.serializers import ModelSerializer
 from rest_framework import serializers
 
+from .tipo_documento_serializer import TipoDocumentoSerializer
 from ...models import Anexo, Proponente
 
 log = logging.getLogger(__name__)
 
 
 class AnexoSerializer(ModelSerializer):
+    tipo_documento = TipoDocumentoSerializer()
+
     class Meta:
         model = Anexo
         fields = '__all__'
