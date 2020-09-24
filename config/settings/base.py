@@ -92,6 +92,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_swagger",
     "django_use_email_as_username",
     "django_filters",
+    "sass_processor",
 ]
 
 LOCAL_APPS = [
@@ -171,6 +172,7 @@ STATICFILES_DIRS = [str(APPS_DIR.path("static"))]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "sass_processor.finders.CssFinder",
 ]
 
 # MEDIA
