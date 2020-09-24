@@ -243,7 +243,7 @@ class TipoDocumentoAdmin(admin.ModelAdmin):
 
     inverte_obrigatorio.short_description = "Inverter o parâmetro 'obrigatório' "
 
-    list_display = ('nome', 'obrigatorio', 'visivel')
+    list_display = ('nome', 'obrigatorio', 'visivel', 'tem_data_validade')
     ordering = ('nome',)
     search_fields = ('nome',)
     list_filter = ('obrigatorio', 'visivel')

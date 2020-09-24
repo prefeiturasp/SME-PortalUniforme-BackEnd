@@ -7,6 +7,7 @@ class TipoDocumento(ModeloBase):
     nome = models.TextField('Tipo de documento', unique=True)
     obrigatorio = models.BooleanField(default=True)
     visivel = models.BooleanField(default=True)
+    tem_data_validade = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.nome} {"(obrigatório)" if self.obrigatorio else ""}'

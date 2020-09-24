@@ -14,6 +14,8 @@ class Anexo(ModeloBase):
 
     arquivo = models.FileField()
 
+    data_validade = models.DateField(null=True, blank=True)
+
     tipo_documento = models.ForeignKey(
         TipoDocumento,
         on_delete=models.PROTECT,
@@ -26,6 +28,7 @@ class Anexo(ModeloBase):
             "proponente": self.proponente.uuid,
             "arquivo": self.arquivo,
             "tipo_documento": self.tipo_documento,
+            "data_validade": self.data_validade,
             "uuid": self.uuid
         }
 
