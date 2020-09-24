@@ -42,6 +42,13 @@ django-filter==2.2.0
 # https://pypi.org/project/drf_base64/
 drf-base64==2.0
 
+# PDF
+weasyprint==51
+django-sass-processor==0.8
+django-compressor==2.4
+libsass==0.19.4
+django-weasyprint==1.0.1
+
 # Para melhoria da aparência do Django Admin
 # https://github.com/fabiocaccamo/django-admin-interface
 django-admin-interface==0.12.0
