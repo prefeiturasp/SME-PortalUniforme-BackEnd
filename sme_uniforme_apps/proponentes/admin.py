@@ -2,6 +2,7 @@ import csv
 from io import BytesIO
 
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.db.models import Count
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
@@ -74,6 +75,26 @@ class ExportXlsxMixin:
         return response
 
     export_as_xlsx.short_description = "Exportar Proponentes"
+
+
+class TemAnexosReprovadosOuVencidosFilter(SimpleListFilter):
+    title = 'tem anexos reprovados ou vencidos'
+    parameter_name = 'anexos'
+
+    def lookups(self, request, model_admin):
+        return [('Reprovados ou Vencidos', 'Reprovados ou Vencidos'),
+                ('Reprovados', 'Reprovados'),
+                ('Vencidos', 'Vencidos')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Reprovados ou Vencidos':
+            return queryset.filter(anexos__status__in=["REPROVADO", "VENCIDO"]).distinct()
+        elif self.value() == 'Reprovados':
+            return queryset.filter(anexos__status="REPROVADO").distinct()
+        elif self.value() == 'Vencidos':
+            return queryset.filter(anexos__status="VENCIDO").distinct()
+        else:
+            return queryset
 
 
 @admin.register(Proponente)
@@ -179,7 +200,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
                     'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
-    list_filter = ('status',)
+    list_filter = ('status', TemAnexosReprovadosOuVencidosFilter)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
     readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social', 'usuario')
 
