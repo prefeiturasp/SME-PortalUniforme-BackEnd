@@ -36,6 +36,11 @@ def muda_status_de_proponentes(queryset, novo_status):
             atualiza_coordenadas_lojas(proponente.lojas)
 
 
+def envia_email_pendencias(queryset):
+    for proponente in queryset.all():
+        proponente.comunicar_pendencia()
+
+
 def atualiza_coordenadas(queryset):
     for proponente in queryset.all():
         atualiza_coordenadas_lojas(proponente.lojas)

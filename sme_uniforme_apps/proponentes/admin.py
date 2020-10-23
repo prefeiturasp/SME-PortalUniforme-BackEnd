@@ -6,13 +6,14 @@ from django.contrib.admin import SimpleListFilter
 from django.db.models import Count
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
+from django.contrib import messages
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
-                       muda_status_de_proponentes, cria_usuario_proponentes_existentes)
+                       muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -165,6 +166,15 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
 
     atualiza_coordenadas_action.short_description = f'Atualiza coordenadas.'
 
+    def envia_email_pendencias_action(self, request, queryset):
+        if len(queryset) != len(queryset.filter(status=Proponente.STATUS_PENDENTE)):
+            self.message_user(request, "Selecione apenas proponentes com status pendente", level=messages.ERROR)
+        else:
+            envia_email_pendencias(queryset)
+            self.message_user(request, f'E-mail de pendências enviado com sucesso.')
+
+    envia_email_pendencias_action.short_description = f'Enviar e-mail de pendências'
+
     def ultima_alteracao(self, obj):
         return obj.alterado_em.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -194,6 +204,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'muda_status_para_credenciado',
         'muda_status_para_descredenciado',
         'atualiza_coordenadas_action',
+        'envia_email_pendencias_action',
         'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
