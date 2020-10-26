@@ -21,7 +21,8 @@ def cria_usuario_proponentes_existentes(queryset):
     for proponente in queryset.all():
         if not proponente.usuario:
             novo_usuario = User.objects.create_user(email=proponente.email,
-                                                    first_name=proponente.responsavel,
+                                                    first_name=proponente.responsavel.split(" ")[0],
+                                                    last_name=" ".join(proponente.responsavel.split(" ")[1:]),
                                                     password="".join([n for n in proponente.cnpj if n.isdigit()])[:5])
             proponente.usuario = novo_usuario
             proponente.save()
