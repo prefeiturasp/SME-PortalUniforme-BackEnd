@@ -1,10 +1,13 @@
+import datetime
 import logging
 
 from smtplib import SMTPServerDisconnected
 
 import environ
 from celery import shared_task
-
+from celery.schedules import crontab
+from celery.task import periodic_task
+from django.db.models import Q
 from ..core.helpers.enviar_email import enviar_email_html
 
 env = environ.Env()
@@ -55,3 +58,10 @@ def enviar_email_recuperar_senha(email, contexto):
         contexto,
         email
     )
+
+
+@periodic_task(run_every=crontab(hour=17, minute=0))
+def alterar_status_documentos_vencidos():
+    from ..proponentes.models import Anexo
+    anexos = Anexo.objects.filter(data_validade__lt=datetime.date.today()).filter(~Q(status=Anexo.STATUS_VENCIDO))
+    anexos.update(status=Anexo.STATUS_VENCIDO, justificativa="Documento vencido")
