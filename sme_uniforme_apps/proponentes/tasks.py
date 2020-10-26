@@ -8,6 +8,8 @@ from celery import shared_task
 from celery.schedules import crontab
 from celery.task import periodic_task
 from django.db.models import Q
+
+from config import celery_app
 from ..core.helpers.enviar_email import enviar_email_html
 
 env = environ.Env()
@@ -79,3 +81,17 @@ def alterar_status_documentos_vencidos():
     from ..proponentes.models import Anexo
     anexos = Anexo.objects.filter(data_validade__lt=datetime.date.today()).filter(~Q(status=Anexo.STATUS_VENCIDO))
     anexos.update(status=Anexo.STATUS_VENCIDO, justificativa="Documento vencido")
+
+
+@celery_app.task(soft_time_limit=1000, time_limit=1200)
+def enviar_email_documentos_proximos_vencimento():
+    from ..proponentes.models import Proponente
+    daqui_a_5_dias = datetime.date.today() + datetime.timedelta(days=5)
+    proponentes = Proponente.objects.filter(anexos__data_validade=daqui_a_5_dias)
+    for proponente in proponentes.all():
+        enviar_email_html(
+            'Documento(s) próximo(s) do vencimento',
+            'email_documentos_proximos_vencimento',
+            None,
+            proponente.email
+        )
