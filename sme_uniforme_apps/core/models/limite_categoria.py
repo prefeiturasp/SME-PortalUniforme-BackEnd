@@ -11,12 +11,13 @@ log = logging.getLogger(__name__)
 
 class LimiteCategoria(ModeloBase):
     categoria_uniforme = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=Uniforme.CATEGORIA_CHOICES,
-        default=Uniforme.CATEGORIA_MALHARIA,
+        default=Uniforme.CATEGORIA_KIT_VERAO,
         unique=True,
     )
     preco_maximo = models.DecimalField('Preço máximo', max_digits=9, decimal_places=2, default=0.00)
+    obrigatorio = models.BooleanField('Categoria obrigatoria?', default=True)
 
     def __str__(self):
         return f'{Uniforme.CATEGORIA_NOMES[self.categoria_uniforme]} Preço Máximo: R$ {self.preco_maximo:.2f}'
@@ -30,5 +31,5 @@ class LimiteCategoria(ModeloBase):
         return result
 
     class Meta:
-        verbose_name = "Limite da categoria"
-        verbose_name_plural = "Limites de categorias"
+        verbose_name = "Limite e obrigatoriedade da categoria"
+        verbose_name_plural = "Limites e obrigatoriedades de categorias"
