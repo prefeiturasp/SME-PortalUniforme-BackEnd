@@ -18,4 +18,4 @@ class UniformeLookUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Uniforme
-        fields = ('id', 'nome')
+        fields = ('id', 'nome', 'categoria')
