@@ -106,7 +106,7 @@ class Uniforme(ModeloBase):
         result = []
         for categoria in cls.CATEGORIA_CHOICES:
             itens = []
-            for uniforme in cls.objects.filter(categoria=categoria[0]):
+            for uniforme in cls.objects.filter(categoria=categoria[0]).order_by('nome'):
                 itens.append(
                     {
                         "id": uniforme.id,
