@@ -6,4 +6,4 @@ from ...models import LimiteCategoria
 class LimiteCategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = LimiteCategoria
-        fields = ('categoria_uniforme', 'preco_maximo')
+        fields = ('categoria_uniforme', 'preco_maximo', 'obrigatorio')
