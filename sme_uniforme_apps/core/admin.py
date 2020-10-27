@@ -24,6 +24,6 @@ class ParametrosAdmin(admin.ModelAdmin):
 
 @admin.register(LimiteCategoria)
 class LimiteCategoriaAdmin(admin.ModelAdmin):
-    list_display = ('categoria_uniforme', 'preco_maximo')
+    list_display = ('categoria_uniforme', 'preco_maximo', 'obrigatorio')
     ordering = ('categoria_uniforme',)
     list_filter = ('categoria_uniforme',)
