@@ -16,6 +16,16 @@ def test_uniformes_api_get_categorias(client, uniforme_meias, uniforme_tenis):
         {
             'id': Uniforme.CATEGORIA_MALHARIA,
             'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA],
+            'uniformes': [],
+        },
+        {
+            'id': Uniforme.CATEGORIA_CALCADO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
+            'uniformes': []
+        },
+        {
+            'id': Uniforme.CATEGORIA_KIT_VERAO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_VERAO],
             'uniformes': [{'descricao': 'Meias (5 pares)',
                            'id': uniforme_meias.id,
                            'nome': 'Meias',
@@ -23,8 +33,8 @@ def test_uniformes_api_get_categorias(client, uniforme_meias, uniforme_tenis):
                            'unidade': 'PAR'}],
         },
         {
-            'id': Uniforme.CATEGORIA_CALCADO,
-            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
+            'id': Uniforme.CATEGORIA_KIT_INVERNO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_INVERNO],
             'uniformes': [{'descricao': 'Tenis (1 par)',
                            'id': uniforme_tenis.id,
                            'nome': 'Tenis',
