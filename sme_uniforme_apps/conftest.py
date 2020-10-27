@@ -8,7 +8,7 @@ from .core.models import Uniforme
 def fake_user(client, django_user_model):
     password = 'teste'
     email = 'fake@user.com'
-    user = django_user_model.objects.create_user(email=email, password=password, validado=True, )
+    user = django_user_model.objects.create_user(email=email, password=password)
     client.login(email=email, password=password)
     return user
 
@@ -27,7 +27,7 @@ def uniforme_calca():
     return baker.make(
         'Uniforme',
         nome='Calça',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
+        categoria=Uniforme.CATEGORIA_KIT_VERAO,
         unidade=Uniforme.UNIDADE_UNIDADE,
         quantidade=1
     )
@@ -38,7 +38,7 @@ def uniforme_camisa():
     return baker.make(
         'Uniforme',
         nome='Camisa',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
+        categoria=Uniforme.CATEGORIA_KIT_VERAO,
         unidade=Uniforme.UNIDADE_UNIDADE,
         quantidade=1
     )
@@ -49,7 +49,7 @@ def uniforme_meias():
     return baker.make(
         'Uniforme',
         nome='Meias',
-        categoria=Uniforme.CATEGORIA_MALHARIA,
+        categoria=Uniforme.CATEGORIA_KIT_VERAO,
         unidade=Uniforme.UNIDADE_PAR,
         quantidade=5
     )
@@ -60,7 +60,7 @@ def uniforme_tenis():
     return baker.make(
         'Uniforme',
         nome='Tenis',
-        categoria=Uniforme.CATEGORIA_CALCADO,
+        categoria=Uniforme.CATEGORIA_KIT_INVERNO,
         unidade=Uniforme.UNIDADE_PAR,
         quantidade=1
     )

@@ -27,6 +27,6 @@ def test_admin():
     model_admin = TipoDocumentoAdmin(TipoDocumento, admin.site)
     # pylint: disable=W0212
     assert admin.site._registry[TipoDocumento]
-    assert model_admin.list_display == ('nome', 'obrigatorio', 'visivel')
+    assert model_admin.list_display == ('nome', 'obrigatorio', 'visivel', 'tem_data_validade')
     assert model_admin.ordering == ('nome',)
     assert model_admin.search_fields == ('nome',)

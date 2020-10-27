@@ -101,6 +101,25 @@ class Uniforme(ModeloBase):
             result.append(choice)
         return result
 
+    @classmethod
+    def categorias_lookup_to_json(cls):
+        result = []
+        for categoria in cls.CATEGORIA_CHOICES:
+            itens = []
+            for uniforme in cls.objects.filter(categoria=categoria[0]).order_by('nome'):
+                itens.append(
+                    {
+                        "id": uniforme.id,
+                        "nome": uniforme.__str__()
+                    }
+                )
+            choice = {
+                'categoria': categoria[1],
+                'itens': itens
+            }
+            result.append(choice)
+        return result
+
     class Meta:
         verbose_name = "Peça de Uniforme"
         verbose_name_plural = "Peças de Uniforme"
