@@ -11,15 +11,21 @@ class Uniforme(ModeloBase):
     # Categoria Choice
     CATEGORIA_MALHARIA = 'MALHARIA'
     CATEGORIA_CALCADO = 'CALCADO'
+    CATEGORIA_KIT_VERAO = 'KIT_VERAO'
+    CATEGORIA_KIT_INVERNO = 'KIT_INVERNO'
 
     CATEGORIA_NOMES = {
         CATEGORIA_MALHARIA: 'Vestuário',
         CATEGORIA_CALCADO: 'Calçados',
+        CATEGORIA_KIT_VERAO: 'Kit Verão',
+        CATEGORIA_KIT_INVERNO: 'Kit Inverno',
     }
 
     CATEGORIA_CHOICES = (
         (CATEGORIA_MALHARIA, CATEGORIA_NOMES[CATEGORIA_MALHARIA]),
         (CATEGORIA_CALCADO, CATEGORIA_NOMES[CATEGORIA_CALCADO]),
+        (CATEGORIA_KIT_VERAO, CATEGORIA_NOMES[CATEGORIA_KIT_VERAO]),
+        (CATEGORIA_KIT_INVERNO, CATEGORIA_NOMES[CATEGORIA_KIT_INVERNO]),
     )
 
     # Unidade Choice
@@ -39,9 +45,9 @@ class Uniforme(ModeloBase):
     nome = models.CharField('Peça de uniforme', unique=True, max_length=100, blank=True, default='')
 
     categoria = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CATEGORIA_CHOICES,
-        default=CATEGORIA_MALHARIA
+        default=CATEGORIA_KIT_VERAO
     )
 
     unidade = models.CharField(
@@ -91,6 +97,25 @@ class Uniforme(ModeloBase):
                 'id': categoria[0],
                 'nome': categoria[1],
                 'uniformes': uniformes
+            }
+            result.append(choice)
+        return result
+
+    @classmethod
+    def categorias_lookup_to_json(cls):
+        result = []
+        for categoria in cls.CATEGORIA_CHOICES:
+            itens = []
+            for uniforme in cls.objects.filter(categoria=categoria[0]).order_by('nome'):
+                itens.append(
+                    {
+                        "id": uniforme.id,
+                        "nome": uniforme.__str__()
+                    }
+                )
+            choice = {
+                'categoria': categoria[1],
+                'itens': itens
             }
             result.append(choice)
         return result

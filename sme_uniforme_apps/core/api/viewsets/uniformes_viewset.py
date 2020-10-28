@@ -31,3 +31,7 @@ class UniformesViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False)
     def categorias(self, _):
         return Response(Uniforme.categorias_to_json())
+
+    @action(detail=False, url_path='lookup-categorias')
+    def lookup_categorias(self, _):
+        return Response(Uniforme.categorias_lookup_to_json())

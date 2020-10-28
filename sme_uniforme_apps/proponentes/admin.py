@@ -2,16 +2,18 @@ import csv
 from io import BytesIO
 
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.db.models import Count
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
+from django.contrib import messages
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
-                       muda_status_de_proponentes)
+                       muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -74,6 +76,26 @@ class ExportXlsxMixin:
         return response
 
     export_as_xlsx.short_description = "Exportar Proponentes"
+
+
+class TemAnexosReprovadosOuVencidosFilter(SimpleListFilter):
+    title = 'tem anexos reprovados ou vencidos'
+    parameter_name = 'anexos'
+
+    def lookups(self, request, model_admin):
+        return [('Reprovados ou Vencidos', 'Reprovados ou Vencidos'),
+                ('Reprovados', 'Reprovados'),
+                ('Vencidos', 'Vencidos')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Reprovados ou Vencidos':
+            return queryset.filter(anexos__status__in=["REPROVADO", "VENCIDO"]).distinct()
+        elif self.value() == 'Reprovados':
+            return queryset.filter(anexos__status="REPROVADO").distinct()
+        elif self.value() == 'Vencidos':
+            return queryset.filter(anexos__status="VENCIDO").distinct()
+        else:
+            return queryset
 
 
 @admin.register(Proponente)
@@ -144,11 +166,32 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
 
     atualiza_coordenadas_action.short_description = f'Atualiza coordenadas.'
 
+    def envia_email_pendencias_action(self, request, queryset):
+        if len(queryset) != len(queryset.filter(status=Proponente.STATUS_PENDENTE)):
+            self.message_user(request, "Selecione apenas proponentes com status pendente", level=messages.ERROR)
+        else:
+            envia_email_pendencias(queryset)
+            self.message_user(request, f'E-mail de pendências enviado com sucesso.')
+
+    envia_email_pendencias_action.short_description = f'Enviar e-mail de pendências'
+
     def ultima_alteracao(self, obj):
         return obj.alterado_em.strftime("%d/%m/%Y %H:%M:%S")
 
     ultima_alteracao.admin_order_field = 'alterado_em'
     ultima_alteracao.short_description = 'Última alteração'
+
+    def cria_usuario_proponente_sem_usuario(self, request, queryset):
+        cria_usuario_proponentes_existentes(queryset)
+        self.message_user(request, f'Caso não exista, foram criados usuários para os proponentes selecionados.')
+    cria_usuario_proponente_sem_usuario.short_description = 'Criar usuários para proponentes sem usuários.'
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser:
+            if 'cria_usuario_proponente_sem_usuario' in actions:
+                del actions['cria_usuario_proponente_sem_usuario']
+        return actions
 
     actions = [
         'verifica_bloqueio_cnpj',
@@ -161,14 +204,16 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'muda_status_para_credenciado',
         'muda_status_para_descredenciado',
         'atualiza_coordenadas_action',
+        'envia_email_pendencias_action',
+        'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
     list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
                     'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
-    list_filter = ('status',)
+    list_filter = ('status', TemAnexosReprovadosOuVencidosFilter)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
-    readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social')
+    readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social', 'usuario')
 
 
 @admin.register(OfertaDeUniforme)
@@ -230,7 +275,7 @@ class TipoDocumentoAdmin(admin.ModelAdmin):
 
     inverte_obrigatorio.short_description = "Inverter o parâmetro 'obrigatório' "
 
-    list_display = ('nome', 'obrigatorio', 'visivel')
+    list_display = ('nome', 'obrigatorio', 'visivel', 'tem_data_validade')
     ordering = ('nome',)
     search_fields = ('nome',)
     list_filter = ('obrigatorio', 'visivel')

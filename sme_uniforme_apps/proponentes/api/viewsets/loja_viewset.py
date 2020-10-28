@@ -1,8 +1,11 @@
 from django.db.models.expressions import RawSQL
+from django.template.loader import render_to_string
 from rest_framework import mixins
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
+from sme_uniforme_apps.utils.html_to_pdf_response import html_to_pdf_response
 from ..serializers.loja_serializer import LojaUpdateFachadaSerializer
 from ..serializers.proponente_serializer import LojaCredenciadaSerializer
 from ...models.loja import Loja
@@ -38,5 +41,15 @@ class LojaViewSet(mixins.ListModelMixin, GenericViewSet):
 
             for loja in queryset:
                 loja.distancia = loja.get_distancia(lat, lon)
+        else:
+            for loja in queryset:
+                loja.distancia = 0
+        return queryset
 
-            return queryset
+    @action(detail=False, url_path='pdf-lojas-credenciadas', methods=['get'])
+    def pdf_lojas_credenciadas(self, request):
+        html_string = render_to_string(
+            'lojas_credenciadas.html',
+            {'lojas': self.get_queryset()}
+        )
+        return html_to_pdf_response(html_string, f'lojas_credenciadas.pdf')

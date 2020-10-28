@@ -10,7 +10,9 @@ from ...api.serializers.loja_serializer import (LojaCreateSerializer,
 from ...api.serializers.oferta_de_uniforme_serializer import (
     OfertaDeUniformeCreateSerializer, OfertaDeUniformeSerializer, OfertaDeUniformeLookupSerializer)
 from ...models import Proponente, Loja
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 log = logging.getLogger(__name__)
 
 
@@ -43,7 +45,8 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
 
         # Sumariza ofertas por categoria
         for oferta in ofertas_de_uniformes:
-            total_por_categoria[oferta['uniforme'].categoria] += (oferta['preco'] * oferta['uniforme'].quantidade)
+            if limites_por_categoria.get(oferta['uniforme'].categoria):
+                total_por_categoria[oferta['uniforme'].categoria] += (oferta['preco'] * oferta['uniforme'].quantidade)
 
         # Encontra e retorna a primeira categoria que ficou acima do limite ou None se nenhuma ficou acima
         categoria_acima_do_limite = None
@@ -61,8 +64,10 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         categorias_fornecidas = set()
 
         for oferta in ofertas_de_uniformes:
-            categorias_fornecidas.add(oferta['uniforme'].categoria)
-            qtd_itens_por_categoria[oferta['uniforme'].categoria] -= 1
+            limite = LimiteCategoria.objects.get(categoria_uniforme=oferta['uniforme'].categoria)
+            if limite.obrigatorio:
+                categorias_fornecidas.add(oferta['uniforme'].categoria)
+                qtd_itens_por_categoria[oferta['uniforme'].categoria] -= 1
 
         categoria_faltando_itens = None
         for categoria, quantidade in qtd_itens_por_categoria.items():
@@ -119,6 +124,15 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         proponente.lojas.set(lojas_lista)
         log.info("Proponente {}, lojas: {}".format(proponente.uuid, ofertas_lista))
         log.info("Criação de proponente finalizada!")
+        log.info("Criação de usuário do proponente")
+        usuario = User.objects.create_user(
+            email=proponente.email,
+            password="".join([n for n in proponente.cnpj if n.isdigit()])[:5],
+            first_name=proponente.responsavel
+        )
+        proponente.usuario = usuario
+        proponente.save()
+        log.info("Criação de usuário do proponente finalizada")
 
         return proponente
 

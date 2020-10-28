@@ -1,0 +1,9 @@
+@import "variaveis";
+
+.lojas-credenciadas {
+  border: 1px solid $cinza-claro;
+  padding: 20px;
+  span {
+    font-weight: bold;
+  }
+}
