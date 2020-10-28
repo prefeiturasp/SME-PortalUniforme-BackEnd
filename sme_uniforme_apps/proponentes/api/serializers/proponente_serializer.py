@@ -45,7 +45,8 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
 
         # Sumariza ofertas por categoria
         for oferta in ofertas_de_uniformes:
-            total_por_categoria[oferta['uniforme'].categoria] += (oferta['preco'] * oferta['uniforme'].quantidade)
+            if limites_por_categoria.get(oferta['uniforme'].categoria):
+                total_por_categoria[oferta['uniforme'].categoria] += (oferta['preco'] * oferta['uniforme'].quantidade)
 
         # Encontra e retorna a primeira categoria que ficou acima do limite ou None se nenhuma ficou acima
         categoria_acima_do_limite = None
@@ -63,8 +64,10 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         categorias_fornecidas = set()
 
         for oferta in ofertas_de_uniformes:
-            categorias_fornecidas.add(oferta['uniforme'].categoria)
-            qtd_itens_por_categoria[oferta['uniforme'].categoria] -= 1
+            limite = LimiteCategoria.objects.get(categoria_uniforme=oferta['uniforme'].categoria)
+            if limite.obrigatorio:
+                categorias_fornecidas.add(oferta['uniforme'].categoria)
+                qtd_itens_por_categoria[oferta['uniforme'].categoria] -= 1
 
         categoria_faltando_itens = None
         for categoria, quantidade in qtd_itens_por_categoria.items():

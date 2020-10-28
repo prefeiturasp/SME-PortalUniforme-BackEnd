@@ -25,7 +25,7 @@ class LimiteCategoria(ModeloBase):
     @classmethod
     def limites_por_categoria_as_dict(cls):
         result = {}
-        for categoria in cls.objects.all():
+        for categoria in cls.objects.filter(obrigatorio=True):
             result[categoria.categoria_uniforme] = categoria.preco_maximo
         log.info(f"Limites por categoria: {result}")
         return result
