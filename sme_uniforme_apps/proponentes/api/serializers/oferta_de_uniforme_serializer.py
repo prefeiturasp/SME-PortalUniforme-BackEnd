@@ -37,6 +37,7 @@ class OfertaDeUniformeCreateSerializer(serializers.ModelSerializer):
 
 class OfertaDeUniformeLookupSerializer(serializers.ModelSerializer):
     uniforme_categoria = serializers.SerializerMethodField()
+    uniforme_categoria_display = serializers.SerializerMethodField()
     item = serializers.SlugRelatedField(
         slug_field='nome',
         required=False,
@@ -47,6 +48,9 @@ class OfertaDeUniformeLookupSerializer(serializers.ModelSerializer):
     def get_uniforme_categoria(self, obj):
         return obj.uniforme.categoria
 
+    def get_uniforme_categoria_display(self, obj):
+        return obj.uniforme.get_categoria_display()
+
     class Meta:
         model = OfertaDeUniforme
-        fields = ('uniforme_categoria', 'item', 'preco')
+        fields = ('uniforme_categoria_display', 'uniforme_categoria', 'item', 'preco')
