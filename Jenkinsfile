@@ -26,7 +26,7 @@ pipeline {
                 -Dsonar.projectKey=SME-PortalUniformes-BackEnd \
                 -Dsonar.sources=. \
                 -Dsonar.host.url=http://sonar.sme.prefeitura.sp.gov.br \
-                -Dsonar.login=5fbad66feb37409e0fb1865b761be2255c7fc95e'
+                -Dsonar.login=b9b2f33241e50cab8fb3c977bee110b0f2cdc488'
             }
        }
 
