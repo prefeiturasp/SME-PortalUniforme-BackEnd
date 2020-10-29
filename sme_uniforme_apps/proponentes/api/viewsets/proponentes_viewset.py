@@ -83,6 +83,7 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.uf = loja.get('uf')
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
+                loja_obj.site = loja.get('site')
                 loja_obj.save()
             else:
                 atributos_extras = ['proponente', 'uuid', 'id', 'email', 'criado_em',
