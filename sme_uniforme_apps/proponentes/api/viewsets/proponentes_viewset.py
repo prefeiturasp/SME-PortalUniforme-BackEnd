@@ -75,11 +75,12 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             if loja.get('id', ''):
                 lojas_ids.append(loja.get('id'))
                 loja_obj = Loja.objects.get(id=loja.get('id', ''))
+                loja_obj.cep = loja.get('cep')
                 loja_obj.numero = loja.get('numero')
                 loja_obj.bairro = loja.get('bairro')
                 loja_obj.cidade = loja.get('cidade')
                 loja_obj.complemento = loja.get('complemento')
-                loja_obj.logradouro = loja.get('logradouro')
+                loja_obj.endereco = loja.get('endereco')
                 loja_obj.uf = loja.get('uf')
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
