@@ -55,8 +55,8 @@ django-admin-interface==0.12.0
 
 # Para gravação de log de alterações nos modelos
 # https://django-auditlog.readthedocs.io/en/latest/index.html
-#django-auditlog==0.4.5
+django-auditlog==0.4.7
 # Pegando última versão diretamente do repositório oficial.
--e git://github.com/jjkester/django-auditlog.git##egg=auditlog
+# -e git://github.com/jjkester/django-auditlog.git##egg=auditlog
 
 sentry-sdk
