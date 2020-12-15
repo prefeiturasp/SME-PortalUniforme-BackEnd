@@ -12,7 +12,7 @@ class LimitesCategoriasViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return self.queryset
+        return LimiteCategoria.objects.all()
 
     def get_serializer_class(self):
         return LimiteCategoriaSerializer

@@ -106,6 +106,7 @@
     {% for loja in lojas %}
         <div><span>Nome da loja: </span>{{ loja.nome_fantasia }}</div>
         <div><span>Nome do Responsável: </span>{{ loja.proponente.responsavel }}</div>
+        <div><span>Site: </span>{{ loja.site|default_if_none:"" }}</div>
         <div><span>E-mail: </span>{{ loja.proponente.email }}</div>
         <div><span>Telefone: </span>{{ loja.telefone }}</div>
         <hr/>
