@@ -1,0 +1,121 @@
+{% load static %}
+{% load sass_tags %}
+
+<html>
+<head>
+    <style>
+        @page {
+            margin-bottom: 3em;
+            @bottom-left {
+                background: #EEEEEE;
+                color: #000000;
+                content: '';
+                font-size: 10px;
+                width: 100%;
+                padding: 1em 2em 4em 2em;
+                margin-top: 1em;
+            }
+            @bottom-right {
+                background: #EEEEEE;
+                color: #000000;
+                content: counter(page);
+                font-size: 10px;
+                padding: 1em 2em 4em 2em;
+                margin-top: 1em;
+            }
+        }
+
+        @page :nth(n+2) {
+            margin-top: 2em;
+        }
+
+        @page :nth(1) {
+            margin-top: 0;
+        }
+
+        .titulo-e-logo {
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .titulo-e-logo img {
+            height: 48px;
+            width: 137px;
+        }
+
+        .titulo-e-logo h1 {
+            font-style: normal;
+            font-weight: normal;
+            font-size: 17px;
+            line-height: 21px;
+            text-transform: uppercase;
+            color: #000000;
+        }
+
+        .header {
+            padding: 1em 2em 1em 2em;
+            background: #EEEEEE;
+        }
+
+        .tabela-cabecalho table, .tabela-cabecalho th, .tabela-cabecalho td {
+            border: 1px solid black;
+            padding: 0.3em;
+        }
+
+        .header .logo-titulo {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .header .logo-titulo img {
+            width: 145px;
+            height: 53px;
+        }
+
+        .header .logo-titulo h1 {
+            display: flex;
+            align-items: flex-end;
+            font-weight: normal;
+            font-size: 16px;
+            color: #000000;
+        }
+
+        .lojas-credenciadas {
+            border: 1px solid #EEEEEE;
+            padding: 20px;
+        }
+
+        .lojas-credenciadas span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <section class="titulo-e-logo">
+        <img src="{% static 'images/LOGO_PB_POSITIVO.png' %}" alt=""/>
+        <h1>Lista de Fornecedores Credenciados<br/>Portal de Uniformes</h1>
+    </section>
+</header>
+<div class="lojas-credenciadas">
+    {% for loja in lojas %}
+        <div><span>Nome da loja: </span>{{ loja.nome_fantasia }}</div>
+        <div><span>Nome do Responsável: </span>{{ loja.proponente.responsavel }}</div>
+        <div><span>Site: </span>{{ loja.site|default_if_none:"" }}</div>
+        <div><span>E-mail: </span>{{ loja.proponente.email }}</div>
+        <div><span>Telefone: </span>{{ loja.telefone }}</div>
+        <hr/>
+    {% empty %}
+        <div>Os estabelecimentos estão em fase de realização cadastro, para
+            posterior análise. Em breve estarão disponíveis para acesso
+            neste portal.
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>

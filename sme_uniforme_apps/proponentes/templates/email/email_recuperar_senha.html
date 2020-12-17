@@ -1,0 +1,12 @@
+{% extends "base/page.html" %}
+{% block content %}
+  <div class="row">
+    <div class="col-12 p-2">
+      <p>Caro fornecedor,</p>
+      <p>
+        Clique neste link para criar uma nova senha no Portal de Fornecedores:<br/><br/>
+        {{ url|safe }}
+      </p>
+    </div>
+  </div>
+{% endblock %}

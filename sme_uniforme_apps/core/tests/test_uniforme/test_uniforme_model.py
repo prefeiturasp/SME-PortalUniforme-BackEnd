@@ -51,9 +51,12 @@ def test_admin():
 def test_metodo_qtd_itens_por_categoria_as_dict(uniforme_camisa, uniforme_meias, uniforme_tenis):
     qtd_itens_por_categoria = Uniforme.qtd_itens_por_categoria_as_dict()
     esperado = {
-        Uniforme.CATEGORIA_MALHARIA: 2,
-        Uniforme.CATEGORIA_CALCADO: 1,
+        Uniforme.CATEGORIA_MALHARIA: 0,
+        Uniforme.CATEGORIA_CALCADO: 0,
+        Uniforme.CATEGORIA_KIT_VERAO: 2,
+        Uniforme.CATEGORIA_KIT_INVERNO: 1,
     }
+    print('quantidade recebida', qtd_itens_por_categoria)
     assert qtd_itens_por_categoria == esperado
 
 
@@ -62,6 +65,8 @@ def test_metodo_qtd_itens_por_categoria_as_dict_quando_nao_ha_itens():
     esperado = {
         Uniforme.CATEGORIA_MALHARIA: 0,
         Uniforme.CATEGORIA_CALCADO: 0,
+        Uniforme.CATEGORIA_KIT_VERAO: 0,
+        Uniforme.CATEGORIA_KIT_INVERNO: 0,
     }
     assert qtd_itens_por_categoria == esperado
 
@@ -71,6 +76,16 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
         {
             'id': Uniforme.CATEGORIA_MALHARIA,
             'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_MALHARIA],
+            'uniformes': [],
+        },
+        {
+            'id': Uniforme.CATEGORIA_CALCADO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
+            'uniformes': []
+        },
+        {
+            'id': Uniforme.CATEGORIA_KIT_VERAO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_VERAO],
             'uniformes': [{'descricao': 'Meias (5 pares)',
                            'id': uniforme_meias.id,
                            'nome': 'Meias',
@@ -78,8 +93,8 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
                            'unidade': 'PAR'}]
         },
         {
-            'id': Uniforme.CATEGORIA_CALCADO,
-            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_CALCADO],
+            'id': Uniforme.CATEGORIA_KIT_INVERNO,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_INVERNO],
             'uniformes': [{'descricao': 'Tenis (1 par)',
                            'id': uniforme_tenis.id,
                            'nome': 'Tenis',

@@ -318,19 +318,19 @@ def payload_proponente_sem_anexos(payload_ofertas_de_uniformes, payload_lojas_se
 
 @pytest.fixture
 def limite_categoria_malharia():
-    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_MALHARIA, preco_maximo=100)
+    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_KIT_VERAO, preco_maximo=100)
 
 
 @pytest.fixture
 def limite_categoria_calcados():
-    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_CALCADO, preco_maximo=50)
+    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_KIT_INVERNO, preco_maximo=50)
 
 
 @pytest.fixture
 def limite_categoria_calcado():
-    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_CALCADO, preco_maximo=100.50)
+    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_KIT_INVERNO, preco_maximo=100.50)
 
 
 @pytest.fixture
 def limite_categoria_malharia():
-    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_MALHARIA, preco_maximo=50.00)
+    return baker.make('LimiteCategoria', categoria_uniforme=Uniforme.CATEGORIA_KIT_VERAO, preco_maximo=50.00)

@@ -1,14 +1,23 @@
+import logging
+
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from sme_uniforme_apps.core.models import Uniforme
+from sme_uniforme_apps.proponentes.api.serializers.loja_serializer import LojaCreateSerializer
+from sme_uniforme_apps.proponentes.models import OfertaDeUniforme
+from sme_uniforme_apps.proponentes.services import atualiza_coordenadas_lojas
 from ..serializers.proponente_serializer import ProponenteSerializer, ProponenteCreateSerializer
 
-from ...models import Proponente, ListaNegra
+from ...models import Proponente, ListaNegra, Loja
+
+log = logging.getLogger(__name__)
 
 
 class ProponentesViewSet(mixins.CreateModelMixin,
@@ -34,6 +43,68 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             return ProponenteSerializer
         else:
             return ProponenteCreateSerializer
+
+    @action(detail=True, methods=['patch'], url_path='atualiza-lojas')
+    def atualiza_lojas(self, request, uuid):
+        proponente = self.get_object()
+        lojas = request.data.pop('lojas')
+        ofertas_de_uniformes = request.data.pop('ofertas_de_uniformes')
+
+        if not lojas:
+            msgError = "Pelo menos uma loja precisa ser enviada!"
+            log.info(msgError)
+            raise ValidationError(msgError)
+
+        if not ofertas_de_uniformes:
+            msgError = "Pelo menos um oferta deve ser enviada!"
+            log.info(msgError)
+            raise ValidationError(msgError)
+        proponente.ofertas_de_uniformes.all().delete()
+
+        for oferta in ofertas_de_uniformes:
+            uniforme = Uniforme.objects.get(nome=oferta.get('nome'))
+            oferta_uniforme = OfertaDeUniforme(
+                proponente=proponente,
+                uniforme=uniforme,
+                preco=oferta.get('valor')
+            )
+            oferta_uniforme.save()
+
+        lojas_ids = []
+        for loja in lojas:
+            if loja.get('id', ''):
+                lojas_ids.append(loja.get('id'))
+                loja_obj = Loja.objects.get(id=loja.get('id', ''))
+                loja_obj.cep = loja.get('cep')
+                loja_obj.numero = loja.get('numero')
+                loja_obj.bairro = loja.get('bairro')
+                loja_obj.cidade = loja.get('cidade')
+                loja_obj.complemento = loja.get('complemento')
+                loja_obj.endereco = loja.get('endereco')
+                loja_obj.uf = loja.get('uf')
+                loja_obj.nome_fantasia = loja.get('nome_fantasia')
+                loja_obj.telefone = loja.get('telefone')
+                loja_obj.site = loja.get('site')
+                loja_obj.save()
+            else:
+                atributos_extras = ['proponente', 'uuid', 'id', 'email', 'criado_em',
+                                    'alterado_em', 'latitude', 'longitude', 'cidade',
+                                    'uf', 'firstName']
+                for attr in atributos_extras:
+                    loja.pop(attr, '')
+                loja_object = LojaCreateSerializer().create(loja)
+                proponente.lojas.add(loja_object)
+                lojas_ids.append(loja_object.id)
+        atualiza_coordenadas_lojas(proponente.lojas)
+
+        for loja in proponente.lojas.all():
+            if loja.id not in lojas_ids:
+                proponente.lojas.remove(loja)
+
+        proponente.status = Proponente.STATUS_ALTERADO
+        proponente.save()
+
+        return Response(ProponenteSerializer(proponente).data, status=status.HTTP_200_OK)
 
     @action(detail=False, url_path='verifica-cnpj')
     def verifica_cnpj(self, request):
