@@ -128,7 +128,8 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         usuario = User.objects.create_user(
             email=proponente.email,
             password="".join([n for n in proponente.cnpj if n.isdigit()])[:5],
-            first_name=proponente.responsavel
+            first_name=proponente.responsavel.split(' ')[0],
+            last_name=' '.join(proponente.responsavel.split(' ')[1:])
         )
         proponente.usuario = usuario
         proponente.save()
