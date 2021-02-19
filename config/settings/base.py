@@ -357,3 +357,5 @@ sentry_sdk.init(
 )
 
 GEOREF_API_URL = env('GEOREF_API_URL')
+
+FILE_UPLOAD_PERMISSIONS = 0o644
