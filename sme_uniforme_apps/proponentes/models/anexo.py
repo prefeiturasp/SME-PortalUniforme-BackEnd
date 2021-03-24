@@ -52,6 +52,9 @@ class Anexo(ModeloBase):
         related_name='anexos'
     )
 
+    def __str__(self):
+        return self.arquivo.name
+
     def as_dict(self):
         return {
             "proponente": self.proponente.uuid,
