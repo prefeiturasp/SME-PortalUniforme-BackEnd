@@ -8,6 +8,7 @@ class TipoDocumento(ModeloBase):
     obrigatorio = models.BooleanField(default=True)
     visivel = models.BooleanField(default=True)
     tem_data_validade = models.BooleanField(default=False)
+    obrigatorio_sme = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.nome} {"(obrigatório)" if self.obrigatorio else ""}'
