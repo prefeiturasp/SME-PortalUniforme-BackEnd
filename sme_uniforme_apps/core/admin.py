@@ -19,7 +19,7 @@ class ParametrosAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'edital', 'instrucao_normativa', 'alterado_em')
     readyonly_field = ('alterado_em',)
-    fields = ('edital', 'instrucao_normativa')
+    fields = ('edital', 'instrucao_normativa', 'email_sme')
 
 
 @admin.register(LimiteCategoria)
