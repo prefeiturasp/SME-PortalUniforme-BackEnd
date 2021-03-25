@@ -160,9 +160,13 @@ class LojaCredenciadaSerializer(serializers.ModelSerializer):
     proponente = ProponenteOfertaUniformeSerializer(many=False)
     email = serializers.SerializerMethodField()
     distancia = serializers.DecimalField(max_digits=4, decimal_places=1)
+    responsavel = serializers.SerializerMethodField()
 
     def get_email(self, obj):
         return obj.proponente.email
+
+    def get_responsavel(self, obj):
+        return obj.proponente.responsavel
 
     class Meta:
         model = Loja
