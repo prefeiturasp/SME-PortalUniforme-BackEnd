@@ -12,6 +12,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
+from .models.forms import AnexoForm
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
                        muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
 
@@ -27,6 +28,7 @@ class LojasInLine(admin.StackedInline):
 
 
 class AnexosInLine(admin.TabularInline):
+    form = AnexoForm
     model = Anexo
     extra = 1  # Quantidade de linhas que serão exibidas.
 
