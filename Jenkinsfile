@@ -23,10 +23,10 @@ pipeline {
          }
             steps {
                 sh 'sonar-scanner \
-                -Dsonar.projectKey=SME-PortalUniformes-BackEnd \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=http://sonar.sme.prefeitura.sp.gov.br \
-                -Dsonar.login=b9b2f33241e50cab8fb3c977bee110b0f2cdc488'
+                    -Dsonar.projectKey=SME-PortalUniforme-BackEnd \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://sonar.sme.prefeitura.sp.gov.br \
+                    -Dsonar.login=095794b8083141325589c9bf46fdbf410505b29a'
             }
        }
 
