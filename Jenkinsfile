@@ -53,14 +53,12 @@ pipeline {
                     if ( env.branchname == 'main' ||  env.branchname == 'master' || env.branchname == 'homolog' || env.branchname == 'release' ) {
                         sendTelegram("🤩 [Deploy ${env.branchname}] Job Name: ${JOB_NAME} \nBuild: ${BUILD_DISPLAY_NAME} \nMe aprove! \nLog: \n${env.BUILD_URL}")
                         timeout(time: 24, unit: "HOURS") {
-                            input message: 'Deseja realizar o deploy?', ok: 'SIM', submitter: 'kelwy_oliveira, anderson_morais, luis_zimmermann, rodolpho_azeredo, joao_mesquita'
+                            input message: 'Deseja realizar o deploy?', ok: 'SIM', submitter: 'kelwy_oliveira, luis_zimmermann, rodolpho_azeredo, joao_mesquita'
                         }
                     }
                     withCredentials([file(credentialsId: "${kubeconfig}", variable: 'config')]){
                             sh('cp $config '+"$home"+'/.kube/config')
-                            sh 'kubectl rollout restart deployment/uniformes-backend -n sme-uniforme'
-                            sh 'kubectl rollout restart deployment/uniformes-celery -n sme-uniforme'
-                            sh 'kubectl rollout restart deployment/uniformes-celery-beat -n sme-uniforme'
+                            sh 'kubectl -n sme-uniforme rollout restart deploy'
                             sh('rm -f '+"$home"+'/.kube/config')
                     }
                 }
