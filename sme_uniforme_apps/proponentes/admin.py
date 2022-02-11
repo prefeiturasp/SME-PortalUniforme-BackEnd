@@ -213,7 +213,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
     list_filter = ('status', TemAnexosReprovadosOuVencidosFilter)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
-    readonly_fields = ('uuid', 'id', 'cnpj', 'razao_social', 'usuario')
+    readonly_fields = ('uuid', 'id', 'cnpj', 'usuario')
 
 
 @admin.register(OfertaDeUniforme)
