@@ -22,6 +22,8 @@ class Loja(ModeloBase):
     numero = models.CharField("Numero", max_length=255, blank=True, default="")
     complemento = models.CharField("Complemento", max_length=255, null=True, blank=True)
 
+    comprovante_endereco = models.FileField("Comprovante de Endereço", blank=True, null=True, max_length=255)
+
     latitude = models.FloatField("Latitude", blank=True, null=True)
     longitude = models.FloatField("longitude", blank=True, null=True)
 
