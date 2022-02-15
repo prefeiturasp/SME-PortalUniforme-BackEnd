@@ -17,6 +17,10 @@ from ..serializers.proponente_serializer import ProponenteSerializer, Proponente
 
 from ...models import Proponente, ListaNegra, Loja
 
+import base64
+
+from django.core.files.base import ContentFile
+
 log = logging.getLogger(__name__)
 
 
@@ -85,6 +89,11 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
                 loja_obj.site = loja.get('site')
+                if loja.get('comprovante_endereco') is not None:
+                    format, imgstr = loja.get('comprovante_endereco').split(';base64,') 
+                    ext = format.split('/')[-1] 
+                    data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+                    loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + ext, data)
                 loja_obj.save()
             else:
                 atributos_extras = ['proponente', 'uuid', 'id', 'email', 'criado_em',
