@@ -1,10 +1,22 @@
-from rest_framework import serializers
+import environ
 
+from rest_framework import serializers
+from config.settings.base import MEDIA_URL
 from ...models import Loja
 
 
+env = environ.Env()
+SERVER_NAME = f'{env("SERVER_NAME")}'
+
 class LojaSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField()
+    comprovante_endereco = serializers.SerializerMethodField('get_comprovante_endereco')
+
+    def get_comprovante_endereco(self, obj):
+        if bool(obj.comprovante_endereco):
+            return '%s%s' % (SERVER_NAME, obj.comprovante_endereco.url)
+        else:
+            return None
 
     def get_email(self, obj):
         return obj.proponente.email
