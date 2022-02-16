@@ -13,7 +13,10 @@ class LojaSerializer(serializers.ModelSerializer):
     comprovante_endereco = serializers.SerializerMethodField('get_comprovante_endereco')
 
     def get_comprovante_endereco(self, obj):
-        return '%s%s' % (SERVER_NAME, obj.comprovante_endereco.url)
+        if bool(obj.comprovante_endereco):
+            return '%s%s' % (SERVER_NAME, obj.comprovante_endereco.url)
+        else:
+            return None
 
     def get_email(self, obj):
         return obj.proponente.email
