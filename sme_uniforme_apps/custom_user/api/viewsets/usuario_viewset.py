@@ -77,7 +77,7 @@ class UsuarioViewset(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Gener
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(usuario)
         env = environ.Env()
-        url = f'https://{env("SERVER_NAME")}/recuperar-senha?id={str(usuario.id)}&confirmationKey={token}'
+        url = f'{env("SERVER_NAME")}/recuperar-senha?id={str(usuario.id)}&confirmationKey={token}'
         enviar_email_recuperar_senha.delay(
             usuario.email,
             {

@@ -154,7 +154,7 @@ class Proponente(ModeloBase, TemObservacao):
             log.info(f'Enviando confirmação de pré-cadastro (Protocolo:{self.protocolo}) enviada para {self.email}.')
 
             env = environ.Env()
-            url = f'https://{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
+            url = f'{env("SERVER_NAME")}/cadastro?uuid={self.uuid}'
             enviar_email_confirmacao_pre_cadastro.delay(self.email,
                                                         {'protocolo': self.protocolo, 'url_cadastro': url})
 
