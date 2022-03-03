@@ -209,13 +209,13 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'envia_email_pendencias_action',
         'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
-    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao',
+    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'ultima_alteracao',
                     'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
     list_filter = ('status', TemAnexosReprovadosOuVencidosFilter)
     inlines = [UniformesFornecidosInLine, LojasInLine, AnexosInLine]
-    readonly_fields = ('uuid', 'id', 'cnpj', 'usuario')
+    readonly_fields = ('uuid', 'id', 'cnpj')
 
 
 @admin.register(OfertaDeUniforme)
