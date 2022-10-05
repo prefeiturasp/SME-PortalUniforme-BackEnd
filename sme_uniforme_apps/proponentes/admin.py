@@ -43,13 +43,13 @@ class ExportXlsxMixin:
             'Cnpj', 'Razão Social', 'Logradouro proponente', 'Cidade proponente', 
             'UF proponente', 'Cep proponente', 'Telefone proponente', 'Email', 
             'Responsável', 'Status', 'Nome fantasia loja', 'Cep loja', 'Endereço loja',
-            'Bairro loja', 'Número loja', 'Complemento loja', 'Telefone loja'
+            'Bairro loja', 'Número loja', 'Complemento loja', 'Telefone loja', 'Longitude', 'Latitude'
         ]
 
         count_de_ofertas_de_uniformes = queryset.annotate(count_ofertas=Count('ofertas_de_uniformes')).all()
         fields_uniformes = ['Nome uniforme', 'Preço', 'Categoria', 'Quantidade'] * max(count_de_ofertas_de_uniformes.values_list('count_ofertas'))[0]
         field_names += fields_uniformes
-        
+
         ws.append(field_names)
 
         for obj in queryset:
@@ -58,7 +58,7 @@ class ExportXlsxMixin:
                     obj.cnpj, obj.razao_social, obj.end_logradouro, obj.end_cidade, 
                     obj.end_uf, obj.end_cep, obj.telefone, obj.email, obj.responsavel,
                     obj.status, loja.nome_fantasia, loja.cep, loja.endereco, loja.bairro,
-                    loja.numero, loja.complemento, loja.telefone]
+                    loja.numero, loja.complemento, loja.telefone, loja.longitude, loja.latitude]
 
                 for oferta in obj.ofertas_de_uniformes.all():
                     linha_oferta = [oferta.uniforme.nome, oferta.preco, oferta.uniforme.categoria, oferta.uniforme.quantidade]
