@@ -48,8 +48,10 @@ class ExportXlsxMixin:
 
         count_de_ofertas_de_uniformes = queryset.annotate(count_ofertas=Count('ofertas_de_uniformes')).all()
         fields_uniformes = ['Nome uniforme', 'Preço', 'Categoria', 'Quantidade'] * max(count_de_ofertas_de_uniformes.values_list('count_ofertas'))[0]
+        fields_lat_long = ['Longitude', 'Latitude']
         field_names += fields_uniformes
-        
+        field_names += fields_lat_long
+
         ws.append(field_names)
 
         for obj in queryset:
@@ -63,6 +65,9 @@ class ExportXlsxMixin:
                 for oferta in obj.ofertas_de_uniformes.all():
                     linha_oferta = [oferta.uniforme.nome, oferta.preco, oferta.uniforme.categoria, oferta.uniforme.quantidade]
                     linha += linha_oferta
+
+                linha_lat_long = [loja.longitude, loja.latitude]
+                linha += linha_lat_long
 
                 ws.append(linha)
 
