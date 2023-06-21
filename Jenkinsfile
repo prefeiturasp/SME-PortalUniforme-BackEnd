@@ -6,7 +6,7 @@ pipeline {
     }
 
     agent {
-      node { label 'jenkins-slave' }
+      node { label 'AGENT-NODES' }
     }
 
     options {
@@ -57,9 +57,10 @@ pipeline {
                         }
                     }
                     withCredentials([file(credentialsId: "${kubeconfig}", variable: 'config')]){
+			    sh('if [ -f '+"$home"+'/.kube/config ];then rm -f '+"$home"+'/.kube/config; fi')
                             sh('cp $config '+"$home"+'/.kube/config')
                             sh 'kubectl -n sme-uniforme rollout restart deploy'
-                            sh('rm -f '+"$home"+'/.kube/config')
+                            sh('if [ -f '+"$home"+'/.kube/config ];then rm -f '+"$home"+'/.kube/config; fi')
                     }
                 }
             }
@@ -67,7 +68,7 @@ pipeline {
     }
 
   post {
-    always { cleanWs notFailBuild: true }
+    always { sh('if [ -f '+"$home"+'/.kube/config ];then rm -f '+"$home"+'/.kube/config; fi')}
     success { sendTelegram("🚀 Job Name: ${JOB_NAME} \nBuild: ${BUILD_DISPLAY_NAME} \nStatus: Success \nLog: \n${env.BUILD_URL}console") }
     unstable { sendTelegram("💣 Job Name: ${JOB_NAME} \nBuild: ${BUILD_DISPLAY_NAME} \nStatus: Unstable \nLog: \n${env.BUILD_URL}console") }
     failure { sendTelegram("💥 Job Name: ${JOB_NAME} \nBuild: ${BUILD_DISPLAY_NAME} \nStatus: Failure \nLog: \n${env.BUILD_URL}console") }
