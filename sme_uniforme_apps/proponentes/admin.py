@@ -187,6 +187,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         return obj.criado_em.strftime("%d/%m/%Y")
 
     data_cadastro.short_description = 'Data do cadastro'
+    data_cadastro.admin_order_field = 'criado_em'
 
     def cria_usuario_proponente_sem_usuario(self, request, queryset):
         cria_usuario_proponentes_existentes(queryset)
