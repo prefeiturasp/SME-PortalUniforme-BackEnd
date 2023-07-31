@@ -183,6 +183,11 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     ultima_alteracao.admin_order_field = 'alterado_em'
     ultima_alteracao.short_description = 'Última alteração'
 
+    def data_cadastro(self, obj):
+        return obj.criado_em.strftime("%d/%m/%Y")
+
+    data_cadastro.short_description = 'Data do cadastro'
+
     def cria_usuario_proponente_sem_usuario(self, request, queryset):
         cria_usuario_proponentes_existentes(queryset)
         self.message_user(request, f'Caso não exista, foram criados usuários para os proponentes selecionados.')
@@ -209,8 +214,8 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'envia_email_pendencias_action',
         'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
-    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'ultima_alteracao',
-                    'status')
+    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro',
+                    'ultima_alteracao', 'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
     list_filter = ('status', TemAnexosReprovadosOuVencidosFilter)
