@@ -1,13 +1,19 @@
-#FROM python:3.6-jessie
-FROM python:3.6-buster
-ENV PYTHONUNBUFFERED 1
-ADD . /code
-WORKDIR /code
-RUN apt-get update && apt-get install libpq-dev -y && \
-    python -m pip --no-cache install -U pip && \
-  #    python -m pip --no-cache install Cython && \
-  #    python -m pip --no-cache install numpy && \
-  python -m pip --no-cache install -r requirements/production.txt
+FROM python:3.8-slim
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Copy project and install dependencies
+WORKDIR /code
+COPY . /code/
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc g++ libpq-dev libcairo2 libpango-1.0-0 libpangocairo-1.0-0  && \
+    pip install psycopg2-binary && \
+    pip --no-cache-dir install --upgrade pip && \
+    pip --no-cache-dir install --requirement requirements/production.txt && \
+    apt-get remove -y gcc g++ && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8001
