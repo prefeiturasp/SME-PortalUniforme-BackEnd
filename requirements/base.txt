@@ -38,7 +38,7 @@ django-use-email-as-username==1.1.0
 
 # Para filtros no DRF
 # https://django-filter.readthedocs.io/en/master/#
-django-filter==2.2.0
+django-filter==2.4.0
 
 # https://pypi.org/project/drf_base64/
 drf-base64==2.0
