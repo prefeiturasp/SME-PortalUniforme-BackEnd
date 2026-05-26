@@ -134,3 +134,9 @@ dmypy.json
 
 # Media folder
 media/
+
+# run
+.run/
+
+#github
+.github/
