@@ -13,6 +13,7 @@ from sme_uniforme_apps.core.models import Uniforme
 from sme_uniforme_apps.proponentes.api.serializers.loja_serializer import LojaCreateSerializer
 from sme_uniforme_apps.proponentes.models import OfertaDeUniforme
 from sme_uniforme_apps.proponentes.services import atualiza_coordenadas_lojas
+from sme_uniforme_apps.proponentes.upload_validation import PDF_EXTENSIONS, validate_upload_extension
 from ..serializers.proponente_serializer import ProponenteSerializer, ProponenteCreateSerializer
 
 from ...models import Proponente, ListaNegra, Loja
@@ -87,8 +88,18 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
                 loja_obj.site = loja.get('site')
-                if loja.get('comprovante_endereco') is not None:
-                    file = base64ToFile(loja.get('comprovante_endereco'))
+                comprovante_endereco = loja.get('comprovante_endereco')
+                if comprovante_endereco:
+                    try:
+                        validate_upload_extension(
+                            comprovante_endereco,
+                            PDF_EXTENSIONS,
+                            'Envie o comprovante de endereço do ponto de venda em PDF.',
+                        )
+                    except ValueError as exc:
+                        raise ValidationError(str(exc))
+
+                    file = base64ToFile(comprovante_endereco)
                     loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
                 loja_obj.save()
             else:
@@ -97,10 +108,20 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                                     'uf', 'firstName']
                 for attr in atributos_extras:
                     loja.pop(attr, '')
-                comprovante = loja.pop('comprovante_endereco', '')    
+                comprovante = loja.pop('comprovante_endereco', None)
                 loja_object = LojaCreateSerializer().create(loja)
-                file = base64ToFile(comprovante)
-                loja_object.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                if comprovante:
+                    try:
+                        validate_upload_extension(
+                            comprovante,
+                            PDF_EXTENSIONS,
+                            'Envie o comprovante de endereço do ponto de venda em PDF.',
+                        )
+                    except ValueError as exc:
+                        raise ValidationError(str(exc))
+
+                    file = base64ToFile(comprovante)
+                    loja_object.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
                 proponente.lojas.add(loja_object)
                 lojas_ids.append(loja_object.id)
         atualiza_coordenadas_lojas(proponente.lojas)

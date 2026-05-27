@@ -1,4 +1,3 @@
-import csv
 from io import BytesIO
 
 from django.contrib import admin
@@ -12,7 +11,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
-from .models.forms import AnexoForm
+from .models.forms import AnexoForm, LojaAdminForm, TipoDocumentoAdminForm
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
                        muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
 
@@ -23,7 +22,9 @@ class UniformesFornecidosInLine(admin.TabularInline):
 
 
 class LojasInLine(admin.StackedInline):
+    form = LojaAdminForm
     model = Loja
+    exclude = ('comprovante_endereco',)
     extra = 1  # Quantidade de linhas que serão exibidas.
 
 
@@ -245,6 +246,9 @@ class ListaNegraAdmin(admin.ModelAdmin):
 
 @admin.register(Loja)
 class LojaAdmin(admin.ModelAdmin):
+    form = LojaAdminForm
+    exclude = ('comprovante_endereco',)
+
     @staticmethod
     def protocolo(loja):
         return loja.proponente.protocolo
@@ -265,6 +269,8 @@ class LojaAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDocumento)
 class TipoDocumentoAdmin(admin.ModelAdmin):
+    form = TipoDocumentoAdminForm
+
     def inverte_visivel(self, request, queryset):
         for tipo_documento in queryset.all():
             tipo_documento.visivel = not tipo_documento.visivel
@@ -283,8 +289,8 @@ class TipoDocumentoAdmin(admin.ModelAdmin):
 
     inverte_obrigatorio.short_description = "Inverter o parâmetro 'obrigatório' "
 
-    list_display = ('nome', 'obrigatorio', 'visivel', 'tem_data_validade', 'obrigatorio_sme')
+    list_display = ('identificador', 'nome', 'obrigatorio', 'visivel', 'tem_data_validade', 'obrigatorio_sme')
     ordering = ('nome',)
-    search_fields = ('nome',)
+    search_fields = ('identificador', 'nome')
     list_filter = ('obrigatorio', 'visivel')
     actions = ['inverte_visivel', 'inverte_obrigatorio']
