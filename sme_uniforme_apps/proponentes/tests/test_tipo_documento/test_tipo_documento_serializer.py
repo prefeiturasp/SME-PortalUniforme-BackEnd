@@ -9,6 +9,7 @@ def test_tipo_documento_serializer(tipo_documento):
     tipo_documento_serializer = TipoDocumentoSerializer(tipo_documento)
 
     assert tipo_documento_serializer.data is not None
+    assert tipo_documento_serializer.data['identificador'] == tipo_documento.identificador
     assert tipo_documento_serializer.data['nome']
     assert tipo_documento_serializer.data['obrigatorio']
     assert tipo_documento_serializer.data['id']
