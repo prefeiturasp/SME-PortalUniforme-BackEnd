@@ -49,6 +49,22 @@ def test_anexo_form_configura_label_e_help_text():
 
     assert form.fields["arquivo"].label == "Documento do proponente"
     assert form.fields["arquivo"].help_text == "Envie apenas arquivos PDF."
+    assert form.fields["status"].label == "Status Admin"
+    assert form.fields["justificativa"].label == "Justificativa Admin"
+    assert form.fields["status"].initial == Anexo.STATUS_PENDENTE
+    assert form.fields["tipo_documento"].widget.attrs["style"] == "width: 220px;"
+    assert form.fields["justificativa"].widget.attrs["style"] == "width: 340px;"
+    assert "status_ia" not in form.fields
+    assert "justificativa_ia" not in form.fields
+
+
+def test_anexo_form_define_title_do_tipo_documento_quando_instancia_tem_valor(
+    tipo_documento,
+):
+    tipo_documento.nome = "Documento muito grande para validar o title do select"
+    form = AnexoForm(instance=Anexo(tipo_documento=tipo_documento))
+
+    assert form.fields["tipo_documento"].widget.attrs["title"] == tipo_documento.nome
 
 
 def test_anexo_create_serializer_configura_label_e_help_text():
@@ -68,6 +84,27 @@ def test_anexo_form_aceita_pdf(tipo_documento):
     )
 
     assert form.is_valid(), form.errors
+
+
+@pytest.mark.parametrize("status_admin", [Anexo.STATUS_REPROVADO, Anexo.STATUS_VENCIDO])
+def test_anexo_form_copia_justificativa_ia_para_admin(tipo_documento, status_admin):
+    anexo = Anexo(
+        tipo_documento=tipo_documento,
+        status_ia=Anexo.STATUS_REPROVADO,
+        justificativa_ia="Documento divergente segundo a IA.",
+    )
+    form = AnexoForm(
+        data={
+            "tipo_documento": tipo_documento.id,
+            "status": status_admin,
+            "justificativa": "",
+        },
+        files={"arquivo": create_uploaded_file("anexo.pdf")},
+        instance=anexo,
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["justificativa"] == "Documento divergente segundo a IA."
 
 
 @pytest.mark.parametrize("file_name", ["anexo.jpg", "anexo.png", "anexo.txt"])
