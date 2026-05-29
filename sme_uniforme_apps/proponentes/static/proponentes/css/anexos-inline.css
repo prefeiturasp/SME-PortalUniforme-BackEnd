@@ -1,0 +1,174 @@
+#anexos-group table {
+    table-layout: fixed;
+}
+
+#anexos-group td.original,
+#anexos-group td.field-tipo_documento,
+#anexos-group td.field-arquivo,
+#anexos-group td.field-data_validade,
+#anexos-group td.field-status_ia_info,
+#anexos-group td.field-justificativa_ia_info,
+#anexos-group td.field-status,
+#anexos-group td.field-justificativa,
+#anexos-group td.field-ultima_alteracao_admin_info,
+#anexos-group th.original,
+#anexos-group th.column-tipo_documento,
+#anexos-group th.column-arquivo,
+#anexos-group th.column-data_validade,
+#anexos-group th.column-status_ia_info,
+#anexos-group th.column-justificativa_ia_info,
+#anexos-group th.column-status,
+#anexos-group th.column-justificativa,
+#anexos-group th.column-ultima_alteracao_admin_info {
+    vertical-align: top !important;
+}
+
+#anexos-group td.original p,
+#anexos-group td.field-arquivo .file-upload,
+#anexos-group td.field-data_validade p,
+#anexos-group td.field-justificativa_ia_info details,
+#anexos-group td.field-tipo_documento .related-widget-wrapper {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#anexos-group td.field-tipo_documento,
+#anexos-group th.column-tipo_documento {
+    width: 220px;
+}
+
+#anexos-group td.field-arquivo,
+#anexos-group th.column-arquivo {
+    width: 180px;
+}
+
+#anexos-group td.field-arquivo {
+    padding-top: 2px !important;
+}
+
+#anexos-group td.field-data_validade,
+#anexos-group th.column-data_validade {
+    width: 105px;
+}
+
+#anexos-group td.field-status_ia_info,
+#anexos-group th.column-status_ia_info {
+    width: 110px;
+}
+
+#anexos-group td.field-justificativa_ia_info,
+#anexos-group th.column-justificativa_ia_info {
+    width: 200px;
+}
+
+#anexos-group td.field-status,
+#anexos-group th.column-status {
+    width: 145px;
+}
+
+#anexos-group td.field-justificativa,
+#anexos-group th.column-justificativa {
+    width: 360px;
+}
+
+#anexos-group td.field-ultima_alteracao_admin_info,
+#anexos-group th.column-ultima_alteracao_admin_info {
+    width: 170px;
+}
+
+#anexos-group td.field-tipo_documento select,
+#anexos-group td.field-arquivo input[type="file"],
+#anexos-group td.field-status select,
+#anexos-group td.field-justificativa textarea,
+#anexos-group td.field-data_validade input[type="text"] {
+    max-width: 100%;
+}
+
+#anexos-group td.field-tipo_documento .related-widget-wrapper {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 4px;
+    max-width: 220px;
+}
+
+#anexos-group td.field-tipo_documento select {
+    width: 220px !important;
+    max-width: 220px !important;
+}
+
+#anexos-group td.field-arquivo .file-upload,
+#anexos-group td.field-status_ia_info .readonly,
+#anexos-group td.field-justificativa_ia_info .readonly,
+#anexos-group td.field-ultima_alteracao_admin_info .readonly {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+#anexos-group td.field-arquivo .file-upload {
+    flex-direction: column;
+}
+
+#anexos-group td.field-status select,
+#anexos-group td.field-justificativa textarea,
+#anexos-group td.field-data_validade p {
+    margin-top: 0;
+}
+
+#anexos-group .readonly,
+#anexos-group .anexo-ia-justificativa,
+#anexos-group .anexo-auditoria {
+    white-space: normal;
+    word-break: break-word;
+}
+
+#anexos-group .anexo-status-ia {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+#anexos-group .anexo-status-ia-aprovado {
+    background: #e7f6eb;
+    color: #22603a;
+}
+
+#anexos-group .anexo-status-ia-reprovado,
+#anexos-group .anexo-status-ia-vencido {
+    background: #fbe9e7;
+    color: #8a2d1d;
+}
+
+#anexos-group .anexo-status-ia-pendente,
+#anexos-group .anexo-status-ia-sem-analise {
+    background: #edf2f7;
+    color: #465a69;
+}
+
+#anexos-group .anexo-ia-detalhe {
+    max-width: 200px;
+}
+
+#anexos-group .anexo-ia-detalhe summary {
+    cursor: pointer;
+    color: #0b57a3;
+}
+
+#anexos-group .anexo-ia-justificativa {
+    margin-top: 6px;
+}
+
+#anexos-group .anexo-ia-justificativa-vazia {
+    min-height: 18px;
+}
+
+#anexos-group .anexo-auditoria {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+}
