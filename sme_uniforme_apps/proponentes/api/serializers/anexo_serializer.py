@@ -16,7 +16,18 @@ class AnexoSerializer(ModelSerializer):
 
     class Meta:
         model = Anexo
-        fields = '__all__'
+        fields = (
+            "id",
+            "criado_em",
+            "alterado_em",
+            "uuid",
+            "proponente",
+            "arquivo",
+            "data_validade",
+            "status",
+            "justificativa",
+            "tipo_documento",
+        )
 
 
 class AnexoCreateSerializer(serializers.ModelSerializer):
@@ -52,7 +63,13 @@ class AnexoCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Anexo
-        exclude = ('id',)
+        exclude = (
+            "id",
+            "status_ia",
+            "justificativa_ia",
+            "ultima_alteracao_admin_por",
+            "ultima_alteracao_admin_em",
+        )
         extra_kwargs = {
             'arquivo': {
                 'label': 'Documento do proponente',
