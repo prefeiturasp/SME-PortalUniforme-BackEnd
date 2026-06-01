@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from .tipo_documento_serializer import TipoDocumentoSerializer
 from ...models import Anexo, Proponente
+from ...upload_validation import PDF_EXTENSIONS, validate_upload_extension
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,14 @@ class AnexoSerializer(ModelSerializer):
 
 class AnexoCreateSerializer(serializers.ModelSerializer):
     proponente = serializers.UUIDField()
+
+    def validate_arquivo(self, value):
+        try:
+            validate_upload_extension(value, PDF_EXTENSIONS, 'Envie o documento do proponente em PDF.')
+        except ValueError as exc:
+            raise serializers.ValidationError(str(exc))
+
+        return value
 
     def create(self, validated_data):
         log.info("Criando anexo!")
@@ -44,3 +53,9 @@ class AnexoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Anexo
         exclude = ('id',)
+        extra_kwargs = {
+            'arquivo': {
+                'label': 'Documento do proponente',
+                'help_text': 'Envie apenas arquivos PDF.',
+            }
+        }
