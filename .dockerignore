@@ -10,3 +10,17 @@ pytest.ini
 README.md
 README.rst
 setup.cfg
+.git
+.venv
+.run
+.idea
+.vscode
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+docs/_build/

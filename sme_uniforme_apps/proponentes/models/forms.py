@@ -1,6 +1,11 @@
 from django import forms
 
-from sme_uniforme_apps.proponentes.models import Anexo
+from sme_uniforme_apps.proponentes.models import Anexo, Loja, TipoDocumento
+from sme_uniforme_apps.proponentes.upload_validation import (
+    IMAGE_EXTENSIONS,
+    PDF_EXTENSIONS,
+    validate_upload_extension,
+)
 
 
 class AnexoForm(forms.ModelForm):

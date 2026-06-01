@@ -13,8 +13,8 @@ class TiposDocumentoViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TipoDocumentoSerializer
     permission_classes = [AllowAny]
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
-    ordering_fields = ('nome',)
-    search_fields = ('uuid', 'id', 'nome')
+    ordering_fields = ('nome', 'identificador')
+    search_fields = ('uuid', 'id', 'nome', 'identificador')
     filter_fields = ('obrigatorio',)
 
     def get_queryset(self):

@@ -1,11 +1,23 @@
 import json
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 
+from ...api.serializers.anexo_serializer import AnexoCreateSerializer
+from ...models.forms import AnexoForm
 from ...models.anexo import Anexo
 
 pytestmark = pytest.mark.django_db
+
+
+ARQUIVO_JPG_BASE64 = "data:image/jpg;base64,/9j/4AAQSkZJRgABAQ=="
+ARQUIVO_PNG_BASE64 = "data:image/png;base64,iVBORw0KGgo="
+ARQUIVO_TXT_BASE64 = "data:text/plain;base64,Q09OVEVVRE8gVEVTVEU="
+
+
+def create_uploaded_file(file_name):
+    return SimpleUploadedFile(file_name, b"conteudo_teste")
 
 
 @pytest.fixture
