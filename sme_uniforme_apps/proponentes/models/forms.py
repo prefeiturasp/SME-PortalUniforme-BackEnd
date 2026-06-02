@@ -16,6 +16,38 @@ class AnexoForm(forms.ModelForm):
         self.fields["tipo_documento"].required = True
         self.fields["arquivo"].label = "Documento do proponente"
         self.fields["arquivo"].help_text = "Envie apenas arquivos PDF."
+        self.fields["tipo_documento"].widget.attrs["style"] = "width: 220px;"
+        self.fields["tipo_documento"].widget.attrs[
+            "onchange"
+        ] = "this.title=this.options[this.selectedIndex] ? this.options[this.selectedIndex].text : '';"
+        if self.instance and self.instance.tipo_documento_id:
+            self.fields["tipo_documento"].widget.attrs[
+                "title"
+            ] = self.instance.tipo_documento.nome
+        self.fields["status"].label = "Status Admin"
+        self.fields["justificativa"].label = "Justificativa Admin"
+        self.fields["status"].initial = self.instance.status or Anexo.STATUS_PENDENTE
+        self.fields["status"].widget.attrs["style"] = "width: 140px;"
+        self.fields["status"].widget.attrs["onchange"] = (
+            "var inline=this.closest('.dynamic-anexos');"
+            "var justificativa=inline&&inline.querySelector('textarea[id$=\"-justificativa\"]');"
+            "var justificativaIA=inline&&inline.querySelector('.anexo-ia-justificativa');"
+            "if((this.value==='REPROVADO'||this.value==='VENCIDO')&&justificativa&&!justificativa.value.trim()&&justificativaIA){"
+            "justificativa.value=(justificativaIA.getAttribute('data-justificativa-ia')||'').trim();"
+            "}"
+        )
+        self.fields["justificativa"].widget.attrs["rows"] = 3
+        self.fields["justificativa"].widget.attrs["style"] = "width: 340px;"
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        self.instance.status = cleaned_data.get("status")
+        self.instance.justificativa = cleaned_data.get("justificativa")
+        self.instance.copiar_justificativa_ia_para_admin()
+        cleaned_data["justificativa"] = self.instance.justificativa
+
+        return cleaned_data
 
     def clean_arquivo(self):
         arquivo = self.cleaned_data.get("arquivo")
@@ -36,7 +68,12 @@ class AnexoForm(forms.ModelForm):
 
     class Meta:
         model = Anexo
-        fields = '__all__'
+        exclude = (
+            "status_ia",
+            "justificativa_ia",
+            "ultima_alteracao_admin_por",
+            "ultima_alteracao_admin_em",
+        )
 
 
 class LojaAdminForm(forms.ModelForm):

@@ -1,5 +1,6 @@
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
+from django.conf import settings
 from django.db import models
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
@@ -27,6 +28,7 @@ class Anexo(ModeloBase):
         (STATUS_PENDENTE, STATUS_NOMES[STATUS_PENDENTE]),
         (STATUS_VENCIDO, STATUS_NOMES[STATUS_VENCIDO]),
     )
+    STATUS_COM_COPIA_DA_IA = (STATUS_REPROVADO, STATUS_VENCIDO)
 
     historico = AuditlogHistoryField()
 
@@ -37,13 +39,28 @@ class Anexo(ModeloBase):
     data_validade = models.DateField(null=True, blank=True)
 
     status = models.CharField(
-        'status',
+        'Status Admin',
         max_length=15,
         choices=STATUS_CHOICES,
         default=STATUS_PENDENTE
     )
 
-    justificativa = models.TextField('Justificativa', blank=True, null=True)
+    justificativa = models.TextField('Justificativa Admin', blank=True, null=True)
+
+    status_ia = models.CharField('Status IA', max_length=255, blank=True, null=True)
+
+    justificativa_ia = models.TextField('Justificativa IA', blank=True, null=True)
+
+    ultima_alteracao_admin_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        editable=False,
+        related_name='anexos_alterados_no_admin'
+    )
+
+    ultima_alteracao_admin_em = models.DateTimeField(blank=True, null=True, editable=False)
 
     tipo_documento = models.ForeignKey(
         TipoDocumento,
@@ -63,6 +80,14 @@ class Anexo(ModeloBase):
             "data_validade": self.data_validade,
             "uuid": self.uuid
         }
+
+    def copiar_justificativa_ia_para_admin(self, sobrescrever=False):
+        if (
+            self.status in self.STATUS_COM_COPIA_DA_IA
+            and self.justificativa_ia
+            and (sobrescrever or not self.justificativa)
+        ):
+            self.justificativa = self.justificativa_ia
 
     class Meta:
         verbose_name = "Anexo"
