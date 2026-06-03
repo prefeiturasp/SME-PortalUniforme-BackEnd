@@ -36,6 +36,8 @@ def test_build_payload_monta_payload_com_primeira_loja_e_documento(
             "numero": "100",
             "cep": "01001-000",
             "bairro": "Centro",
+            "cidade": "Sao Paulo",
+            "uf": "SP",
             "telefone": "(11) 3333-4444",
             "site": "https://primeira-loja.exemplo.com",
         },
@@ -45,6 +47,8 @@ def test_build_payload_monta_payload_com_primeira_loja_e_documento(
             "numero": "200",
             "cep": "02002-000",
             "bairro": "Bairro",
+            "cidade": "Sao Paulo",
+            "uf": "SP",
             "telefone": "(11) 4444-5555",
         },
     ]

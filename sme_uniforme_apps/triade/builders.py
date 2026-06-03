@@ -85,19 +85,27 @@ class TriadePayloadBuilder:
             "telefone_responsavel": self._required_value(
                 proponente.telefone, "proponente.telefone"
             ),
-            "ponto-venda": self._build_pontos_venda(lojas),
+            "ponto-venda": self._build_pontos_venda(proponente, lojas),
         }
 
-    def _build_pontos_venda(self, lojas):
+    def _build_pontos_venda(self, proponente, lojas):
         pontos_venda = []
         for loja in lojas:
             ponto_venda = {}
+            cidade = self._optional_value(
+                getattr(loja, "cidade", None)
+            ) or self._required_value(proponente.end_cidade, "proponente.end_cidade")
+            uf = self._optional_value(
+                getattr(loja, "uf", None)
+            ) or self._required_value(proponente.end_uf, "proponente.end_uf")
             campos = (
                 ("nome-loja", loja.nome_fantasia),
                 ("endereco", loja.endereco),
                 ("numero", loja.numero),
                 ("cep", loja.cep),
                 ("bairro", loja.bairro),
+                ("cidade", cidade),
+                ("uf", uf),
                 ("telefone", loja.telefone),
                 ("site", loja.site),
             )
