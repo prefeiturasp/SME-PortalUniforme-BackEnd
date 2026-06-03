@@ -83,7 +83,7 @@ class TriadeSubmissionService:
             lote.schema_version = self.schema_version
             update_fields.append("schema_version")
 
-        if lote.payload_envio:
+        if lote.payload_envio and lote.batch_id:
             if update_fields:
                 save_with_alterado_em(lote, update_fields)
             return TriadePreparedLote(

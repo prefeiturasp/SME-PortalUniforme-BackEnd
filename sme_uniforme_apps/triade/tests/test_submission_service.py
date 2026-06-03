@@ -34,7 +34,7 @@ def configure_triade_settings(settings):
     settings.TRIADE_SEND_ONLY_REQUIRED_DOCUMENTS = False
 
 
-def test_prepare_lote_reusa_external_batch_id_e_payload_persistido(
+def test_prepare_lote_reconstroi_payload_persistido_quando_lote_ainda_nao_tem_batch_id(
     settings, proponente_triade, loja_primeira, anexo_triade
 ):
     configure_triade_settings(settings)
@@ -45,7 +45,37 @@ def test_prepare_lote_reusa_external_batch_id_e_payload_persistido(
     assert prepared.created is True
     assert prepared.reused_payload is False
     assert lote.external_batch_id == "proponente-{}".format(proponente_triade.uuid)
-    assert prepared.payload["applicant"]["name"] == "Empresa Teste LTDA"
+
+    payload_antigo = json.loads(lote.payload_envio)
+    del payload_antigo["applicant"]["fields"]["ponto-venda"][0]["cidade"]
+    del payload_antigo["applicant"]["fields"]["ponto-venda"][0]["uf"]
+    lote.payload_envio = json.dumps(payload_antigo)
+    lote.save(update_fields=("payload_envio",))
+
+    prepared_rebuild = service.prepare_lote_envio(proponente_triade)
+
+    assert prepared_rebuild.lote.id == lote.id
+    assert prepared_rebuild.created is False
+    assert prepared_rebuild.reused_payload is False
+    assert (
+        prepared_rebuild.payload["applicant"]["fields"]["ponto-venda"][0]["cidade"]
+        == "Sao Paulo"
+    )
+    assert (
+        prepared_rebuild.payload["applicant"]["fields"]["ponto-venda"][0]["uf"] == "SP"
+    )
+
+
+def test_prepare_lote_reusa_external_batch_id_e_payload_persistido_quando_ja_tem_batch_id(
+    settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+
+    prepared = service.prepare_lote_envio(proponente_triade)
+    lote = prepared.lote
+    lote.batch_id = uuid4()
+    lote.save(update_fields=("batch_id",))
 
     proponente_triade.razao_social = "Empresa Alterada Depois Do Primeiro Snapshot"
     proponente_triade.save(update_fields=("razao_social",))
