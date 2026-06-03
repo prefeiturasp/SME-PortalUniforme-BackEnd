@@ -210,6 +210,7 @@ class Proponente(ModeloBase, TemObservacao):
         proponente.save()
         log.info(f'Cadastro concluído. UUID:{uuid}')
         proponente.comunicar_cadastro()
+        return proponente
 
     @classmethod
     def email_ja_cadastrado(cls, email):

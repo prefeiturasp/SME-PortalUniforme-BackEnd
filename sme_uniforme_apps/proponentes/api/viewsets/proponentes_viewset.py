@@ -18,7 +18,7 @@ from ..serializers.proponente_serializer import ProponenteSerializer, Proponente
 
 from ...models import Proponente, ListaNegra, Loja
 from ....utils.base64ToFile import base64ToFile
-
+from sme_uniforme_apps.triade.runtime import is_triade_enabled
 
 log = logging.getLogger(__name__)
 
@@ -161,6 +161,18 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             proponente = Proponente.concluir_cadastro(uuid)
         except Exception as e:
             return Response({"detail": e.__str__()}, status.HTTP_400_BAD_REQUEST)
+
+        if is_triade_enabled():
+            try:
+                from sme_uniforme_apps.triade.tasks import orquestrar_envio_lote_triade
+
+                orquestrar_envio_lote_triade.delay(str(proponente.uuid))
+            except Exception:
+                log.exception(
+                    "Falha ao enfileirar envio TRIADE para o proponente %s.",
+                    proponente.uuid,
+                )
+
         serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
         return Response(serializer.data)
 

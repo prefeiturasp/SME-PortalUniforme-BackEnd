@@ -100,6 +100,7 @@ LOCAL_APPS = [
     "sme_uniforme_apps.robo.apps.RoboConfig",
     "sme_uniforme_apps.core.apps.CoreConfig",
     "sme_uniforme_apps.proponentes.apps.ProponentesConfig",
+    "sme_uniforme_apps.triade.apps.TriadeConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -237,6 +238,19 @@ X_FRAME_OPTIONS = "DENY"
 EMAIL_BACKEND = 'des.backends.ConfiguredEmailBackend'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#email-timeout
 EMAIL_TIMEOUT = 5
+
+# TRIADE
+# ------------------------------------------------------------------------------
+TRIADE_ENABLED = env.bool("TRIADE_ENABLED", default=False)
+TRIADE_API_URL = env("TRIADE_API_URL", default="")
+TRIADE_API_TOKEN = env("TRIADE_API_TOKEN", default="")
+TRIADE_HMAC_SECRET = env("TRIADE_HMAC_SECRET", default="")
+TRIADE_SOURCE_SYSTEM = env("TRIADE_SOURCE_SYSTEM", default="")
+TRIADE_SCHEMA_VERSION = env("TRIADE_SCHEMA_VERSION", default="")
+TRIADE_TIMEOUT_SECONDS = env.int("TRIADE_TIMEOUT_SECONDS", default=30)
+TRIADE_SEND_ONLY_REQUIRED_DOCUMENTS = env.bool(
+    "TRIADE_SEND_ONLY_REQUIRED_DOCUMENTS", default=False
+)
 
 # ADMIN
 # ------------------------------------------------------------------------------
