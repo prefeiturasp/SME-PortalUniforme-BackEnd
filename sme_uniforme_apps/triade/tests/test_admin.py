@@ -157,6 +157,9 @@ def test_tela_admin_de_estatisticas_triade_consolida_quantitativos_e_filtra(
     assert "DOCUMENTOS" in conteudo
     assert "Decisao do lote" in conteudo
     assert "Status do documento" in conteudo
+    assert "triade-card--status" in conteudo
+    assert "triade-card--decision" in conteudo
+    assert "Visao geral" in conteudo
     assert response.context["metrics"]["lotes"]["total"] == 1
     assert response.context["metrics"]["lotes"]["status"]["completed"] == 1
     assert response.context["metrics"]["lotes"]["status"]["error"] == 0

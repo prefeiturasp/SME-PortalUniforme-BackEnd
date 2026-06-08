@@ -454,96 +454,156 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
 
     def _build_lotes_cards(self, metrics):
         return [
-            {"label": "Total de lotes", "value": metrics["total"]},
-            {"label": "Lotes sem callback", "value": metrics["sem_callback"]},
+            {
+                "label": "Total de lotes",
+                "value": metrics["total"],
+                "kind": "neutral",
+                "kind_label": "Visao geral",
+            },
+            {
+                "label": "Lotes sem callback",
+                "value": metrics["sem_callback"],
+                "kind": "neutral",
+                "kind_label": "Visao geral",
+            },
             {
                 "label": "Lotes em processamento",
                 "value": metrics["status"].get("processing", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Lotes aguardando revisao",
                 "value": metrics["status"].get("pending_review", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Lotes concluidos",
                 "value": metrics["status"].get("completed", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Lotes com erro",
                 "value": metrics["status"].get("error", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Lotes aprovados",
                 "value": metrics["decisoes"].get("APROVADO", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
             {
                 "label": "Lotes reprovados",
                 "value": metrics["decisoes"].get("REPROVADO", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
             {
                 "label": "Lotes com pendencia",
                 "value": metrics["decisoes"].get("PENDENCIA", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
         ]
 
     def _build_callbacks_cards(self, metrics):
         return [
-            {"label": "Total de callbacks", "value": metrics["total"]},
+            {
+                "label": "Total de callbacks",
+                "value": metrics["total"],
+                "kind": "neutral",
+                "kind_label": "Visao geral",
+            },
             {
                 "label": "Callbacks recebidos",
                 "value": metrics["status"].get("recebido", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Callbacks enfileirados",
                 "value": metrics["status"].get("enfileirado", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Callbacks processando",
                 "value": metrics["status"].get("processando", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Callbacks processados",
                 "value": metrics["status"].get("processado", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Callbacks duplicados",
                 "value": metrics["status"].get("duplicado", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Callbacks com erro",
                 "value": metrics["status"].get("erro", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
         ]
 
     def _build_documentos_cards(self, metrics):
         return [
-            {"label": "Total de documentos", "value": metrics["total"]},
+            {
+                "label": "Total de documentos",
+                "value": metrics["total"],
+                "kind": "neutral",
+                "kind_label": "Visao geral",
+            },
             {
                 "label": "Documentos em processamento",
                 "value": metrics["status"].get("processing", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Documentos aguardando revisao",
                 "value": metrics["status"].get("pending_review", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Documentos concluidos",
                 "value": metrics["status"].get("completed", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Documentos com erro",
                 "value": metrics["status"].get("error", 0),
+                "kind": "status",
+                "kind_label": "Status",
             },
             {
                 "label": "Documentos aprovados",
                 "value": metrics["decisoes"].get("APROVADO", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
             {
                 "label": "Documentos reprovados",
                 "value": metrics["decisoes"].get("REPROVADO", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
             {
                 "label": "Documentos em pendencia",
                 "value": metrics["decisoes"].get("PENDENCIA", 0),
+                "kind": "decision",
+                "kind_label": "Decisao",
             },
         ]
