@@ -352,7 +352,7 @@
         </select>
       </div>
       <div class="triade-filter-field">
-        <label for="id_decisao_lote">Decisao do lote</label>
+        <label for="id_decisao_lote">Decisão do lote</label>
         <select id="id_decisao_lote" name="decisao_lote">
           <option value="">Todas</option>
           {% for option in decisao_lote_options %}
@@ -415,7 +415,7 @@
         </select>
       </div>
       <div class="triade-filter-field">
-        <label for="id_decisao_documento">Decisao do documento</label>
+        <label for="id_decisao_documento">Decisão do documento</label>
         <select id="id_decisao_documento" name="decisao_documento">
           <option value="">Todas</option>
           {% for option in decisao_documento_options %}
@@ -447,7 +447,7 @@
     <div class="triade-section__header">
       <h2 class="triade-section__title">LOTES</h2>
       <p class="triade-section__subtitle">
-        Status e decisao consolidada do lote, incluindo os estados canonicos do
+        Status e decisão consolidados do lote, incluindo os estados canônicos do
         TRIADE e o estado local de preparo do payload.
       </p>
     </div>
@@ -457,7 +457,7 @@
         ><span
           class="triade-legend__swatch triade-legend__swatch--neutral"
         ></span
-        >Visao geral</span
+        >Visão geral</span
       >
       <span class="triade-legend__item"
         ><span
@@ -469,7 +469,7 @@
         ><span
           class="triade-legend__swatch triade-legend__swatch--decision"
         ></span
-        >Decisao</span
+        >Decisão</span
       >
     </div>
 
@@ -493,7 +493,7 @@
         </div>
       </div>
       <div class="triade-chip-group triade-chip-group--decision">
-        <h3>Decisoes monitoradas</h3>
+        <h3>Decisões monitoradas</h3>
         <div class="triade-chip-list">
           {% for item in catalog.lotes.decisoes %}
           <span class="triade-chip">{{ item.display }}</span>
@@ -528,11 +528,11 @@
       </div>
 
       <div class="module triade-module triade-module--decision">
-        <h3>Lotes por decisao</h3>
+        <h3>Lotes por decisão</h3>
         <table class="triade-table">
           <thead>
             <tr>
-              <th>Decisao</th>
+              <th>Decisão</th>
               <th>Total</th>
             </tr>
           </thead>
@@ -560,7 +560,7 @@
             <th>External batch id</th>
             <th>Proponente</th>
             <th>Status</th>
-            <th>Decisao</th>
+            <th>Decisão</th>
             <th>Criado em</th>
           </tr>
         </thead>
@@ -596,7 +596,7 @@
       <h2 class="triade-section__title">CALLBACKS</h2>
       <p class="triade-section__subtitle">
         Estados internos do processamento do webhook, usados para auditoria,
-        deduplicacao e observabilidade do recebimento.
+        deduplicação e observabilidade do recebimento.
       </p>
     </div>
 
@@ -650,7 +650,7 @@
     <div class="triade-section__header">
       <h2 class="triade-section__title">DOCUMENTOS</h2>
       <p class="triade-section__subtitle">
-        Status tecnico do documento no TRIADE e decisao final retornada para
+        Status técnico do documento no TRIADE e decisão final retornada para
         cada anexo reconciliado no lote.
       </p>
     </div>
@@ -675,7 +675,7 @@
         </div>
       </div>
       <div class="triade-chip-group triade-chip-group--decision">
-        <h3>Decisoes monitoradas</h3>
+        <h3>Decisões monitoradas</h3>
         <div class="triade-chip-list">
           {% for item in catalog.documentos.decisoes %}
           <span class="triade-chip">{{ item.display }}</span>
@@ -710,11 +710,11 @@
       </div>
 
       <div class="module triade-module triade-module--decision">
-        <h3>Documentos por decisao</h3>
+        <h3>Documentos por decisão</h3>
         <table class="triade-table">
           <thead>
             <tr>
-              <th>Decisao</th>
+              <th>Decisão</th>
               <th>Total</th>
             </tr>
           </thead>

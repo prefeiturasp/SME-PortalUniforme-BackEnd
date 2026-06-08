@@ -209,7 +209,7 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
         context = {
             **self.admin_site.each_context(request),
             "opts": self.model._meta,
-            "title": "Estatisticas TRIADE",
+            "title": "Estatísticas TRIADE",
             "filters": filtros,
             "catalog": catalog,
             "metrics": metrics,
@@ -458,13 +458,13 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "label": "Total de lotes",
                 "value": metrics["total"],
                 "kind": "neutral",
-                "kind_label": "Visao geral",
+                "kind_label": "Visão geral",
             },
             {
                 "label": "Lotes sem callback",
                 "value": metrics["sem_callback"],
                 "kind": "neutral",
-                "kind_label": "Visao geral",
+                "kind_label": "Visão geral",
             },
             {
                 "label": "Lotes em processamento",
@@ -473,13 +473,13 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "kind_label": "Status",
             },
             {
-                "label": "Lotes aguardando revisao",
+                "label": "Lotes aguardando revisão",
                 "value": metrics["status"].get("pending_review", 0),
                 "kind": "status",
                 "kind_label": "Status",
             },
             {
-                "label": "Lotes concluidos",
+                "label": "Lotes concluídos",
                 "value": metrics["status"].get("completed", 0),
                 "kind": "status",
                 "kind_label": "Status",
@@ -494,19 +494,19 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "label": "Lotes aprovados",
                 "value": metrics["decisoes"].get("APROVADO", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
             {
                 "label": "Lotes reprovados",
                 "value": metrics["decisoes"].get("REPROVADO", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
             {
-                "label": "Lotes com pendencia",
+                "label": "Lotes com pendência",
                 "value": metrics["decisoes"].get("PENDENCIA", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
         ]
 
@@ -516,7 +516,7 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "label": "Total de callbacks",
                 "value": metrics["total"],
                 "kind": "neutral",
-                "kind_label": "Visao geral",
+                "kind_label": "Visão geral",
             },
             {
                 "label": "Callbacks recebidos",
@@ -562,7 +562,7 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "label": "Total de documentos",
                 "value": metrics["total"],
                 "kind": "neutral",
-                "kind_label": "Visao geral",
+                "kind_label": "Visão geral",
             },
             {
                 "label": "Documentos em processamento",
@@ -571,13 +571,13 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "kind_label": "Status",
             },
             {
-                "label": "Documentos aguardando revisao",
+                "label": "Documentos aguardando revisão",
                 "value": metrics["status"].get("pending_review", 0),
                 "kind": "status",
                 "kind_label": "Status",
             },
             {
-                "label": "Documentos concluidos",
+                "label": "Documentos concluídos",
                 "value": metrics["status"].get("completed", 0),
                 "kind": "status",
                 "kind_label": "Status",
@@ -592,18 +592,18 @@ class TriadeEstatisticaAdmin(admin.ModelAdmin):
                 "label": "Documentos aprovados",
                 "value": metrics["decisoes"].get("APROVADO", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
             {
                 "label": "Documentos reprovados",
                 "value": metrics["decisoes"].get("REPROVADO", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
             {
-                "label": "Documentos em pendencia",
+                "label": "Documentos em pendência",
                 "value": metrics["decisoes"].get("PENDENCIA", 0),
                 "kind": "decision",
-                "kind_label": "Decisao",
+                "kind_label": "Decisão",
             },
         ]

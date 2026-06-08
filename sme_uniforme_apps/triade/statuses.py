@@ -34,23 +34,23 @@ TRIADE_LOTE_STATUS_LABELS = {
     "payload_ready": "Payload pronto",
     "received": "Recebido",
     "processing": "Em processamento",
-    "pending_review": "Aguardando revisao",
-    "completed": "Concluido",
+    "pending_review": "Aguardando revisão",
+    "completed": "Concluído",
     "error": "Erro",
 }
 
 TRIADE_DOCUMENTO_STATUS_LABELS = {
     "received": "Recebido",
     "processing": "Em processamento",
-    "pending_review": "Aguardando revisao",
-    "completed": "Concluido",
+    "pending_review": "Aguardando revisão",
+    "completed": "Concluído",
     "error": "Erro",
 }
 
 TRIADE_DECISAO_LABELS = {
     "APROVADO": "Aprovado",
     "REPROVADO": "Reprovado",
-    "PENDENCIA": "Pendencia",
+    "PENDENCIA": "Pendência",
 }
 
 TRIADE_CALLBACK_PROCESSING_LABELS = {
