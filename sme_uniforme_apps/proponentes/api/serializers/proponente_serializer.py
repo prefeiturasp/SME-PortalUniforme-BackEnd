@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ....core.models import LimiteCategoria, Uniforme
+from ...cnpj import CNPJ_VALIDATION_MESSAGE, first_access_password, format_cnpj
 from ...api.serializers.anexo_serializer import AnexoSerializer
 from ...api.serializers.loja_serializer import (LojaCreateSerializer,
                                                 LojaSerializer)
@@ -29,9 +30,32 @@ class ProponenteSerializer(serializers.ModelSerializer):
 
 
 class ProponenteCreateSerializer(serializers.ModelSerializer):
+    cnpj = serializers.CharField(
+        allow_blank=True,
+        allow_null=True,
+        required=False,
+        validators=[],
+    )
 
     ofertas_de_uniformes = OfertaDeUniformeCreateSerializer(many=True)
     lojas = LojaCreateSerializer(many=True)
+
+    def validate_cnpj(self, value):
+        if not value:
+            return value
+
+        normalized_cnpj = format_cnpj(value)
+        if not Proponente.cnpj_valido(normalized_cnpj):
+            raise serializers.ValidationError(CNPJ_VALIDATION_MESSAGE)
+
+        queryset = Proponente.objects.all()
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.filter(cnpj=normalized_cnpj).exists():
+            raise serializers.ValidationError("Já existe um proponente com este CNPJ.")
+
+        return normalized_cnpj
 
     @staticmethod
     def categoria_acima_limite(ofertas_de_uniformes):
@@ -127,7 +151,7 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
         log.info("Criação de usuário do proponente")
         usuario = User.objects.create_user(
             email=proponente.email,
-            password="".join([n for n in proponente.cnpj if n.isdigit()])[:5],
+            password=first_access_password(proponente.cnpj),
             first_name=proponente.responsavel.split(' ')[0],
             last_name=' '.join(proponente.responsavel.split(' ')[1:])
         )
