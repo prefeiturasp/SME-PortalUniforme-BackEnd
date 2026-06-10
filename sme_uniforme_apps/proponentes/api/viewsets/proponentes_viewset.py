@@ -47,6 +47,22 @@ class ProponentesViewSet(mixins.CreateModelMixin,
         else:
             return ProponenteCreateSerializer
 
+    @staticmethod
+    def _validate_comprovante_endereco(loja):
+        comprovante_endereco = loja.get("comprovante_endereco")
+
+        if comprovante_endereco:
+            try:
+                validate_upload_extension(
+                    comprovante_endereco,
+                    PDF_EXTENSIONS,
+                    "Envie o comprovante de endereço do ponto de venda em PDF.",
+                )
+            except ValueError as exc:
+                raise ValidationError(str(exc))
+
+        return comprovante_endereco
+
     @action(detail=True, methods=['patch'], url_path='atualiza-lojas')
     def atualiza_lojas(self, request, uuid):
         proponente = self.get_object()
@@ -88,17 +104,8 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
                 loja_obj.site = loja.get('site')
-                comprovante_endereco = loja.get('comprovante_endereco')
+                comprovante_endereco = self._validate_comprovante_endereco(loja)
                 if comprovante_endereco:
-                    try:
-                        validate_upload_extension(
-                            comprovante_endereco,
-                            PDF_EXTENSIONS,
-                            'Envie o comprovante de endereço do ponto de venda em PDF.',
-                        )
-                    except ValueError as exc:
-                        raise ValidationError(str(exc))
-
                     file = base64ToFile(comprovante_endereco)
                     loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
                 loja_obj.save()
@@ -108,18 +115,10 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                                     'uf', 'firstName']
                 for attr in atributos_extras:
                     loja.pop(attr, '')
-                comprovante = loja.pop('comprovante_endereco', None)
+                comprovante = self._validate_comprovante_endereco(loja)
+                loja.pop('comprovante_endereco', None)
                 loja_object = LojaCreateSerializer().create(loja)
                 if comprovante:
-                    try:
-                        validate_upload_extension(
-                            comprovante,
-                            PDF_EXTENSIONS,
-                            'Envie o comprovante de endereço do ponto de venda em PDF.',
-                        )
-                    except ValueError as exc:
-                        raise ValidationError(str(exc))
-
                     file = base64ToFile(comprovante)
                     loja_object.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
                 proponente.lojas.add(loja_object)
