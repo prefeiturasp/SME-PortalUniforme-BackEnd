@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -82,6 +83,42 @@ def test_url_atualiza_lojas_sem_comprovante_endereco(
 @patch(
     "sme_uniforme_apps.proponentes.api.viewsets.proponentes_viewset.atualiza_coordenadas_lojas"
 )
+def test_url_atualiza_lojas_adiciona_comprovante_endereco_pdf(
+    mock_atualiza_coordenadas_lojas,
+    client,
+    proponente,
+    uniforme_calca,
+    arquivo_anexo_base64,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    payload = create_payload_atualiza_lojas(
+        uniforme_calca.nome,
+        comprovante_endereco=arquivo_anexo_base64,
+    )
+
+    response = client.patch(
+        f"/proponentes/{proponente.uuid}/atualiza-lojas/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    result = json.loads(response.content)
+    proponente.refresh_from_db()
+    loja_fisica = proponente.lojas.first()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert loja_fisica.comprovante_endereco
+    assert Path(loja_fisica.comprovante_endereco.path).exists()
+    assert result["lojas"][0]["comprovante_endereco"].endswith(".pdf")
+    mock_atualiza_coordenadas_lojas.assert_called_once()
+
+    loja_fisica.comprovante_endereco.delete(save=False)
+
+
+@patch(
+    "sme_uniforme_apps.proponentes.api.viewsets.proponentes_viewset.atualiza_coordenadas_lojas"
+)
 def test_url_atualiza_lojas_com_comprovante_endereco_pdf(
     mock_atualiza_coordenadas_lojas,
     client,
@@ -89,7 +126,10 @@ def test_url_atualiza_lojas_com_comprovante_endereco_pdf(
     loja_fisica,
     uniforme_calca,
     arquivo_anexo_base64,
+    settings,
+    tmp_path,
 ):
+    settings.MEDIA_ROOT = str(tmp_path)
     payload = create_payload_atualiza_lojas(
         uniforme_calca.nome,
         comprovante_endereco=arquivo_anexo_base64,
@@ -101,12 +141,17 @@ def test_url_atualiza_lojas_com_comprovante_endereco_pdf(
         data=json.dumps(payload),
         content_type="application/json",
     )
+    result = json.loads(response.content)
 
     loja_fisica.refresh_from_db()
 
     assert response.status_code == status.HTTP_200_OK
     assert loja_fisica.comprovante_endereco
+    assert Path(loja_fisica.comprovante_endereco.path).exists()
+    assert result["lojas"][0]["comprovante_endereco"].endswith(".pdf")
     mock_atualiza_coordenadas_lojas.assert_called_once()
+
+    loja_fisica.comprovante_endereco.delete(save=False)
 
 
 @patch(

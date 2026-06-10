@@ -1,8 +1,46 @@
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ...api.serializers.loja_serializer import (LojaCreateSerializer, LojaSerializer, LojaUpdateFachadaSerializer)
 
 pytestmark = pytest.mark.django_db
+
+PDF_BYTES = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF"
+
+
+def create_uploaded_file(file_name, content=b"conteudo_teste", content_type=None):
+    return SimpleUploadedFile(file_name, content, content_type=content_type)
+
+
+def create_loja_payload(foto_fachada=None, comprovante_endereco=None):
+    payload = {
+        "nome_fantasia": "Loja Teste",
+        "cep": "27600-000",
+        "endereco": "Rua Teste",
+        "bairro": "Centro",
+        "numero": "123",
+        "complemento": "loja 1",
+        "telefone": "(11) 4565-9876",
+        "numero_iptu": "",
+        "foto_fachada": create_uploaded_file("fachada.png", content_type="image/png"),
+        "comprovante_endereco": create_uploaded_file(
+            "comprovante.pdf",
+            content=PDF_BYTES,
+            content_type="application/pdf",
+        ),
+    }
+
+    if foto_fachada is None:
+        payload.pop("foto_fachada")
+    elif foto_fachada is not False:
+        payload["foto_fachada"] = foto_fachada
+
+    if comprovante_endereco is None:
+        payload.pop("comprovante_endereco")
+    elif comprovante_endereco is not False:
+        payload["comprovante_endereco"] = comprovante_endereco
+
+    return payload
 
 
 def test_loja_serializer(loja_fisica):
@@ -42,9 +80,24 @@ def test_loja_create_serializer_configura_campos_de_upload():
     assert foto_fachada.help_text == "Envie apenas arquivos JPG, JPEG ou PNG."
 
 
+def test_loja_create_serializer_rejeita_comprovante_endereco_nao_pdf():
+    payload_loja = create_loja_payload(
+        comprovante_endereco=create_uploaded_file("comprovante.txt")
+    )
+
+    serializer = LojaCreateSerializer(data=payload_loja)
+
+    assert not serializer.is_valid()
+    assert serializer.errors["comprovante_endereco"] == [
+        "Envie o comprovante de endereço do ponto de venda em PDF."
+    ]
+
+
 def test_loja_update_fachada_serializer_configura_label_e_help_text():
     serializer = LojaUpdateFachadaSerializer()
 
+    assert not serializer.fields["foto_fachada"].required
+    assert serializer.fields["foto_fachada"].allow_null
     assert serializer.fields["foto_fachada"].label == "Foto da fachada da loja"
     assert (
         serializer.fields["foto_fachada"].help_text
@@ -52,14 +105,20 @@ def test_loja_update_fachada_serializer_configura_label_e_help_text():
     )
 
 
-def test_loja_fachada_update(payload_update_fachada_loja):
-    loja_partial_update = LojaUpdateFachadaSerializer(data=payload_update_fachada_loja)
+def test_loja_fachada_update():
+    loja_partial_update = LojaUpdateFachadaSerializer(
+        data={
+            "foto_fachada": create_uploaded_file(
+                "fachada.png", content_type="image/png"
+            )
+        }
+    )
     assert loja_partial_update.is_valid()
 
 
-def test_loja_fachada_update_rejeita_extensao_invalida(arquivo_txt_base64):
+def test_loja_fachada_update_rejeita_extensao_invalida():
     loja_partial_update = LojaUpdateFachadaSerializer(
-        data={"foto_fachada": arquivo_txt_base64}
+        data={"foto_fachada": create_uploaded_file("fachada.txt")}
     )
 
     assert not loja_partial_update.is_valid()
