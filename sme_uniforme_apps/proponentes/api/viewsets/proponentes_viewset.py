@@ -105,9 +105,12 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.telefone = loja.get('telefone')
                 loja_obj.site = loja.get('site')
                 comprovante_endereco = self._validate_comprovante_endereco(loja)
-                if comprovante_endereco:
-                    file = base64ToFile(comprovante_endereco)
-                    loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                if 'comprovante_endereco' in loja:
+                    if comprovante_endereco is not None:
+                        file = base64ToFile(comprovante_endereco)
+                        loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                    else:
+                        loja_obj.comprovante_endereco = None
                 loja_obj.save()
             else:
                 atributos_extras = ['proponente', 'uuid', 'id', 'email', 'criado_em',

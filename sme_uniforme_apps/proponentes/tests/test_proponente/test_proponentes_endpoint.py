@@ -10,9 +10,11 @@ pytestmark = pytest.mark.django_db
 
 ARQUIVO_JPG_BASE64 = "data:image/jpg;base64,/9j/4AAQSkZJRgABAQ=="
 
+MISSING = object()
+
 
 def create_payload_atualiza_lojas(
-    uniforme_nome, comprovante_endereco=None, loja_id=None
+    uniforme_nome, comprovante_endereco=MISSING, loja_id=None
 ):
     loja = {
         "nome_fantasia": "Loja Atualizada",
@@ -26,7 +28,7 @@ def create_payload_atualiza_lojas(
     }
     if loja_id:
         loja["id"] = loja_id
-    if comprovante_endereco is not None:
+    if comprovante_endereco is not MISSING:
         loja["comprovante_endereco"] = comprovante_endereco
 
     return {
@@ -152,6 +154,54 @@ def test_url_atualiza_lojas_com_comprovante_endereco_pdf(
     mock_atualiza_coordenadas_lojas.assert_called_once()
 
     loja_fisica.comprovante_endereco.delete(save=False)
+
+
+@patch(
+    "sme_uniforme_apps.proponentes.api.viewsets.proponentes_viewset.atualiza_coordenadas_lojas"
+)
+def test_url_atualiza_lojas_remove_comprovante_endereco(
+    mock_atualiza_coordenadas_lojas,
+    client,
+    proponente,
+    loja_fisica,
+    uniforme_calca,
+    arquivo_anexo_base64,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    # Primeiro adiciona comprovante
+    payload_adiciona = create_payload_atualiza_lojas(
+        uniforme_calca.nome,
+        comprovante_endereco=arquivo_anexo_base64,
+        loja_id=loja_fisica.id,
+    )
+    client.patch(
+        f"/proponentes/{proponente.uuid}/atualiza-lojas/",
+        data=json.dumps(payload_adiciona),
+        content_type="application/json",
+    )
+    loja_fisica.refresh_from_db()
+    assert loja_fisica.comprovante_endereco
+
+    # Agora remove comprovante enviando None
+    payload_remove = create_payload_atualiza_lojas(
+        uniforme_calca.nome,
+        comprovante_endereco=None,
+        loja_id=loja_fisica.id,
+    )
+    response = client.patch(
+        f"/proponentes/{proponente.uuid}/atualiza-lojas/",
+        data=json.dumps(payload_remove),
+        content_type="application/json",
+    )
+    result = json.loads(response.content)
+    loja_fisica.refresh_from_db()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert not loja_fisica.comprovante_endereco
+    assert result["lojas"][0]["comprovante_endereco"] is None
+    mock_atualiza_coordenadas_lojas.assert_called()
 
 
 @patch(
