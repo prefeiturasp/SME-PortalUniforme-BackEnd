@@ -23,7 +23,7 @@ def test_build_payload_monta_payload_com_primeira_loja_e_documento(
     assert payload["source_system"] == "portal_uniforme"
     assert payload["schema_version"] == "1.0"
     assert payload["external_batch_id"] == "PROTOCOLO-TRIADE-001"
-    assert payload["applicant"]["document_number"] == "00529476000114"
+    assert payload["applicant"]["document_number"] == "AB12C3D4000139"
     assert payload["applicant"]["name"] == "Empresa Teste LTDA"
     assert payload["applicant"]["fields"]["nome_fantasia"] == "Loja Centro"
     assert payload["applicant"]["fields"]["bairro"] == "Centro"

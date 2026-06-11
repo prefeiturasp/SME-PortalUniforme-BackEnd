@@ -81,10 +81,33 @@ class LojaAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(LojaAdminForm, self).__init__(*args, **kwargs)
 
+        self.fields["comprovante_endereco"].label = (
+            "Comprovante de endereço do ponto de venda"
+        )
+        self.fields["comprovante_endereco"].help_text = (
+            "Campo opcional. Se enviado, deve estar em PDF."
+        )
         self.fields["foto_fachada"].label = "Foto da fachada da loja"
         self.fields["foto_fachada"].help_text = (
             "Envie apenas arquivos JPG, JPEG ou PNG."
         )
+
+    def clean_comprovante_endereco(self):
+        comprovante_endereco = self.cleaned_data.get("comprovante_endereco")
+
+        if not comprovante_endereco or "comprovante_endereco" not in self.changed_data:
+            return comprovante_endereco
+
+        try:
+            validate_upload_extension(
+                comprovante_endereco,
+                PDF_EXTENSIONS,
+                "Envie o comprovante de endereço do ponto de venda em PDF.",
+            )
+        except ValueError as exc:
+            raise forms.ValidationError(str(exc))
+
+        return comprovante_endereco
 
     def clean_foto_fachada(self):
         foto_fachada = self.cleaned_data.get("foto_fachada")

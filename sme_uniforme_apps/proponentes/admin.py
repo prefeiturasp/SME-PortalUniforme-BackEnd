@@ -27,7 +27,6 @@ class UniformesFornecidosInLine(admin.TabularInline):
 class LojasInLine(admin.StackedInline):
     form = LojaAdminForm
     model = Loja
-    exclude = ('comprovante_endereco',)
     extra = 1  # Quantidade de linhas que serão exibidas.
 
 
@@ -375,7 +374,6 @@ class ListaNegraAdmin(admin.ModelAdmin):
 @admin.register(Loja)
 class LojaAdmin(admin.ModelAdmin):
     form = LojaAdminForm
-    exclude = ('comprovante_endereco',)
 
     @staticmethod
     def protocolo(loja):

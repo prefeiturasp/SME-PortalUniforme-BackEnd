@@ -1,5 +1,6 @@
 from django.db import models
 
+from ..cnpj import format_cnpj
 from .validators import cnpj_validation
 
 from sme_uniforme_apps.core.models_abstracts import ModeloBase
@@ -17,7 +18,17 @@ class ListaNegra(ModeloBase):
 
     @classmethod
     def cnpj_bloqueado(cls, cnpj):
-        return cls.objects.filter(cnpj=cnpj).exists()
+        return cls.objects.filter(cnpj=format_cnpj(cnpj)).exists()
+
+    def clean(self):
+        super().clean()
+        if self.cnpj:
+            self.cnpj = format_cnpj(self.cnpj)
+
+    def save(self, *args, **kwargs):
+        if self.cnpj:
+            self.cnpj = format_cnpj(self.cnpj)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "CNPJ bloqueado"

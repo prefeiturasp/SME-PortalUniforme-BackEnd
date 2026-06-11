@@ -1,7 +1,6 @@
 import environ
 import logging
 
-from brazilnum.cnpj import validate_cnpj
 from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save, pre_save
@@ -15,6 +14,7 @@ from sme_uniforme_apps.core.models_abstracts import ModeloBase, TemObservacao
 from ..services import cnpj_esta_bloqueado
 from ..tasks import (enviar_email_confirmacao_cadastro,
                      enviar_email_confirmacao_pre_cadastro, enviar_email_pendencia)
+from ..cnpj import format_cnpj, validate_cnpj
 from .tipo_documento import TipoDocumento
 from .validators import cep_validation, cnpj_validation, phone_validation
 from django.contrib.auth import get_user_model
@@ -178,7 +178,7 @@ class Proponente(ModeloBase, TemObservacao):
 
     @classmethod
     def cnpj_ja_cadastrado(cls, cnpj):
-        return cls.objects.filter(cnpj=cnpj).exists()
+        return cls.objects.filter(cnpj=format_cnpj(cnpj)).exists()
 
     @staticmethod
     def cnpj_valido(cnpj):
@@ -186,11 +186,16 @@ class Proponente(ModeloBase, TemObservacao):
 
     @classmethod
     def bloqueia_por_cnpj(cls, cnpj):
-        Proponente.objects.filter(cnpj=cnpj).update(status=Proponente.STATUS_BLOQUEADO)
+        Proponente.objects.filter(cnpj=format_cnpj(cnpj)).update(status=Proponente.STATUS_BLOQUEADO)
 
     @classmethod
     def desbloqueia_por_cnpj(cls, cnpj):
-        Proponente.objects.filter(cnpj=cnpj).update(status=Proponente.STATUS_INSCRITO)
+        Proponente.objects.filter(cnpj=format_cnpj(cnpj)).update(status=Proponente.STATUS_INSCRITO)
+
+    def clean(self):
+        super().clean()
+        if self.cnpj:
+            self.cnpj = format_cnpj(self.cnpj)
 
     @classmethod
     def documentos_obrigatorios_enviados(cls, proponente):
@@ -233,7 +238,10 @@ def proponente_post_save(instance, created, **kwargs):
 
 @receiver(pre_save, sender=Proponente)
 def proponente_pre_save(instance, **kwargs):
-    if instance.status == Proponente.STATUS_INSCRITO and instance.cnpj and cnpj_esta_bloqueado(instance.cnpj):
+    if instance.cnpj:
+        instance.cnpj = format_cnpj(instance.cnpj)
+
+    if (instance.status == Proponente.STATUS_INSCRITO and instance.cnpj and cnpj_esta_bloqueado(instance.cnpj)):
         instance.status = Proponente.STATUS_BLOQUEADO
 
     elif instance.status == Proponente.STATUS_BLOQUEADO and instance.cnpj and not cnpj_esta_bloqueado(instance.cnpj):

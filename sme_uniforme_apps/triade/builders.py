@@ -2,6 +2,8 @@ import base64
 import json
 import os
 
+from sme_uniforme_apps.proponentes.cnpj import compact_cnpj
+
 from .exceptions import TriadePermanentError
 
 
@@ -274,7 +276,7 @@ class TriadePayloadBuilder:
 
     def _normalized_document_number(self, cnpj):
         cnpj = self._required_value(cnpj, "proponente.cnpj")
-        normalized = "".join(char for char in cnpj if char.isdigit())
+        normalized = compact_cnpj(cnpj)
         if not normalized:
             raise TriadePayloadBuilderError(
                 "TRIADE payload exige proponente.cnpj valido para envio."

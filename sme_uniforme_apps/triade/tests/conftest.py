@@ -9,7 +9,7 @@ from sme_uniforme_apps.proponentes.models import Proponente
 def proponente_triade():
     return baker.make(
         "Proponente",
-        cnpj="00.529.476/0001-14",
+        cnpj="AB.12C.3D4/0001-39",
         razao_social="Empresa Teste LTDA",
         end_logradouro="Rua Teste, 123",
         end_cidade="Sao Paulo",
