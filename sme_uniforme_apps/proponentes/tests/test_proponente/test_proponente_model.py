@@ -1,6 +1,7 @@
 import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from model_bakery import baker
 
 from sme_uniforme_apps.proponentes.admin import ProponenteAdmin
 from sme_uniforme_apps.proponentes.models import Proponente
@@ -43,7 +44,7 @@ def test_admin():
     # pylint: disable=W0212
     assert admin.site._registry[Proponente]
     assert model_admin.list_display == (
-        'protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'ultima_alteracao', 'status')
+        'protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro', 'ultima_alteracao', 'status')
     assert model_admin.ordering == ('-alterado_em',)
     assert model_admin.search_fields == ('uuid', 'cnpj', 'razao_social', 'responsavel')
 
@@ -67,9 +68,78 @@ def test_cnpj_valido_resultado_positivo():
     assert Proponente.cnpj_valido(cnpj_valido)
 
 
+def test_cnpj_alfanumerico_valido_resultado_positivo():
+    cnpj_valido = "AB.12C.3D4/0001-39"
+    assert Proponente.cnpj_valido(cnpj_valido)
+
+
 def test_cnpj_valido_resultado_negativo():
     cnpj_invalido = '73.110.385/0001-00'
     assert not Proponente.cnpj_valido(cnpj_invalido)
+
+
+def test_cnpj_alfanumerico_valido_resultado_negativo():
+    cnpj_invalido = "AB.12C.3D4/0001-30"
+    assert not Proponente.cnpj_valido(cnpj_invalido)
+
+
+def test_cnpj_ja_cadastrado_normaliza_formato_alfanumerico():
+    baker.make(
+        "Proponente",
+        cnpj="AB.12C.3D4/0001-39",
+        razao_social="Alfanumerico",
+        end_logradouro="Rua Teste",
+        end_cidade="São Paulo",
+        end_uf="SP",
+        end_cep="99999-000",
+        telefone="(99) 99999-9999",
+        email="alfanumerico@teste.com",
+        responsavel="Fulano Alfa",
+    )
+
+    assert Proponente.cnpj_ja_cadastrado("ab12c3d4000139")
+
+
+def test_bloqueia_por_cnpj_normaliza_formato_alfanumerico():
+    proponente = baker.make(
+        "Proponente",
+        cnpj="AB.12C.3D4/0001-39",
+        status=Proponente.STATUS_INSCRITO,
+        razao_social="Teste Alfa",
+        end_logradouro="Rua Teste",
+        end_cidade="São Paulo",
+        end_uf="SP",
+        end_cep="99999-000",
+        telefone="(99) 99999-9999",
+        email="bloqueia.alfa@teste.com",
+        responsavel="Fulano Alfa",
+    )
+
+    Proponente.bloqueia_por_cnpj("ab12c3d4000139")
+    proponente.refresh_from_db()
+
+    assert proponente.status == Proponente.STATUS_BLOQUEADO
+
+
+def test_desbloqueia_por_cnpj_normaliza_formato_alfanumerico():
+    proponente = baker.make(
+        "Proponente",
+        cnpj="AB.12C.3D4/0001-39",
+        status=Proponente.STATUS_BLOQUEADO,
+        razao_social="Teste Alfa",
+        end_logradouro="Rua Teste",
+        end_cidade="São Paulo",
+        end_uf="SP",
+        end_cep="99999-000",
+        telefone="(99) 99999-9999",
+        email="desbloqueia.alfa@teste.com",
+        responsavel="Fulano Alfa",
+    )
+
+    Proponente.desbloqueia_por_cnpj("ab12c3d4000139")
+    proponente.refresh_from_db()
+
+    assert proponente.status == Proponente.STATUS_INSCRITO
 
 
 def test_proponente_status_default_em_processo(proponente):

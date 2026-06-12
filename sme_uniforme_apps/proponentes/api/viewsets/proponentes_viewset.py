@@ -13,11 +13,12 @@ from sme_uniforme_apps.core.models import Uniforme
 from sme_uniforme_apps.proponentes.api.serializers.loja_serializer import LojaCreateSerializer
 from sme_uniforme_apps.proponentes.models import OfertaDeUniforme
 from sme_uniforme_apps.proponentes.services import atualiza_coordenadas_lojas
+from sme_uniforme_apps.proponentes.upload_validation import PDF_EXTENSIONS, validate_upload_extension
 from ..serializers.proponente_serializer import ProponenteSerializer, ProponenteCreateSerializer
 
 from ...models import Proponente, ListaNegra, Loja
 from ....utils.base64ToFile import base64ToFile
-
+from sme_uniforme_apps.triade.runtime import is_triade_enabled
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,22 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             return ProponenteSerializer
         else:
             return ProponenteCreateSerializer
+
+    @staticmethod
+    def _validate_comprovante_endereco(loja):
+        comprovante_endereco = loja.get("comprovante_endereco")
+
+        if comprovante_endereco:
+            try:
+                validate_upload_extension(
+                    comprovante_endereco,
+                    PDF_EXTENSIONS,
+                    "Envie o comprovante de endereço do ponto de venda em PDF.",
+                )
+            except ValueError as exc:
+                raise ValidationError(str(exc))
+
+        return comprovante_endereco
 
     @action(detail=True, methods=['patch'], url_path='atualiza-lojas')
     def atualiza_lojas(self, request, uuid):
@@ -87,9 +104,13 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                 loja_obj.nome_fantasia = loja.get('nome_fantasia')
                 loja_obj.telefone = loja.get('telefone')
                 loja_obj.site = loja.get('site')
-                if loja.get('comprovante_endereco') is not None:
-                    file = base64ToFile(loja.get('comprovante_endereco'))
-                    loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                comprovante_endereco = self._validate_comprovante_endereco(loja)
+                if 'comprovante_endereco' in loja:
+                    if comprovante_endereco is not None:
+                        file = base64ToFile(comprovante_endereco)
+                        loja_obj.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                    else:
+                        loja_obj.comprovante_endereco = None
                 loja_obj.save()
             else:
                 atributos_extras = ['proponente', 'uuid', 'id', 'email', 'criado_em',
@@ -97,10 +118,12 @@ class ProponentesViewSet(mixins.CreateModelMixin,
                                     'uf', 'firstName']
                 for attr in atributos_extras:
                     loja.pop(attr, '')
-                comprovante = loja.pop('comprovante_endereco', '')    
+                comprovante = self._validate_comprovante_endereco(loja)
+                loja.pop('comprovante_endereco', None)
                 loja_object = LojaCreateSerializer().create(loja)
-                file = base64ToFile(comprovante)
-                loja_object.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
+                if comprovante:
+                    file = base64ToFile(comprovante)
+                    loja_object.comprovante_endereco.save('comprovante_endereco_loja.' + file['ext'], file['data'])
                 proponente.lojas.add(loja_object)
                 lojas_ids.append(loja_object.id)
         atualiza_coordenadas_lojas(proponente.lojas)
@@ -140,6 +163,18 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             proponente = Proponente.concluir_cadastro(uuid)
         except Exception as e:
             return Response({"detail": e.__str__()}, status.HTTP_400_BAD_REQUEST)
+
+        if is_triade_enabled():
+            try:
+                from sme_uniforme_apps.triade.tasks import orquestrar_envio_lote_triade
+
+                orquestrar_envio_lote_triade.delay(str(proponente.uuid))
+            except Exception:
+                log.exception(
+                    "Falha ao enfileirar envio TRIADE para o proponente %s.",
+                    proponente.uuid,
+                )
+
         serializer = ProponenteSerializer(proponente, many=False, context={'request': request})
         return Response(serializer.data)
 
