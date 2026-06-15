@@ -14,7 +14,11 @@ from .exceptions import TriadeConfigError, TriadePermanentError, TriadeTransient
 from .models import TriadeDocumento, TriadeLote
 from .persistence import queryset_update_with_alterado_em, save_with_alterado_em
 from .runtime import get_triade_runtime_config
-from .statuses import normalize_decisao, normalize_status
+from .statuses import (
+    TRIADE_LOTE_TERMINAL_STATUSES,
+    normalize_decisao,
+    normalize_status,
+)
 
 log = logging.getLogger(__name__)
 
@@ -234,6 +238,7 @@ class TriadeSubmissionService:
 
         if response.is_success or response.status_code == 409:
             response_data = self._response_data_as_dict(response)
+            normalized_status = normalize_status(response_data.get("status"))
             lote.submission_id = (
                 self._parse_uuid(
                     response_data.get("submission_id"),
@@ -245,9 +250,10 @@ class TriadeSubmissionService:
             lote.analysis_desk_id = (
                 response_data.get("analysis_desk_id") or lote.analysis_desk_id
             )
-            lote.status = (
-                normalize_status(response_data.get("status")) or self.STATUS_PROCESSANDO
-            )
+            if normalized_status:
+                lote.status = normalized_status
+            elif lote.status not in TRIADE_LOTE_TERMINAL_STATUSES:
+                lote.status = self.STATUS_PROCESSANDO
             lote.iniciado_em = lote.iniciado_em or timezone.now()
             lote.ultimo_erro = None
             save_with_alterado_em(

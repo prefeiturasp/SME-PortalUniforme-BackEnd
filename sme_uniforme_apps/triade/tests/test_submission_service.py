@@ -245,3 +245,25 @@ def test_dispatch_trata_409_do_start_como_sucesso_idempotente(
     assert lote.status == "processing"
     assert lote.iniciado_em is not None
     assert lote.ultimo_erro is None
+
+
+@patch("sme_uniforme_apps.triade.client.requests.Session.request")
+def test_dispatch_com_409_no_start_preserva_status_terminal_do_lote(
+    mock_request, settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+    prepared = service.prepare_lote_envio(proponente_triade)
+    lote = prepared.lote
+    lote.batch_id = uuid4()
+    lote.status = "completed"
+    lote.save(update_fields=("batch_id", "status"))
+    mock_request.side_effect = [DummyResponse(409, {"detail": "pipeline ja iniciado"})]
+
+    lote = service.dispatch_proponente_uuid(str(proponente_triade.uuid))
+    lote.refresh_from_db()
+
+    assert mock_request.call_count == 1
+    assert lote.status_http_inicio == 409
+    assert lote.status == "completed"
+    assert lote.ultimo_erro is None

@@ -7,6 +7,12 @@ TRIADE_LOTE_STATUSES = (
     "error",
 )
 
+TRIADE_LOTE_TERMINAL_STATUSES = (
+    "pending_review",
+    "completed",
+    "error",
+)
+
 TRIADE_DOCUMENTO_STATUSES = (
     "received",
     "processing",
