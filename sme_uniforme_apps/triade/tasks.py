@@ -34,6 +34,24 @@ def orquestrar_envio_lote_triade(
 
 @shared_task(
     bind=True,
+    autoretry_for=(TriadeTransientError,),
+    retry_backoff=2,
+    retry_kwargs={"max_retries": 6},
+)
+def reprocessar_lote_triade(self, lote_id):
+    lote = TriadeSubmissionService().retry_lote_id(lote_id)
+    return {
+        "lote_id": lote.id,
+        "lote_uuid": str(lote.uuid),
+        "external_batch_id": lote.external_batch_id,
+        "batch_id": str(lote.batch_id) if lote.batch_id else None,
+        "submission_id": str(lote.submission_id) if lote.submission_id else None,
+        "status": lote.status,
+    }
+
+
+@shared_task(
+    bind=True,
     autoretry_for=(TriadeCallbackTransientError,),
     retry_backoff=2,
     retry_kwargs={"max_retries": 6},

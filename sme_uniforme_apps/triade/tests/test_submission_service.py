@@ -6,6 +6,10 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from model_bakery import baker
 
+from sme_uniforme_apps.triade.exceptions import (
+    TriadePermanentError,
+    TriadeTransientError,
+)
 from sme_uniforme_apps.triade.models import TriadeConfiguracao, TriadeDocumento
 from sme_uniforme_apps.triade.services import TriadeSubmissionService
 
@@ -267,3 +271,99 @@ def test_dispatch_com_409_no_start_preserva_status_terminal_do_lote(
     assert lote.status_http_inicio == 409
     assert lote.status == "completed"
     assert lote.ultimo_erro is None
+
+
+@patch("sme_uniforme_apps.triade.client.requests.Session.request")
+def test_retry_lote_sem_batch_id_reusa_snapshot_persistido(
+    mock_request, settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+    prepared = service.prepare_lote_envio(proponente_triade)
+    lote = prepared.lote
+    payload_snapshot = json.loads(lote.payload_envio)
+    batch_id = uuid4()
+
+    proponente_triade.razao_social = "Empresa Alterada Depois Do Snapshot"
+    proponente_triade.save(update_fields=("razao_social",))
+
+    mock_request.side_effect = [
+        DummyResponse(201, {"batch_id": str(batch_id), "status": "received"}),
+        DummyResponse(200, {"status": "processing"}),
+    ]
+
+    lote = service.retry_lote(lote)
+    lote.refresh_from_db()
+
+    assert mock_request.call_count == 2
+    assert (
+        mock_request.call_args_list[0].kwargs["json"]["applicant"]["name"]
+        == payload_snapshot["applicant"]["name"]
+    )
+    assert mock_request.call_args_list[0].kwargs["json"]["applicant"]["name"] == (
+        "Empresa Teste LTDA"
+    )
+    assert lote.batch_id == batch_id
+    assert lote.status == "processing"
+
+
+@patch("sme_uniforme_apps.triade.client.requests.Session.request")
+def test_retry_lote_com_batch_id_apenas_reinicia_pipeline(
+    mock_request, settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+    lote = service.prepare_lote_envio(proponente_triade).lote
+    lote.batch_id = uuid4()
+    lote.status = "error"
+    lote.save(update_fields=("batch_id", "status"))
+    mock_request.side_effect = [DummyResponse(409, {"detail": "pipeline ja iniciado"})]
+
+    lote = service.retry_lote(lote)
+    lote.refresh_from_db()
+
+    assert mock_request.call_count == 1
+    assert mock_request.call_args.kwargs["url"] == (
+        "https://triade.exemplo.com/integration/v1/submissions/{}/start".format(
+            lote.batch_id
+        )
+    )
+    assert lote.status_http_inicio == 409
+
+
+def test_retry_lote_falha_sem_batch_id_e_sem_payload_persistido(
+    settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+    lote = service.prepare_lote_envio(proponente_triade).lote
+    lote.status = "error"
+    lote.payload_envio = None
+    lote.batch_id = None
+    lote.save(update_fields=("status", "payload_envio", "batch_id"))
+
+    with pytest.raises(TriadePermanentError, match="batch_id ou payload_envio"):
+        service.retry_lote(lote)
+
+
+def test_retry_lote_falha_quando_criacao_anterior_foi_erro_permanente(
+    settings, proponente_triade, loja_primeira, anexo_triade
+):
+    configure_triade_settings(settings)
+    service = TriadeSubmissionService()
+    lote = service.prepare_lote_envio(proponente_triade).lote
+    lote.status = "error"
+    lote.batch_id = None
+    lote.status_http_criacao = 422
+    lote.save(update_fields=("status", "batch_id", "status_http_criacao"))
+
+    with pytest.raises(TriadePermanentError, match="erro permanente de payload"):
+        service.retry_lote(lote)
+
+
+def test_task_reprocessar_lote_triade_tem_autoretry_configurado():
+    from sme_uniforme_apps.triade.tasks import reprocessar_lote_triade
+
+    assert TriadeTransientError in reprocessar_lote_triade.autoretry_for
+    assert reprocessar_lote_triade.retry_kwargs.get("max_retries") == 6
+    assert reprocessar_lote_triade.retry_backoff == 2

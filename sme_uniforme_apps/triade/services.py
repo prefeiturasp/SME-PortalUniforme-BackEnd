@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from sme_uniforme_apps.proponentes.models import Proponente
 
@@ -15,6 +16,7 @@ from .models import TriadeDocumento, TriadeLote
 from .persistence import queryset_update_with_alterado_em, save_with_alterado_em
 from .runtime import get_triade_runtime_config
 from .statuses import (
+    TRIADE_LOTE_STATUSES_REPROCESSAVEIS,
     TRIADE_LOTE_TERMINAL_STATUSES,
     normalize_decisao,
     normalize_status,
@@ -180,6 +182,97 @@ class TriadeSubmissionService:
     def build_external_batch_id(self, proponente):
         return "proponente-{}".format(proponente.uuid)
 
+    def retry_lote_id(self, lote_id):
+        try:
+            lote = TriadeLote.objects.get(pk=lote_id)
+        except TriadeLote.DoesNotExist:
+            raise TriadePermanentError(
+                "Lote TRIADE {} nao encontrado para retomada de processamento.".format(
+                    lote_id
+                )
+            )
+
+        return self.retry_lote(lote)
+
+    def retry_lote(self, lote):
+        blocker = self.get_retry_lote_blocker(lote)
+        if blocker:
+            raise TriadePermanentError(blocker)
+
+        if lote.batch_id:
+            self._iniciar_pipeline(lote)
+            lote.refresh_from_db()
+            return lote
+
+        payload = self._deserialize_json(lote.payload_envio, "payload_envio")
+        self._criar_lote_externo(lote, payload)
+        lote.refresh_from_db()
+        self._iniciar_pipeline(lote)
+        lote.refresh_from_db()
+        return lote
+
+    def get_retry_lote_blocker(self, lote):
+        status_normalized = normalize_status(lote.status)
+        if status_normalized not in TRIADE_LOTE_STATUSES_REPROCESSAVEIS:
+            return "Lote TRIADE {} esta com status {} e nao pode ser retomado.".format(
+                lote.external_batch_id,
+                lote.status,
+            )
+
+        if lote.batch_id:
+            return None
+
+        if not lote.payload_envio:
+            return (
+                "Lote TRIADE {} nao pode ser retomado sem batch_id ou payload_envio "
+                "persistido."
+            ).format(lote.external_batch_id)
+
+        if self._can_retry_create_same_snapshot(lote):
+            return None
+
+        return (
+            "Lote TRIADE {} falhou na criacao com HTTP {}. Isso indica erro "
+            "permanente de payload/configuracao; nao retome o mesmo snapshot."
+        ).format(lote.external_batch_id, lote.status_http_criacao)
+
+    def _can_retry_create_same_snapshot(self, lote):
+        status_code = lote.status_http_criacao
+        if status_code is None:
+            return True
+        if 200 <= status_code < 300:
+            return True
+        if status_code == 429:
+            return True
+        if 500 <= status_code <= 599:
+            return True
+        return False
+
+    def sync_lote(self, lote):
+        if not lote.batch_id:
+            raise TriadePermanentError(
+                "Lote TRIADE {} nao possui batch_id para sincronizacao.".format(
+                    lote.external_batch_id
+                )
+            )
+
+        try:
+            response = self.client.get_batch(str(lote.batch_id))
+        except TriadeTransientError as exc:
+            lote.ultimo_erro = str(exc)
+            save_with_alterado_em(lote, ("ultimo_erro",))
+            raise
+
+        response_data = self._response_data_as_dict(response)
+        if response.is_success:
+            self._apply_batch_sync_to_lote(lote, response_data)
+            self._sync_documentos_from_batch(lote, response_data.get("documents", []))
+            return lote
+
+        lote.ultimo_erro = self._build_error_message("consulta do lote", response)
+        save_with_alterado_em(lote, ("ultimo_erro",))
+        self._raise_for_response("consulta do lote", response)
+
     def _criar_lote_externo(self, lote, payload):
         response = self.client.create_batch(payload)
         lote.status_http_criacao = response.status_code
@@ -334,6 +427,66 @@ class TriadeSubmissionService:
                     **defaults
                 )
 
+    def _apply_batch_sync_to_lote(self, lote, response_data):
+        normalized_status = normalize_status(response_data.get("status"))
+        if normalized_status:
+            lote.status = normalized_status
+
+        metadata = response_data.get("metadata")
+        if metadata is not None:
+            lote.metadata = self._serialize_json(metadata)
+
+        lote.ultimo_erro = None
+        save_with_alterado_em(lote, ("status", "metadata", "ultimo_erro"))
+
+    def _sync_documentos_from_batch(self, lote, documents):
+        for document_payload in documents:
+            external_document_id = document_payload.get("external_document_id")
+            if not external_document_id:
+                continue
+
+            defaults = {}
+            normalized_status = normalize_status(document_payload.get("status"))
+            normalized_decisao = normalize_decisao(document_payload.get("decisao"))
+
+            if normalized_status:
+                defaults["status"] = normalized_status
+            if normalized_decisao:
+                defaults["decisao"] = normalized_decisao
+
+            document_id = self._parse_uuid(
+                document_payload.get("document_id"),
+                "documents[].document_id",
+                required=False,
+            )
+            if document_id:
+                defaults["document_id"] = document_id
+
+            processed_at = self._parse_datetime(document_payload.get("processed_at"))
+            if processed_at:
+                defaults["processed_at"] = processed_at
+
+            for field_name in (
+                "external_document_type",
+                "document_type",
+                "title",
+                "justificativa",
+                "error",
+            ):
+                if field_name in document_payload:
+                    defaults[field_name] = document_payload.get(field_name) or None
+
+            if document_payload.get("metadata") is not None:
+                defaults["metadata"] = self._serialize_json(
+                    document_payload.get("metadata")
+                )
+
+            TriadeDocumento.objects.update_or_create(
+                lote=lote,
+                external_document_id=external_document_id,
+                defaults=defaults,
+            )
+
     def _registrar_erro_no_lote(self, lote, response, etapa, update_fields):
         lote.status = self.STATUS_ERRO
         lote.ultimo_erro = self._build_error_message(etapa, response)
@@ -387,6 +540,17 @@ class TriadeSubmissionService:
         return json.dumps(
             value, ensure_ascii=False, separators=(",", ":"), sort_keys=True
         )
+
+    def _parse_datetime(self, value):
+        if not value:
+            return None
+
+        parsed = parse_datetime(value)
+        if not parsed:
+            return None
+        if timezone.is_naive(parsed):
+            return timezone.make_aware(parsed, timezone.get_current_timezone())
+        return parsed
 
     def _get_anexos_para_envio(self, proponente):
         queryset = proponente.anexos.select_related("tipo_documento").order_by("id")

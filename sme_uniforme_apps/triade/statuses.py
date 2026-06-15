@@ -13,6 +13,12 @@ TRIADE_LOTE_TERMINAL_STATUSES = (
     "error",
 )
 
+TRIADE_LOTE_STATUSES_REPROCESSAVEIS = (
+    "error",
+    "payload_ready",
+    "received",
+)
+
 TRIADE_DOCUMENTO_STATUSES = (
     "received",
     "processing",
