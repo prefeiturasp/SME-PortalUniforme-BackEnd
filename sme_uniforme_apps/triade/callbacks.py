@@ -5,7 +5,7 @@ import logging
 import uuid
 
 from django.conf import settings
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -13,6 +13,7 @@ from django.utils.dateparse import parse_datetime
 from sme_uniforme_apps.proponentes.models import Anexo
 
 from .exceptions import (
+    TriadeCallbackTransientError,
     TriadeConfigError,
     TriadePermanentError,
     TriadeRequestError,
@@ -86,14 +87,14 @@ class TriadeCallbackService:
             raise TriadeSignatureError("Assinatura TRIADE invalida.")
 
     def process_callback(self, callback_id):
-        callback = TriadeCallback.objects.get(pk=callback_id)
-        if callback.status_processamento in (
-            self.STATUS_PROCESSADO,
-            self.STATUS_DUPLICADO,
-        ):
-            return callback
-
         try:
+            callback = TriadeCallback.objects.get(pk=callback_id)
+            if callback.status_processamento in (
+                self.STATUS_PROCESSADO,
+                self.STATUS_DUPLICADO,
+            ):
+                return callback
+
             with transaction.atomic():
                 callback = TriadeCallback.objects.select_for_update().get(
                     pk=callback_id
@@ -144,6 +145,25 @@ class TriadeCallbackService:
                     ),
                 )
                 return callback
+        except OperationalError as exc:
+            log.warning(
+                "Falha transitória de banco de dados durante o processamento do callback TRIADE %s: %s. Nova tentativa será realizada.",
+                callback_id,
+                exc,
+            )
+            try:
+                queryset_update_with_alterado_em(
+                    TriadeCallback.objects.filter(pk=callback_id),
+                    status_processamento=self.STATUS_RECEBIDO,
+                    erro="Falha transitória: {}".format(exc),
+                )
+            except OperationalError:
+                log.warning(
+                    "Não foi possível restaurar o status do callback TRIADE %s após a ocorrência de uma falha transitória.",
+                    callback_id,
+                    exc_info=True,
+                )
+            raise TriadeCallbackTransientError(str(exc)) from exc
         except Exception as exc:
             log.exception("Falha ao processar callback TRIADE %s.", callback_id)
             queryset_update_with_alterado_em(

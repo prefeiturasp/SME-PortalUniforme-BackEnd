@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from .callbacks import TriadeCallbackService
-from .exceptions import TriadeTransientError
+from .exceptions import TriadeCallbackTransientError, TriadeTransientError
 from .services import TriadeSubmissionService
 
 
@@ -32,8 +32,13 @@ def orquestrar_envio_lote_triade(
     }
 
 
-@shared_task
-def processar_callback_triade(callback_id):
+@shared_task(
+    bind=True,
+    autoretry_for=(TriadeCallbackTransientError,),
+    retry_backoff=2,
+    retry_kwargs={"max_retries": 6},
+)
+def processar_callback_triade(self, callback_id):
     callback = TriadeCallbackService().process_callback(callback_id)
     return {
         "callback_id": callback.id,
