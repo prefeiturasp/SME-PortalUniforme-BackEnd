@@ -20,3 +20,7 @@ class TriadeSignatureError(TriadePermanentError):
 
 class TriadeTransientError(TriadeError):
     pass
+
+
+class TriadeCallbackTransientError(TriadeError):
+    pass

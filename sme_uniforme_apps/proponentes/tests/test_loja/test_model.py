@@ -86,6 +86,19 @@ def test_admin_loja_exibe_comprovante_endereco(proponente, admin_user):
     )
 
 
+def test_admin_loja_protocolo_nao_quebra_sem_proponente():
+    loja_admin = LojaAdmin(Loja, AdminSite())
+    loja = Loja(
+        nome_fantasia="Loja Sem Proponente",
+        cep="01001-000",
+        endereco="Rua Teste",
+        bairro="Centro",
+        numero="100",
+    )
+
+    assert loja_admin.protocolo(loja) == "-"
+
+
 def test_loja_admin_form_configura_label_e_help_text():
     form = LojaAdminForm()
 
