@@ -377,6 +377,8 @@ class LojaAdmin(admin.ModelAdmin):
 
     @staticmethod
     def protocolo(loja):
+        if not loja.proponente_id:
+            return "-"
         return loja.proponente.protocolo
 
     @staticmethod

@@ -1,10 +1,12 @@
 import json
+import logging
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.template.response import TemplateResponse
 from django.utils.dateparse import parse_date
 from django.utils.html import format_html
 
+from .exceptions import TriadeConfigError, TriadePermanentError, TriadeTransientError
 from .models import (
     TriadeCallback,
     TriadeConfiguracao,
@@ -12,6 +14,7 @@ from .models import (
     TriadeEstatistica,
     TriadeLote,
 )
+from .services import TriadeSubmissionService
 from .statuses import (
     TRIADE_CALLBACK_PROCESSING_LABELS,
     TRIADE_CALLBACK_PROCESSING_STATUSES,
@@ -19,12 +22,16 @@ from .statuses import (
     TRIADE_DECISOES,
     TRIADE_DOCUMENTO_STATUS_LABELS,
     TRIADE_DOCUMENTO_STATUSES,
+    TRIADE_LOTE_STATUSES_REPROCESSAVEIS,
     TRIADE_LOTE_STATUS_LABELS,
     TRIADE_LOTE_STATUSES,
     merge_known_and_observed_values,
     normalize_decisao,
     normalize_status,
 )
+from .tasks import reprocessar_lote_triade
+
+log = logging.getLogger(__name__)
 
 
 class TriadeReadOnlyAdmin(admin.ModelAdmin):
@@ -90,6 +97,7 @@ class TriadeLoteAdmin(TriadeReadOnlyAdmin):
         "proponente__cnpj",
         "proponente__razao_social",
     )
+    actions = ("retomar_processamento_na_triade", "sincronizar_com_triade")
 
     def get_fields(self, request, obj=None):
         fields = [field.name for field in self.model._meta.fields]
@@ -102,6 +110,139 @@ class TriadeLoteAdmin(TriadeReadOnlyAdmin):
         return self.render_large_text(obj.payload_envio)
 
     payload_envio_formatado.short_description = "Payload envio"
+
+    def retomar_processamento_na_triade(self, request, queryset):
+        try:
+            service = TriadeSubmissionService()
+        except TriadeConfigError as exc:
+            self.message_user(request, str(exc), level=messages.ERROR)
+            return
+
+        retomados = 0
+        ignorados_status = 0
+        ignorados_snapshot = 0
+        ignorados_erro_permanente = 0
+        falhas_enfileiramento = 0
+
+        for lote in queryset:
+            if normalize_status(lote.status) not in TRIADE_LOTE_STATUSES_REPROCESSAVEIS:
+                ignorados_status += 1
+                continue
+
+            blocker = service.get_retry_lote_blocker(lote)
+            if blocker:
+                if not lote.batch_id and not lote.payload_envio:
+                    ignorados_snapshot += 1
+                elif not lote.batch_id:
+                    ignorados_erro_permanente += 1
+                continue
+
+            try:
+                reprocessar_lote_triade.delay(lote.id)
+            except Exception:
+                log.exception(
+                    "Falha ao enfileirar retomada do lote TRIADE %s.",
+                    lote.external_batch_id,
+                )
+                falhas_enfileiramento += 1
+                continue
+
+            retomados += 1
+
+        if retomados:
+            self.message_user(
+                request,
+                "{} lote(s) agendado(s) para retomar o processamento na TRIADE.".format(
+                    retomados
+                ),
+                level=messages.SUCCESS,
+            )
+        if ignorados_status:
+            statuses_permitidos = ", ".join(TRIADE_LOTE_STATUSES_REPROCESSAVEIS)
+            self.message_user(
+                request,
+                "{} lote(s) ignorado(s) por status não reprocessável "
+                "(use apenas {}).".format(
+                    ignorados_status, statuses_permitidos
+                ),
+                level=messages.WARNING,
+            )
+        if ignorados_snapshot:
+            self.message_user(
+                request,
+                "{} lote(s) ignorado(s) por não terem batch_id nem payload_envio "
+                "persistido para retomar o mesmo lote.".format(ignorados_snapshot),
+                level=messages.WARNING,
+            )
+        if ignorados_erro_permanente:
+            self.message_user(
+                request,
+                "{} lote(s) ignorado(s) porque a criação anterior falhou com erro "
+                "permanente de payload/configuração. Corrija os dados e faça um novo envio.".format(
+                    ignorados_erro_permanente
+                ),
+                level=messages.WARNING,
+            )
+        if falhas_enfileiramento:
+            self.message_user(
+                request,
+                "{} lote(s) não puderam ser enfileirados para retomada. "
+                "Verifique os logs da aplicação.".format(falhas_enfileiramento),
+                level=messages.ERROR,
+            )
+
+    retomar_processamento_na_triade.short_description = (
+        "Retomar processamento na TRIADE (mesmo lote/snapshot)"
+    )
+
+    def sincronizar_com_triade(self, request, queryset):
+        try:
+            service = TriadeSubmissionService()
+        except TriadeConfigError as exc:
+            self.message_user(request, str(exc), level=messages.ERROR)
+            return
+
+        sincronizados = 0
+        sem_batch = 0
+        com_erro = 0
+
+        for lote in queryset:
+            if not lote.batch_id:
+                sem_batch += 1
+                continue
+
+            try:
+                service.sync_lote(lote)
+            except (TriadePermanentError, TriadeTransientError):
+                com_erro += 1
+                continue
+
+            sincronizados += 1
+
+        if sincronizados:
+            self.message_user(
+                request,
+                "{} lote(s) sincronizado(s) com a TRIADE.".format(sincronizados),
+                level=messages.SUCCESS,
+            )
+        if sem_batch:
+            self.message_user(
+                request,
+                "{} lote(s) ignorado(s) por não terem batch_id "
+                "(não foram aceitos pela TRIADE).".format(sem_batch),
+                level=messages.WARNING,
+            )
+        if com_erro:
+            self.message_user(
+                request,
+                "{} lote(s) com erro na consulta. Verifique ultimo_erro "
+                "e tente novamente.".format(com_erro),
+                level=messages.WARNING,
+            )
+
+    sincronizar_com_triade.short_description = (
+        "Sincronizar status e documentos com a TRIADE (GET /batches/{id})"
+    )
 
 
 @admin.register(TriadeDocumento)
