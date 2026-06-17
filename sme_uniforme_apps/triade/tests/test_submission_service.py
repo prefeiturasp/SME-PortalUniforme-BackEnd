@@ -63,7 +63,7 @@ def test_prepare_lote_reconstroi_payload_persistido_quando_lote_ainda_nao_tem_ba
     assert prepared_rebuild.reused_payload is False
     assert (
         prepared_rebuild.payload["applicant"]["fields"]["ponto-venda"][0]["cidade"]
-        == "Sao Paulo"
+        == "São Paulo"
     )
     assert (
         prepared_rebuild.payload["applicant"]["fields"]["ponto-venda"][0]["uf"] == "SP"
@@ -124,9 +124,11 @@ def test_prepare_lote_envia_so_documentos_obrigatorios_quando_configurado_no_ban
         documento["external_document_id"] for documento in prepared.payload["documents"]
     ]
 
-    assert external_document_ids == [str(anexo_triade.uuid)]
+    assert str(anexo_triade.uuid) in external_document_ids
     assert str(anexo_opcional.uuid) not in external_document_ids
-    assert TriadeDocumento.objects.filter(lote=prepared.lote).count() == 1
+    assert TriadeDocumento.objects.filter(lote=prepared.lote).count() == len(
+        external_document_ids
+    )
 
 
 @patch("sme_uniforme_apps.triade.client.requests.Session.request")
@@ -178,10 +180,11 @@ def test_dispatch_proponente_envia_lote_e_inicia_pipeline(
     assert lote.payload_envio
     assert lote.ultimo_erro is None
 
-    documento = TriadeDocumento.objects.get(lote=lote)
+    documento = TriadeDocumento.objects.get(lote=lote, anexo=anexo_triade)
     assert documento.anexo_id == anexo_triade.id
     assert documento.external_document_id == str(anexo_triade.uuid)
     assert documento.document_type == anexo_triade.tipo_documento.identificador
+    assert TriadeDocumento.objects.filter(lote=lote).count() == 3
 
 
 @patch("sme_uniforme_apps.triade.client.requests.Session.request")

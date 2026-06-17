@@ -43,7 +43,25 @@ def arquivo_pdf():
 
 
 @pytest.fixture
-def loja_primeira(proponente_triade):
+def foto_fachada_arquivo():
+    return SimpleUploadedFile(
+        "fachada.jpg",
+        b"\xff\xd8\xff\xe0conteudo de fachada",
+        content_type="image/jpeg",
+    )
+
+
+@pytest.fixture
+def comprovante_endereco_arquivo():
+    return SimpleUploadedFile(
+        "comprovante.pdf",
+        b"%PDF-1.4 conteudo do comprovante",
+        content_type="application/pdf",
+    )
+
+
+@pytest.fixture
+def loja_primeira(proponente_triade, foto_fachada_arquivo, comprovante_endereco_arquivo):
     return baker.make(
         "Loja",
         proponente=proponente_triade,
@@ -54,11 +72,13 @@ def loja_primeira(proponente_triade):
         numero="100",
         telefone="(11) 3333-4444",
         site="https://primeira-loja.exemplo.com",
+        foto_fachada=foto_fachada_arquivo,
+        comprovante_endereco=comprovante_endereco_arquivo,
     )
 
 
 @pytest.fixture
-def loja_segunda(proponente_triade):
+def loja_segunda(proponente_triade, foto_fachada_arquivo, comprovante_endereco_arquivo):
     return baker.make(
         "Loja",
         proponente=proponente_triade,
@@ -68,6 +88,8 @@ def loja_segunda(proponente_triade):
         bairro="Bairro",
         numero="200",
         telefone="(11) 4444-5555",
+        foto_fachada=foto_fachada_arquivo,
+        comprovante_endereco=comprovante_endereco_arquivo,
     )
 
 
