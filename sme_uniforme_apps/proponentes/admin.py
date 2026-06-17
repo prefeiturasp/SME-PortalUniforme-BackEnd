@@ -101,7 +101,9 @@ class AnexosInLine(admin.TabularInline):
 
     def justificativa_ia_info(self, obj):
         justificativa_ia = obj.justificativa_ia if obj and obj.justificativa_ia else ''
-        justificativa_data = justificativa_ia
+        justificativa_data = (
+            Anexo.remover_prefixo_analise_ia(justificativa_ia) if obj else ''
+        )
 
         if not justificativa_ia:
             return format_html(

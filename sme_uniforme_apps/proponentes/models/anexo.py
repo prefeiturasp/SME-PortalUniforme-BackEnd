@@ -87,7 +87,17 @@ class Anexo(ModeloBase):
             and self.justificativa_ia
             and (sobrescrever or not self.justificativa)
         ):
-            self.justificativa = self.justificativa_ia
+            self.justificativa = self.remover_prefixo_analise_ia(
+                self.justificativa_ia
+            )
+
+    @staticmethod
+    def remover_prefixo_analise_ia(texto):
+        prefixo = "Análise da IA:"
+        texto = texto.lstrip()
+        if texto.lower().startswith(prefixo.lower()):
+            texto = texto[len(prefixo):].lstrip()
+        return texto
 
     class Meta:
         verbose_name = "Anexo"
