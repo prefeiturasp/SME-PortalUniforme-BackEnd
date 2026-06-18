@@ -87,14 +87,14 @@ def test_build_payload_monta_documentos_de_loja_com_foto_fachada_e_comprovante(
 
     documentos_loja = [
         documento for documento in payload["documents"]
-        if documento["document_type"].startswith(("foto-fachada-", "comprovante-endereco-"))
+        if documento["document_type"] in ("foto-fachada", "comprovante-endereco")
     ]
     identificadores = [documento["document_type"] for documento in documentos_loja]
     assert identificadores == [
-        "foto-fachada-loja-centro-{}".format(loja_primeira.id),
-        "comprovante-endereco-loja-centro-{}".format(loja_primeira.id),
-        "foto-fachada-loja-bairro-{}".format(loja_segunda.id),
-        "comprovante-endereco-loja-bairro-{}".format(loja_segunda.id),
+        "foto-fachada",
+        "comprovante-endereco",
+        "foto-fachada",
+        "comprovante-endereco",
     ]
 
     for documento in documentos_loja:
@@ -118,7 +118,7 @@ def test_build_payload_monta_documentos_de_loja_com_foto_fachada_e_comprovante(
     )
 
 
-def test_build_payload_gera_identificadores_unicos_para_lojas_com_mesmo_nome_fantasia(
+def test_build_payload_diferencia_lojas_via_external_document_id_e_metadata(
     proponente_triade, loja_primeira, anexo_triade
 ):
     loja_mesmo_nome = baker.make(
@@ -149,14 +149,25 @@ def test_build_payload_gera_identificadores_unicos_para_lojas_com_mesmo_nome_fan
 
     documentos_loja = [
         documento for documento in payload["documents"]
-        if documento["document_type"].startswith(("foto-fachada-", "comprovante-endereco-"))
+        if documento["document_type"] in ("foto-fachada", "comprovante-endereco")
     ]
-    identificadores = [documento["document_type"] for documento in documentos_loja]
+    identificadores = [documento["external_document_id"] for documento in documentos_loja]
 
     assert len(identificadores) == len(set(identificadores))
-    assert "foto-fachada-loja-centro-{}".format(loja_primeira.id) in identificadores
-    assert "foto-fachada-loja-centro-{}".format(loja_mesmo_nome.id) in identificadores
-    assert loja_primeira.id != loja_mesmo_nome.id
+
+    foto_fachada_primeira = next(
+        doc for doc in documentos_loja
+        if doc["document_type"] == "foto-fachada"
+        and doc["metadata"]["loja_id"] == loja_primeira.id
+    )
+    foto_fachada_mesmo_nome = next(
+        doc for doc in documentos_loja
+        if doc["document_type"] == "foto-fachada"
+        and doc["metadata"]["loja_id"] == loja_mesmo_nome.id
+    )
+    assert foto_fachada_primeira["document_type"] == foto_fachada_mesmo_nome["document_type"]
+    assert foto_fachada_primeira["external_document_id"] != foto_fachada_mesmo_nome["external_document_id"]
+    assert foto_fachada_primeira["metadata"]["loja_uuid"] != foto_fachada_mesmo_nome["metadata"]["loja_uuid"]
 
 
 def test_build_payload_falha_sem_loja(proponente_triade, anexo_triade):

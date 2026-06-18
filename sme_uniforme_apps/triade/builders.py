@@ -3,8 +3,6 @@ import json
 import os
 import uuid
 
-from django.utils.text import slugify
-
 from sme_uniforme_apps.proponentes.cnpj import compact_cnpj
 
 from .exceptions import TriadePermanentError
@@ -180,14 +178,7 @@ class TriadePayloadBuilder:
                 if not arquivo:
                     continue
 
-                nome_fantasia_slug = slugify(loja.nome_fantasia or "")
-                identificador = (
-                    "{}-{}-{}".format(
-                        prefixo_identificador, nome_fantasia_slug, loja.id
-                    )
-                    if nome_fantasia_slug
-                    else "{}-{}".format(prefixo_identificador, loja.id)
-                )
+                identificador = prefixo_identificador
                 external_document_id = self._build_loja_external_document_id(
                     loja, campo
                 )
