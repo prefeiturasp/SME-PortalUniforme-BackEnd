@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import uuid
 
 from sme_uniforme_apps.proponentes.cnpj import compact_cnpj
 
@@ -33,7 +34,7 @@ class TriadePayloadBuilder:
         external_batch_id = self._build_external_batch_id(external_batch_id)
         lojas = list(proponente.lojas.order_by("id"))
         primeira_loja = self._get_primeira_loja(lojas)
-        documentos = self._build_documents(proponente, anexos)
+        documentos = self._build_documents(proponente, lojas, anexos)
 
         payload = {
             "source_system": self.source_system,
@@ -94,20 +95,14 @@ class TriadePayloadBuilder:
         pontos_venda = []
         for loja in lojas:
             ponto_venda = {}
-            cidade = self._optional_value(
-                getattr(loja, "cidade", None)
-            ) or self._required_value(proponente.end_cidade, "proponente.end_cidade")
-            uf = self._optional_value(
-                getattr(loja, "uf", None)
-            ) or self._required_value(proponente.end_uf, "proponente.end_uf")
             campos = (
                 ("nome-loja", loja.nome_fantasia),
                 ("endereco", loja.endereco),
                 ("numero", loja.numero),
                 ("cep", loja.cep),
                 ("bairro", loja.bairro),
-                ("cidade", cidade),
-                ("uf", uf),
+                ("cidade", "São Paulo"),
+                ("uf", "SP"),
                 ("telefone", loja.telefone),
                 ("site", loja.site),
             )
@@ -121,7 +116,7 @@ class TriadePayloadBuilder:
 
         return pontos_venda
 
-    def _build_documents(self, proponente, anexos):
+    def _build_documents(self, proponente, lojas, anexos):
         anexos_ordenados = self._get_anexos(proponente, anexos)
         documentos = []
         external_document_ids = set()
@@ -166,7 +161,61 @@ class TriadePayloadBuilder:
                 }
             )
 
+        documentos.extend(
+            self._build_loja_documents(proponente, lojas, external_document_ids)
+        )
+
         return documentos
+
+    def _build_loja_documents(self, proponente, lojas, external_document_ids):
+        documentos = []
+        for loja in lojas:
+            for campo, prefixo_identificador in (
+                ("foto_fachada", "foto-fachada"),
+                ("comprovante_endereco", "comprovante-endereco"),
+            ):
+                arquivo = getattr(loja, campo, None)
+                if not arquivo:
+                    continue
+
+                identificador = prefixo_identificador
+                external_document_id = self._build_loja_external_document_id(
+                    loja, campo
+                )
+
+                if external_document_id in external_document_ids:
+                    raise TriadePayloadBuilderError(
+                        "TRIADE payload exige external_document_id unico dentro do lote."
+                    )
+                external_document_ids.add(external_document_id)
+
+                title = self._build_loja_document_title(arquivo, loja, campo)
+                mime_type = self._resolve_mime_type(arquivo)
+                content_data = self._build_loja_document_content(
+                    arquivo, loja, campo
+                )
+
+                documentos.append(
+                    {
+                        "external_document_id": external_document_id,
+                        "document_type": identificador,
+                        "title": title,
+                        "content": {
+                            "type": "base64",
+                            "mime_type": mime_type,
+                            "data": content_data,
+                        },
+                        "metadata": self._build_loja_document_metadata(
+                            proponente, loja, campo, identificador
+                        ),
+                    }
+                )
+
+        return documentos
+
+    @staticmethod
+    def _build_loja_external_document_id(loja, campo):
+        return str(uuid.uuid5(uuid.UUID(str(loja.uuid)), campo))
 
     def _build_document_metadata(self, proponente, anexo):
         metadata = {
@@ -242,6 +291,61 @@ class TriadePayloadBuilder:
             )
 
         return base64.b64encode(raw_content).decode("ascii")
+
+    def _build_loja_document_title(self, arquivo, loja, campo):
+        nome_arquivo = os.path.basename(arquivo.name or "")
+        if not nome_arquivo:
+            raise TriadePayloadBuilderError(
+                "TRIADE payload exige arquivo valido para o campo {} da loja {}.".format(
+                    campo, loja.uuid
+                )
+            )
+        return nome_arquivo
+
+    def _build_loja_document_content(self, arquivo, loja, campo):
+        try:
+            arquivo.open("rb")
+            raw_content = arquivo.read()
+        finally:
+            arquivo.close()
+
+        if not raw_content:
+            raise TriadePayloadBuilderError(
+                "TRIADE payload exige arquivo com conteudo para o campo {} da loja {}.".format(
+                    campo, loja.uuid
+                )
+            )
+
+        document_size = len(raw_content)
+        if document_size > self.MAX_DOCUMENT_SIZE_BYTES:
+            raise TriadePayloadBuilderError(
+                "TRIADE payload excede o limite de 15 MiB para o campo {} da loja {}.".format(
+                    campo, loja.uuid
+                )
+            )
+
+        return base64.b64encode(raw_content).decode("ascii")
+
+    def _build_loja_document_metadata(self, proponente, loja, campo, identificador):
+        nome_fantasia = self._optional_value(loja.nome_fantasia) or ""
+        return {
+            "loja_uuid": str(loja.uuid),
+            "loja_id": loja.id,
+            "loja_nome_fantasia": nome_fantasia,
+            "campo_loja": campo,
+            "proponente_uuid": str(proponente.uuid),
+            "tipo_documento_identificador": identificador,
+        }
+
+    def _resolve_mime_type(self, arquivo):
+        nome_arquivo = (arquivo.name or "").lower()
+        if nome_arquivo.endswith(".png"):
+            return "image/png"
+        if nome_arquivo.endswith((".jpg", ".jpeg")):
+            return "image/jpeg"
+        if nome_arquivo.endswith(".pdf"):
+            return "application/pdf"
+        return "application/octet-stream"
 
     def _get_anexos(self, proponente, anexos):
         if anexos is None:
