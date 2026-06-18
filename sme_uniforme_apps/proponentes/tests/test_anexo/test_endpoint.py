@@ -107,6 +107,49 @@ def test_anexo_form_copia_justificativa_ia_para_admin(tipo_documento, status_adm
     assert form.cleaned_data["justificativa"] == "Documento divergente segundo a IA."
 
 
+@pytest.mark.parametrize("status_admin", [Anexo.STATUS_REPROVADO, Anexo.STATUS_VENCIDO])
+def test_anexo_form_remove_prefixo_analise_da_ia_ao_copiar_para_admin(
+    tipo_documento, status_admin
+):
+    anexo = Anexo(
+        tipo_documento=tipo_documento,
+        status_ia=Anexo.STATUS_REPROVADO,
+        justificativa_ia="Análise da IA: Documento divergente segundo a IA.",
+    )
+    form = AnexoForm(
+        data={
+            "tipo_documento": tipo_documento.id,
+            "status": status_admin,
+            "justificativa": "",
+        },
+        files={"arquivo": create_uploaded_file("anexo.pdf")},
+        instance=anexo,
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["justificativa"] == "Documento divergente segundo a IA."
+
+
+def test_anexo_preserva_justificativa_sem_prefixo_analise_da_ia(tipo_documento):
+    anexo = Anexo(
+        tipo_documento=tipo_documento,
+        status_ia=Anexo.STATUS_REPROVADO,
+        justificativa_ia="Documento divergente segundo a IA.",
+    )
+    form = AnexoForm(
+        data={
+            "tipo_documento": tipo_documento.id,
+            "status": Anexo.STATUS_REPROVADO,
+            "justificativa": "",
+        },
+        files={"arquivo": create_uploaded_file("anexo.pdf")},
+        instance=anexo,
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["justificativa"] == "Documento divergente segundo a IA."
+
+
 @pytest.mark.parametrize("file_name", ["anexo.jpg", "anexo.png", "anexo.txt"])
 def test_anexo_form_rejeita_arquivo_nao_pdf(tipo_documento, file_name):
     form = AnexoForm(

@@ -145,6 +145,31 @@ def test_inline_exibe_justificativa_ia_em_bloco_readonly_com_hook_js(anexo):
     assert 'data-justificativa-ia="Documento divergente segundo a IA."' in html
 
 
+def test_inline_remove_prefixo_analise_da_ia_do_data_atributo_para_hook_js(anexo):
+    inline = AnexosInLine(Proponente, AdminSite())
+    anexo.status_ia = Anexo.STATUS_REPROVADO
+    anexo.justificativa_ia = (
+        "Análise da IA: Documento divergente segundo a IA."
+    )
+
+    html = inline.justificativa_ia_info(anexo)
+
+    assert 'data-justificativa-ia="Documento divergente segundo a IA."' in html
+    assert (
+        "Análise da IA: Documento divergente segundo a IA." in html
+    ), "O texto completo com prefixo deve continuar visível no título e no corpo do details"
+
+
+def test_inline_remove_prefixo_analise_da_ia_com_espacos_e_caixa_alta(anexo):
+    inline = AnexosInLine(Proponente, AdminSite())
+    anexo.status_ia = Anexo.STATUS_REPROVADO
+    anexo.justificativa_ia = "   ANÁLISE DA IA:  Documento divergente."
+
+    html = inline.justificativa_ia_info(anexo)
+
+    assert 'data-justificativa-ia="Documento divergente."' in html
+
+
 def test_inline_deixa_justificativa_ia_vazia_quando_nao_ha_texto(anexo):
     inline = AnexosInLine(Proponente, AdminSite())
     anexo.justificativa_ia = ""
