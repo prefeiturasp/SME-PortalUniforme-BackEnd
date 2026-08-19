@@ -55,6 +55,7 @@ def test_metodo_qtd_itens_por_categoria_as_dict(uniforme_camisa, uniforme_meias,
         Uniforme.CATEGORIA_CALCADO: 0,
         Uniforme.CATEGORIA_KIT_VERAO: 2,
         Uniforme.CATEGORIA_KIT_INVERNO: 1,
+        Uniforme.CATEGORIA_KIT_UNIFORME: 0,
     }
     print('quantidade recebida', qtd_itens_por_categoria)
     assert qtd_itens_por_categoria == esperado
@@ -67,6 +68,7 @@ def test_metodo_qtd_itens_por_categoria_as_dict_quando_nao_ha_itens():
         Uniforme.CATEGORIA_CALCADO: 0,
         Uniforme.CATEGORIA_KIT_VERAO: 0,
         Uniforme.CATEGORIA_KIT_INVERNO: 0,
+        Uniforme.CATEGORIA_KIT_UNIFORME: 0,
     }
     assert qtd_itens_por_categoria == esperado
 
@@ -100,7 +102,12 @@ def test_metodo_categorias_to_json(uniforme_meias, uniforme_tenis):
                            'nome': 'Tenis',
                            'quantidade': 1,
                            'unidade': 'PAR'}]
-        }
+        },
+        {
+            'id': Uniforme.CATEGORIA_KIT_UNIFORME,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_UNIFORME],
+            'uniformes': []
+        },
     ]
     resultado = Uniforme.categorias_to_json()
     assert esperado == resultado
