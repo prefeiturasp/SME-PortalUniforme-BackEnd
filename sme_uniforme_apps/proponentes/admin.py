@@ -2,7 +2,7 @@ from io import BytesIO
 
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.html import format_html
@@ -17,6 +17,8 @@ from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
 from .models.forms import AnexoForm, LojaAdminForm, TipoDocumentoAdminForm
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
                        muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
+from sme_uniforme_apps.triade.models import TriadeLote
+from sme_uniforme_apps.triade.statuses import TRIADE_LOTE_STATUS_LABELS, normalize_status
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -302,6 +304,22 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     data_cadastro.short_description = 'Data do cadastro'
     data_cadastro.admin_order_field = 'criado_em'
 
+    def validacao_triade(self, obj):
+        lote = obj.triade_lotes.first()
+        if not lote:
+            return "-"
+
+        status = normalize_status(lote.status)
+        return TRIADE_LOTE_STATUS_LABELS.get(status, status)
+
+    validacao_triade.short_description = 'Validação TRIADE'
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related(
+            Prefetch('triade_lotes', queryset=TriadeLote.objects.order_by('-criado_em'))
+        )
+
     def cria_usuario_proponente_sem_usuario(self, request, queryset):
         cria_usuario_proponentes_existentes(queryset)
         self.message_user(request, f'Caso não exista, foram criados usuários para os proponentes selecionados.')
@@ -345,7 +363,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'envia_email_pendencias_action',
         'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
-    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro',
+    list_display = ('protocolo', 'validacao_triade', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro',
                     'ultima_alteracao', 'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
