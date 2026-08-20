@@ -44,7 +44,7 @@ def test_admin():
     # pylint: disable=W0212
     assert admin.site._registry[Proponente]
     assert model_admin.list_display == (
-        'protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro', 'ultima_alteracao', 'status')
+        'protocolo', 'validacao_triade', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro', 'ultima_alteracao', 'status')
     assert model_admin.ordering == ('-alterado_em',)
     assert model_admin.search_fields == ('uuid', 'cnpj', 'razao_social', 'responsavel')
 
