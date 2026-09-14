@@ -1,5 +1,6 @@
 import logging
 
+from django.db import transaction
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -47,6 +48,7 @@ class ProponentesViewSet(mixins.CreateModelMixin,
             return ProponenteCreateSerializer
 
     @action(detail=True, methods=['patch'], url_path='atualiza-lojas')
+    @transaction.atomic
     def atualiza_lojas(self, request, uuid):
         proponente = self.get_object()
         lojas = request.data.pop('lojas')

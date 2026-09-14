@@ -3,7 +3,7 @@ import logging
 
 from brazilnum.cnpj import validate_cnpj
 from django.core import validators
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -201,6 +201,7 @@ class Proponente(ModeloBase, TemObservacao):
         return tipos_obrigatorios.count() == anexos_obrigatorios.count()
 
     @classmethod
+    @transaction.atomic
     def concluir_cadastro(cls, uuid):
         proponente = Proponente.objects.get(uuid=uuid)
         if not cls.documentos_obrigatorios_enviados(proponente):

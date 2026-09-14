@@ -55,7 +55,8 @@ DATABASES = {
         'PORT': env('POSTGRES_PORT'),
     }
 }
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DATABASES["default"]["ATOMIC_REQUESTS"] = False
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 # URLS
 # ------------------------------------------------------------------------------

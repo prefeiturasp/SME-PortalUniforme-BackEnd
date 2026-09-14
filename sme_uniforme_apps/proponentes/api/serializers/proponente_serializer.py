@@ -1,5 +1,6 @@
 import logging
 
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -77,6 +78,7 @@ class ProponenteCreateSerializer(serializers.ModelSerializer):
                 break
         return categoria_faltando_itens
 
+    @transaction.atomic
     def create(self, validated_data):
         ofertas_de_uniformes = validated_data.pop('ofertas_de_uniformes')
         lojas = validated_data.pop('lojas')
