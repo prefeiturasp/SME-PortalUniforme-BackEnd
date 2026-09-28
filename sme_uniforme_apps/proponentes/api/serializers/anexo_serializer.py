@@ -1,6 +1,7 @@
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from drf_base64.serializers import ModelSerializer
 from rest_framework import serializers
 
@@ -41,6 +42,7 @@ class AnexoCreateSerializer(serializers.ModelSerializer):
 
         return value
 
+    @transaction.atomic
     def create(self, validated_data):
         log.info("Criando anexo!")
         proponent_uuid = validated_data.pop('proponente')
