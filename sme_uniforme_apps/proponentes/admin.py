@@ -3,6 +3,7 @@ from io import BytesIO
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Count, Prefetch
+from django.db import transaction
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.html import format_html
@@ -218,11 +219,12 @@ class TemAnexosReprovadosOuVencidosFilter(SimpleListFilter):
 @admin.register(Proponente)
 class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     def verifica_bloqueio_cnpj(self, request, queryset):
-        for proponente in queryset.all():
-            bloqueado = cnpj_esta_bloqueado(proponente.cnpj)
-            if (bloqueado and proponente.status == Proponente.STATUS_INSCRITO) or (
-                    not bloqueado and proponente.status == Proponente.STATUS_BLOQUEADO):
-                proponente.save()
+        with transaction.atomic():
+            for proponente in queryset.all():
+                bloqueado = cnpj_esta_bloqueado(proponente.cnpj)
+                if (bloqueado and proponente.status == Proponente.STATUS_INSCRITO) or (
+                        not bloqueado and proponente.status == Proponente.STATUS_BLOQUEADO):
+                    proponente.save()
 
         self.message_user(request, "Bloqueios verificados.")
 
@@ -420,18 +422,20 @@ class TipoDocumentoAdmin(admin.ModelAdmin):
     form = TipoDocumentoAdminForm
 
     def inverte_visivel(self, request, queryset):
-        for tipo_documento in queryset.all():
-            tipo_documento.visivel = not tipo_documento.visivel
-            tipo_documento.save()
+        with transaction.atomic():
+            for tipo_documento in queryset.all():
+                tipo_documento.visivel = not tipo_documento.visivel
+                tipo_documento.save()
 
         self.message_user(request, "Parâmetro 'visível' atualizado.")
 
     inverte_visivel.short_description = "Inverter o parâmetro 'visível' "
 
     def inverte_obrigatorio(self, request, queryset):
-        for tipo_documento in queryset.all():
-            tipo_documento.obrigatorio = not tipo_documento.obrigatorio
-            tipo_documento.save()
+        with transaction.atomic():
+            for tipo_documento in queryset.all():
+                tipo_documento.obrigatorio = not tipo_documento.obrigatorio
+                tipo_documento.save()
 
         self.message_user(request, "Parâmetro 'obrigatório' atualizado.")
 

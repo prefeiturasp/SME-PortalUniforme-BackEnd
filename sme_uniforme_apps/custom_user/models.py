@@ -1,3 +1,4 @@
+from django.db import transaction
 from django_use_email_as_username.models import BaseUser, BaseUserManager
 
 
@@ -5,6 +6,7 @@ class User(BaseUser):
     objects = BaseUserManager()
 
     @classmethod
+    @transaction.atomic
     def cria_usuario(cls, email, nome, senha):
         novo_usuario = cls.objects.create(email=email, first_name=nome, )
         novo_usuario.set_password(senha)
