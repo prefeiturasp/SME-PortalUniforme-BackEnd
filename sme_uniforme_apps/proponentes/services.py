@@ -2,6 +2,7 @@ import logging
 
 import requests
 from django.conf import settings
+from django.db import transaction
 
 from .cnpj import first_access_password
 from ..custom_user.models import User
@@ -21,21 +22,23 @@ def cnpj_esta_bloqueado(cnpj):
 def cria_usuario_proponentes_existentes(queryset):
     for proponente in queryset.all():
         if not proponente.usuario:
-            novo_usuario = User.objects.create_user(email=proponente.email,
-                                                    first_name=proponente.responsavel.split(" ")[0],
-                                                    last_name=" ".join(proponente.responsavel.split(" ")[1:]),
-                                                    password=first_access_password(proponente.cnpj))
-            proponente.usuario = novo_usuario
-            proponente.save()
+            with transaction.atomic():
+                novo_usuario = User.objects.create_user(email=proponente.email,
+                                                        first_name=proponente.responsavel.split(" ")[0],
+                                                        last_name=" ".join(proponente.responsavel.split(" ")[1:]),
+                                                        password=first_access_password(proponente.cnpj))
+                proponente.usuario = novo_usuario
+                proponente.save()
 
 
 def muda_status_de_proponentes(queryset, novo_status):
     for proponente in queryset.all():
-        if proponente.status != novo_status:
-            proponente.status = novo_status
-            proponente.save()
-        if novo_status == "CREDENCIADO":
-            atualiza_coordenadas_lojas(proponente.lojas)
+        with transaction.atomic():
+            if proponente.status != novo_status:
+                proponente.status = novo_status
+                proponente.save()
+            if novo_status == "CREDENCIADO":
+                atualiza_coordenadas_lojas(proponente.lojas)
 
 
 def envia_email_pendencias(queryset):
@@ -45,7 +48,8 @@ def envia_email_pendencias(queryset):
 
 def atualiza_coordenadas(queryset):
     for proponente in queryset.all():
-        atualiza_coordenadas_lojas(proponente.lojas)
+        with transaction.atomic():
+            atualiza_coordenadas_lojas(proponente.lojas)
 
 
 def atualiza_coordenadas_lojas(lojas):
