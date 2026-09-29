@@ -41,6 +41,11 @@ def test_uniformes_api_get_categorias(client, uniforme_meias, uniforme_tenis):
                            'quantidade': 1,
                            'unidade': 'PAR'}]
         },
+        {
+            'id': Uniforme.CATEGORIA_KIT_UNIFORME,
+            'nome': Uniforme.CATEGORIA_NOMES[Uniforme.CATEGORIA_KIT_UNIFORME],
+            'uniformes': []
+        },
     ]
 
     assert response.status_code == status.HTTP_200_OK

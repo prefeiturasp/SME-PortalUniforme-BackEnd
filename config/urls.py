@@ -11,6 +11,7 @@ from rest_framework_jwt.views import verify_jwt_token, refresh_jwt_token, obtain
 from sme_uniforme_apps.core.api.urls import urlpatterns as core_url
 from sme_uniforme_apps.proponentes.urls import urlpatterns as proponentes_url
 from sme_uniforme_apps.custom_user.urls import urlpatterns as users_url
+from sme_uniforme_apps.triade.urls import urlpatterns as triade_url
 
 schema_view = get_swagger_view(title="Portal SME Uniformes")
 
@@ -27,6 +28,7 @@ urlpatterns = [
 urlpatterns += core_url
 urlpatterns += proponentes_url
 urlpatterns += users_url
+urlpatterns += triade_url
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

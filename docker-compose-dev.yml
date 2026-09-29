@@ -1,0 +1,106 @@
+x-app-base: &app-base
+  image: sme-portaluniforme-backend-dev:local
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  env_file:
+    - .env
+  environment:
+    POSTGRES_HOST: db
+    POSTGRES_PORT: 5432
+    REDIS_LOCATION: redis://redis:6379/1
+    SERVER_NAME: http://localhost:${BACKEND_PORT:-8000}
+  volumes:
+    - .:/app
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *app-base
+    command: >
+      sh -c "
+      python manage.py check &&
+      python manage.py migrate &&
+      exec python manage.py runserver 0.0.0.0:8000
+      "
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs/', timeout=5)"
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  celery-worker:
+    <<: *app-base
+    command: celery -A config worker --loglevel=info
+    depends_on:
+      web:
+        condition: service_healthy
+
+  celery-beat:
+    <<: *app-base
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      web:
+        condition: service_healthy
+
+  db:
+    image: postgres:11.2-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-12345qw}
+      POSTGRES_DB: ${POSTGRES_DB:-uniformes}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-12345qw}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-uniformes}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:5.0.0-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-matheus.jesus@spassu.com.br}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-adminadmin}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-9090}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:

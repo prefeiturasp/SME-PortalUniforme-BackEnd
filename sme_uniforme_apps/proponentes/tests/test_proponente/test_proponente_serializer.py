@@ -1,6 +1,16 @@
 import pytest
+from pathlib import Path
 
-from sme_uniforme_apps.proponentes.api.serializers.proponente_serializer import ProponenteSerializer, ProponenteLookUpSerializer
+from django.core.files.uploadedfile import SimpleUploadedFile
+from model_bakery import baker
+
+from sme_uniforme_apps.core.models import Uniforme
+
+from sme_uniforme_apps.proponentes.api.serializers.proponente_serializer import (
+    ProponenteCreateSerializer,
+    ProponenteLookUpSerializer,
+    ProponenteSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -36,3 +46,52 @@ def test_proponente_lookup_serializer(proponente):
     assert proponente_serializer.data['razao_social']
     assert proponente_serializer.data['uuid']
 
+
+def test_proponente_create_serializer_cria_loja_com_comprovante_endereco(
+    payload_proponente_sem_anexos,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    baker.make(
+        "LimiteCategoria",
+        categoria_uniforme=Uniforme.CATEGORIA_KIT_VERAO,
+        preco_maximo=999,
+    )
+    baker.make(
+        "LimiteCategoria",
+        categoria_uniforme=Uniforme.CATEGORIA_KIT_INVERNO,
+        preco_maximo=999,
+    )
+    payload_proponente_sem_anexos["lojas"][0]["foto_fachada"] = SimpleUploadedFile(
+        "fachada.png",
+        b"conteudo_teste",
+        content_type="image/png",
+    )
+    payload_proponente_sem_anexos["lojas"][0]["comprovante_endereco"] = (
+        SimpleUploadedFile(
+            "comprovante.pdf",
+            b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF",
+            content_type="application/pdf",
+        )
+    )
+
+    serializer = ProponenteCreateSerializer(data=payload_proponente_sem_anexos)
+
+    assert serializer.is_valid(), serializer.errors
+
+    proponente = serializer.save()
+    loja = proponente.lojas.get(nome_fantasia="Loja A")
+    proponente_serializer = ProponenteSerializer(proponente)
+    comprovante_url = next(
+        loja_payload["comprovante_endereco"]
+        for loja_payload in proponente_serializer.data["lojas"]
+        if loja_payload["nome_fantasia"] == "Loja A"
+    )
+
+    assert loja.comprovante_endereco
+    assert Path(loja.comprovante_endereco.path).exists()
+    assert comprovante_url
+    assert comprovante_url.endswith(".pdf")
+
+    loja.comprovante_endereco.delete(save=False)

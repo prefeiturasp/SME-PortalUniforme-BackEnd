@@ -48,9 +48,9 @@ def loja_fisica(proponente, arquivo):
     )
 
 @pytest.fixture
-def payload_update_fachada_loja(arquivo_anexo_base64):
+def payload_update_fachada_loja(arquivo_fachada_base64):
     return {
-        "foto_fachada": arquivo_anexo_base64,
+        "foto_fachada": arquivo_fachada_base64,
     }
 
 
@@ -104,6 +104,7 @@ def proponente_bloqueado(cnpj_bloqueado, lista_negra):
 def tipo_documento():
     return baker.make(
         'TipoDocumento',
+        identificador='CERTIDAO_NEGATIVA',
         nome='Certidão Negativa',
         obrigatorio=True,
         visivel=True
@@ -114,6 +115,7 @@ def tipo_documento():
 def tipo_documento_nao_obrigatorio():
     return baker.make(
         'TipoDocumento',
+        identificador='CARTA_RECOMENDACAO',
         nome='Carta de Recomendação',
         obrigatorio=False,
     )
@@ -121,7 +123,18 @@ def tipo_documento_nao_obrigatorio():
 
 @pytest.fixture
 def arquivo_anexo_base64():
-    return "data:text/plain/txt;base64,RW5kZXJl528gSVB2NDoJMTAuNDkuMjMuOTANClNlcnZpZG9yZXMgRE5TIElQdjQ6CTEwLjQ5LjE2LjQwCjEwLjQ5LjE2LjQzDQpTdWZpeG8gRE5TIFByaW3hcmlvOgllZHVjYWNhby5pbnRyYW5ldA0KRmFicmljYW50ZToJSW50ZWwNCkRlc2NyaefjbzoJSW50ZWwoUikgRXRoZXJuZXQgQ29ubmVjdGlvbiBJMjE4LUxNDQpWZXJz428gZG8gZHJpdmVyOgkxMi4xMy4xNy40DQpFbmRlcmXnbyBm7XNpY28gKE1BQyk6CTc0LUU2LUUyLUQwLUVDLTNF"
+    return "data:application/pdf;base64,JVBERi0xLjQKJUVPRgo="
+
+
+@pytest.fixture
+def arquivo_fachada_base64():
+    return "data:image/png;base64,iVBORw0KGgo="
+
+
+@pytest.fixture
+def arquivo_txt_base64():
+    return "data:text/plain;base64,Q09OVEVVRE8gVEVTVEU="
+
 
 @pytest.fixture
 def payload_anexo(arquivo_anexo_base64, tipo_documento, proponente):
@@ -219,7 +232,7 @@ def payload_ofertas_de_uniformes_faltando_a_camisa(uniforme_calca, uniforme_teni
 
 
 @pytest.fixture
-def payload_lojas(arquivo_anexo_base64):
+def payload_lojas(arquivo_fachada_base64):
     return [
         {
             "nome_fantasia": "Loja A",
@@ -232,7 +245,7 @@ def payload_lojas(arquivo_anexo_base64):
             "longitude": 0,
             "numero_iptu": "",
             "telefone": "(55) 4344-8765",
-            "foto_fachada": arquivo_anexo_base64
+            "foto_fachada": arquivo_fachada_base64
         },
         {
             "nome_fantasia": "Loja B",
@@ -244,7 +257,7 @@ def payload_lojas(arquivo_anexo_base64):
             "longitude": 0,
             "numero_iptu": "",
             "telefone": "(24) 9988-29105",
-            "foto_fachada": arquivo_anexo_base64
+            "foto_fachada": arquivo_fachada_base64
         }
     ]
 

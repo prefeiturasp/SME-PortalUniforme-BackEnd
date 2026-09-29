@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 from django.db import transaction
 
+from .cnpj import first_access_password
 from ..custom_user.models import User
 from .models.lista_negra import ListaNegra
 
@@ -25,7 +26,7 @@ def cria_usuario_proponentes_existentes(queryset):
                 novo_usuario = User.objects.create_user(email=proponente.email,
                                                         first_name=proponente.responsavel.split(" ")[0],
                                                         last_name=" ".join(proponente.responsavel.split(" ")[1:]),
-                                                        password="".join([n for n in proponente.cnpj if n.isdigit()])[:5])
+                                                        password=first_access_password(proponente.cnpj))
                 proponente.usuario = novo_usuario
                 proponente.save()
 

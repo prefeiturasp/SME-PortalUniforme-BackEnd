@@ -1,21 +1,25 @@
-import csv
 from io import BytesIO
 
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.db.models import Count, Prefetch
 from django.db import transaction
-from django.db.models import Count
 from django.http import HttpResponse
+from django.utils import timezone
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 from django.contrib import messages
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 
 from .models import (Anexo, ListaNegra, Loja, OfertaDeUniforme, Proponente,
                      TipoDocumento)
-from .models.forms import AnexoForm
+from .models.forms import AnexoForm, LojaAdminForm, TipoDocumentoAdminForm
 from .services import (atualiza_coordenadas, cnpj_esta_bloqueado,
                        muda_status_de_proponentes, cria_usuario_proponentes_existentes, envia_email_pendencias)
+from sme_uniforme_apps.triade.models import TriadeLote
+from sme_uniforme_apps.triade.statuses import TRIADE_LOTE_STATUS_LABELS, normalize_status
 
 
 class UniformesFornecidosInLine(admin.TabularInline):
@@ -24,6 +28,7 @@ class UniformesFornecidosInLine(admin.TabularInline):
 
 
 class LojasInLine(admin.StackedInline):
+    form = LojaAdminForm
     model = Loja
     extra = 1  # Quantidade de linhas que serão exibidas.
 
@@ -31,7 +36,117 @@ class LojasInLine(admin.StackedInline):
 class AnexosInLine(admin.TabularInline):
     form = AnexoForm
     model = Anexo
-    extra = 1  # Quantidade de linhas que serão exibidas.
+    extra = 0
+    fields = (
+        'tipo_documento',
+        'arquivo',
+        'data_validade',
+        'status_ia_info',
+        'justificativa_ia_info',
+        'status',
+        'justificativa',
+        'ultima_alteracao_admin_info',
+    )
+    readonly_fields = (
+        'status_ia_info',
+        'justificativa_ia_info',
+        'ultima_alteracao_admin_info',
+    )
+
+    class Media:
+        css = {'all': ('proponentes/css/anexos-inline.css',)}
+        js = ()
+
+    @staticmethod
+    def _nome_usuario(usuario):
+        nome_completo = ''
+        if hasattr(usuario, 'get_full_name'):
+            nome_completo = usuario.get_full_name().strip()
+
+        return nome_completo or getattr(usuario, 'email', '') or str(usuario)
+
+    def _resolve_ultima_alteracao(self, obj):
+        usuario = obj.ultima_alteracao_admin_por
+        data = obj.ultima_alteracao_admin_em
+
+        if usuario and data:
+            return usuario, data
+
+        historico = (
+            obj.historico.exclude(actor=None)
+            .select_related('actor')
+            .order_by('-timestamp')
+            .first()
+        )
+        if historico:
+            return historico.actor, historico.timestamp
+
+        return None, None
+
+    def status_ia_info(self, obj):
+        status_ia = obj.status_ia if obj and obj.status_ia else ''
+        status_ia_exibicao = (
+            Anexo.STATUS_NOMES.get(status_ia, status_ia)
+            if status_ia
+            else 'Sem análise de IA.'
+        )
+        classe = 'sem-analise'
+        if status_ia:
+            classe = slugify(status_ia).replace('_', '-') or 'status-ia'
+
+        return format_html(
+            '<span class="anexo-status-ia anexo-status-ia-{}">{}</span>',
+            classe,
+            status_ia_exibicao,
+        )
+
+    status_ia_info.short_description = 'Status IA'
+
+    def justificativa_ia_info(self, obj):
+        justificativa_ia = obj.justificativa_ia if obj and obj.justificativa_ia else ''
+        justificativa_data = (
+            Anexo.remover_prefixo_analise_ia(justificativa_ia) if obj else ''
+        )
+
+        if not justificativa_ia:
+            return format_html(
+                '<div class="anexo-ia-justificativa anexo-ia-justificativa-vazia" data-justificativa-ia=""></div>'
+            )
+
+        resumo = justificativa_ia
+        if len(resumo) > 42:
+            resumo = '{}...'.format(resumo[:42])
+
+        return format_html(
+            (
+                '<details class="anexo-ia-detalhe">'
+                '<summary title="{}">{}</summary>'
+                '<div class="anexo-ia-justificativa" data-justificativa-ia="{}">{}</div>'
+                '</details>'
+            ),
+            justificativa_ia,
+            resumo,
+            justificativa_data,
+            justificativa_ia,
+        )
+
+    justificativa_ia_info.short_description = 'Justificativa IA'
+
+    def ultima_alteracao_admin_info(self, obj):
+        if not obj or not obj.pk:
+            return 'Nenhuma alteração registrada.'
+
+        usuario, data = self._resolve_ultima_alteracao(obj)
+        if not usuario or not data:
+            return 'Nenhuma alteração registrada.'
+
+        return format_html(
+            '<div class="anexo-auditoria"><strong>{}</strong><span>{}</span></div>',
+            self._nome_usuario(usuario),
+            timezone.localtime(data).strftime('%d/%m/%Y'),
+        )
+
+    ultima_alteracao_admin_info.short_description = 'Auditoria'
 
 
 class ExportXlsxMixin:
@@ -191,6 +306,22 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
     data_cadastro.short_description = 'Data do cadastro'
     data_cadastro.admin_order_field = 'criado_em'
 
+    def validacao_triade(self, obj):
+        lote = obj.triade_lotes.first()
+        if not lote:
+            return "-"
+
+        status = normalize_status(lote.status)
+        return TRIADE_LOTE_STATUS_LABELS.get(status, status)
+
+    validacao_triade.short_description = 'Validação TRIADE'
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related(
+            Prefetch('triade_lotes', queryset=TriadeLote.objects.order_by('-criado_em'))
+        )
+
     def cria_usuario_proponente_sem_usuario(self, request, queryset):
         cria_usuario_proponentes_existentes(queryset)
         self.message_user(request, f'Caso não exista, foram criados usuários para os proponentes selecionados.')
@@ -202,6 +333,23 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
             if 'cria_usuario_proponente_sem_usuario' in actions:
                 del actions['cria_usuario_proponente_sem_usuario']
         return actions
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is not Anexo:
+            return super().save_formset(request, form, formset, change)
+
+        instances = formset.save(commit=False)
+
+        for deleted_object in formset.deleted_objects:
+            deleted_object.delete()
+
+        for instance in instances:
+            instance.copiar_justificativa_ia_para_admin()
+            instance.ultima_alteracao_admin_por = request.user
+            instance.ultima_alteracao_admin_em = timezone.now()
+            instance.save()
+
+        formset.save_m2m()
 
     actions = [
         'verifica_bloqueio_cnpj',
@@ -217,7 +365,7 @@ class ProponenteAdmin(admin.ModelAdmin, ExportXlsxMixin):
         'envia_email_pendencias_action',
         'cria_usuario_proponente_sem_usuario',
         'export_as_xlsx']
-    list_display = ('protocolo', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro',
+    list_display = ('protocolo', 'validacao_triade', 'cnpj', 'razao_social', 'responsavel', 'telefone', 'email', 'usuario', 'data_cadastro',
                     'ultima_alteracao', 'status')
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cnpj', 'razao_social', 'responsavel')
@@ -247,8 +395,12 @@ class ListaNegraAdmin(admin.ModelAdmin):
 
 @admin.register(Loja)
 class LojaAdmin(admin.ModelAdmin):
+    form = LojaAdminForm
+
     @staticmethod
     def protocolo(loja):
+        if not loja.proponente_id:
+            return "-"
         return loja.proponente.protocolo
 
     @staticmethod
@@ -267,6 +419,8 @@ class LojaAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDocumento)
 class TipoDocumentoAdmin(admin.ModelAdmin):
+    form = TipoDocumentoAdminForm
+
     def inverte_visivel(self, request, queryset):
         with transaction.atomic():
             for tipo_documento in queryset.all():
@@ -287,8 +441,8 @@ class TipoDocumentoAdmin(admin.ModelAdmin):
 
     inverte_obrigatorio.short_description = "Inverter o parâmetro 'obrigatório' "
 
-    list_display = ('nome', 'obrigatorio', 'visivel', 'tem_data_validade', 'obrigatorio_sme')
+    list_display = ('identificador', 'nome', 'obrigatorio', 'visivel', 'tem_data_validade', 'obrigatorio_sme')
     ordering = ('nome',)
-    search_fields = ('nome',)
+    search_fields = ('identificador', 'nome')
     list_filter = ('obrigatorio', 'visivel')
     actions = ['inverte_visivel', 'inverte_obrigatorio']

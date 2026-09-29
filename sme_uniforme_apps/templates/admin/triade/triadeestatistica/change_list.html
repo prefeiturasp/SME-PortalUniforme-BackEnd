@@ -1,0 +1,738 @@
+{% extends "admin/base_site.html" %} {% block extrastyle %} {{ block.super }}
+<style>
+  .triade-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .triade-filters,
+  .triade-section {
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .triade-filter-grid,
+  .triade-grid,
+  .triade-table-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .triade-filter-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .triade-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .triade-filter-field label {
+    font-weight: 600;
+  }
+
+  .triade-filter-field input,
+  .triade-filter-field select {
+    min-width: 0;
+  }
+
+  .triade-filters__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .triade-filters__actions .button,
+  .triade-filters__actions .button.default {
+    box-sizing: border-box;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .triade-section__header {
+    margin-bottom: 16px;
+  }
+
+  .triade-section__title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin: 0;
+  }
+
+  .triade-section__subtitle {
+    color: #666;
+    margin: 8px 0 0;
+  }
+
+  .triade-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 20px;
+  }
+
+  .triade-card {
+    background: #f8f8f8;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 112px;
+    padding: 16px;
+  }
+
+  .triade-card--neutral {
+    background: #f7f7f7;
+    border-color: #dcdcdc;
+  }
+
+  .triade-card--status {
+    background: #eef6ff;
+    border-color: #c9def7;
+  }
+
+  .triade-card--decision {
+    background: #fff4e6;
+    border-color: #f1d0a4;
+  }
+
+  .triade-card__kind {
+    align-self: flex-start;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 4px 8px;
+    text-transform: uppercase;
+  }
+
+  .triade-card--neutral .triade-card__kind {
+    background: #ececec;
+    color: #5f5f5f;
+  }
+
+  .triade-card--status .triade-card__kind {
+    background: #d7e8fb;
+    color: #20507f;
+  }
+
+  .triade-card--decision .triade-card__kind {
+    background: #f8dfbe;
+    color: #8a4b08;
+  }
+
+  .triade-card__label {
+    color: #666;
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .triade-card__value {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .triade-chip-groups {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-bottom: 20px;
+  }
+
+  .triade-chip-group h3 {
+    font-size: 13px;
+    margin: 0 0 8px;
+    text-transform: uppercase;
+  }
+
+  .triade-chip-group--status h3 {
+    color: #20507f;
+  }
+
+  .triade-chip-group--decision h3 {
+    color: #8a4b08;
+  }
+
+  .triade-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .triade-chip {
+    background: #eef3ff;
+    border-radius: 999px;
+    color: #1f3a6d;
+    display: inline-flex;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .triade-chip-group--decision .triade-chip {
+    background: #fff0dc;
+    color: #8a4b08;
+  }
+
+  .triade-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .triade-legend__item {
+    align-items: center;
+    color: #555;
+    display: inline-flex;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .triade-legend__swatch {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+  }
+
+  .triade-legend__swatch--neutral {
+    background: #f7f7f7;
+    border-color: #dcdcdc;
+  }
+
+  .triade-legend__swatch--status {
+    background: #eef6ff;
+    border-color: #c9def7;
+  }
+
+  .triade-legend__swatch--decision {
+    background: #fff4e6;
+    border-color: #f1d0a4;
+  }
+
+  .triade-table-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  .triade-module h3 {
+    margin-top: 0;
+  }
+
+  .triade-module--status {
+    border-left: 4px solid #c9def7;
+  }
+
+  .triade-module--decision {
+    border-left: 4px solid #f1d0a4;
+  }
+
+  .triade-module--neutral {
+    border-left: 4px solid #dcdcdc;
+  }
+
+  .triade-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+
+  .triade-table thead th {
+    background: #f4f4f4;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .triade-module--status .triade-table thead th {
+    background: #eaf3ff;
+  }
+
+  .triade-module--decision .triade-table thead th {
+    background: #fff1e1;
+  }
+
+  .triade-table th,
+  .triade-table td {
+    border-bottom: 1px solid #ececec;
+    padding: 10px 12px;
+    vertical-align: middle;
+  }
+
+  .triade-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .triade-module--status .triade-table tbody tr:nth-child(odd) td {
+    background: #f7fbff;
+  }
+
+  .triade-module--decision .triade-table tbody tr:nth-child(odd) td {
+    background: #fff8ef;
+  }
+
+  .triade-table__code {
+    color: #666;
+    display: block;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .triade-table__tag {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+  }
+
+  .triade-table__tag--status {
+    background: #e5f0ff;
+    color: #20507f;
+  }
+
+  .triade-table__tag--decision {
+    background: #ffe8cc;
+    color: #8a4b08;
+  }
+
+  .triade-table__tag--neutral {
+    background: #ededed;
+    color: #5f5f5f;
+  }
+</style>
+{% endblock %} {% block content %}
+<div id="content-main" class="triade-page">
+  <form method="get" class="triade-filters">
+    <div class="triade-filter-grid">
+      <div class="triade-filter-field">
+        <label for="id_data_inicial">Data inicial</label>
+        <input
+          id="id_data_inicial"
+          type="date"
+          name="data_inicial"
+          value="{{ filters.data_inicial }}"
+        />
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_data_final">Data final</label>
+        <input
+          id="id_data_final"
+          type="date"
+          name="data_final"
+          value="{{ filters.data_final }}"
+        />
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_status_lote">Status do lote</label>
+        <select id="id_status_lote" name="status_lote">
+          <option value="">Todos</option>
+          {% for option in status_lote_options %}
+          <option
+            value="{{ option.value }}"
+            {%
+            if
+            filters.status_lote=""
+            ="option.value"
+            %}
+            selected{%
+            endif
+            %}
+          >
+            {{ option.display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_decisao_lote">Decisão do lote</label>
+        <select id="id_decisao_lote" name="decisao_lote">
+          <option value="">Todas</option>
+          {% for option in decisao_lote_options %}
+          <option
+            value="{{ option.value }}"
+            {%
+            if
+            filters.decisao_lote=""
+            ="option.value"
+            %}
+            selected{%
+            endif
+            %}
+          >
+            {{ option.display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_status_callback">Status do callback</label>
+        <select id="id_status_callback" name="status_callback">
+          <option value="">Todos</option>
+          {% for option in status_callback_options %}
+          <option
+            value="{{ option.value }}"
+            {%
+            if
+            filters.status_callback=""
+            ="option.value"
+            %}
+            selected{%
+            endif
+            %}
+          >
+            {{ option.display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_status_documento">Status do documento</label>
+        <select id="id_status_documento" name="status_documento">
+          <option value="">Todos</option>
+          {% for option in status_documento_options %}
+          <option
+            value="{{ option.value }}"
+            {%
+            if
+            filters.status_documento=""
+            ="option.value"
+            %}
+            selected{%
+            endif
+            %}
+          >
+            {{ option.display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="triade-filter-field">
+        <label for="id_decisao_documento">Decisão do documento</label>
+        <select id="id_decisao_documento" name="decisao_documento">
+          <option value="">Todas</option>
+          {% for option in decisao_documento_options %}
+          <option
+            value="{{ option.value }}"
+            {%
+            if
+            filters.decisao_documento=""
+            ="option.value"
+            %}
+            selected{%
+            endif
+            %}
+          >
+            {{ option.display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="triade-filters__actions">
+      <button type="submit" class="button default">Filtrar</button>
+      <a href="." class="button">Limpar</a>
+    </div>
+  </form>
+
+  <section class="triade-section">
+    <div class="triade-section__header">
+      <h2 class="triade-section__title">LOTES</h2>
+      <p class="triade-section__subtitle">
+        Status e decisão consolidados do lote, incluindo os estados canônicos do
+        TRIADE e o estado local de preparo do payload.
+      </p>
+    </div>
+
+    <div class="triade-legend">
+      <span class="triade-legend__item"
+        ><span
+          class="triade-legend__swatch triade-legend__swatch--neutral"
+        ></span
+        >Visão geral</span
+      >
+      <span class="triade-legend__item"
+        ><span
+          class="triade-legend__swatch triade-legend__swatch--status"
+        ></span
+        >Status</span
+      >
+      <span class="triade-legend__item"
+        ><span
+          class="triade-legend__swatch triade-legend__swatch--decision"
+        ></span
+        >Decisão</span
+      >
+    </div>
+
+    <div class="triade-grid">
+      {% for card in lotes_cards %}
+      <div class="triade-card triade-card--{{ card.kind }}">
+        <span class="triade-card__kind">{{ card.kind_label }}</span>
+        <span class="triade-card__label">{{ card.label }}</span>
+        <div class="triade-card__value">{{ card.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="triade-chip-groups">
+      <div class="triade-chip-group triade-chip-group--status">
+        <h3>Status monitorados</h3>
+        <div class="triade-chip-list">
+          {% for item in catalog.lotes.status %}
+          <span class="triade-chip">{{ item.display }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="triade-chip-group triade-chip-group--decision">
+        <h3>Decisões monitoradas</h3>
+        <div class="triade-chip-list">
+          {% for item in catalog.lotes.decisoes %}
+          <span class="triade-chip">{{ item.display }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="triade-table-grid">
+      <div class="module triade-module triade-module--status">
+        <h3>Lotes por status</h3>
+        <table class="triade-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in lotes_por_status %}
+            <tr>
+              <td>
+                <span class="triade-table__tag triade-table__tag--status"
+                  >{{ item.label }}</span
+                ><span class="triade-table__code">{{ item.value }}</span>
+              </td>
+              <td>{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="module triade-module triade-module--decision">
+        <h3>Lotes por decisão</h3>
+        <table class="triade-table">
+          <thead>
+            <tr>
+              <th>Decisão</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in lotes_por_decisao %}
+            <tr>
+              <td>
+                <span class="triade-table__tag triade-table__tag--decision"
+                  >{{ item.label }}</span
+                ><span class="triade-table__code">{{ item.value }}</span>
+              </td>
+              <td>{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="module triade-module triade-module--neutral">
+      <h3>Lotes recentes</h3>
+      <table class="triade-table">
+        <thead>
+          <tr>
+            <th>External batch id</th>
+            <th>Proponente</th>
+            <th>Status</th>
+            <th>Decisão</th>
+            <th>Criado em</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lote in recent_lotes %}
+          <tr>
+            <td>{{ lote.external_batch_id }}</td>
+            <td>{{ lote.proponente|default:"-" }}</td>
+            <td>
+              <span class="triade-table__tag triade-table__tag--status"
+                >{{ lote.status|default:"-" }}</span
+              >
+            </td>
+            <td>
+              <span class="triade-table__tag triade-table__tag--decision"
+                >{{ lote.decisao_parecer|default:"-" }}</span
+              >
+            </td>
+            <td>{{ lote.criado_em }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">Sem lotes no filtro atual.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="triade-section">
+    <div class="triade-section__header">
+      <h2 class="triade-section__title">CALLBACKS</h2>
+      <p class="triade-section__subtitle">
+        Estados internos do processamento do webhook, usados para auditoria,
+        deduplicação e observabilidade do recebimento.
+      </p>
+    </div>
+
+    <div class="triade-grid">
+      {% for card in callbacks_cards %}
+      <div class="triade-card triade-card--{{ card.kind }}">
+        <span class="triade-card__kind">{{ card.kind_label }}</span>
+        <span class="triade-card__label">{{ card.label }}</span>
+        <div class="triade-card__value">{{ card.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="triade-chip-groups">
+      <div class="triade-chip-group triade-chip-group--status">
+        <h3>Status monitorados</h3>
+        <div class="triade-chip-list">
+          {% for item in catalog.callbacks.status %}
+          <span class="triade-chip">{{ item.display }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="module triade-module triade-module--status">
+      <h3>Callbacks por status</h3>
+      <table class="triade-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in callbacks_por_status %}
+          <tr>
+            <td>
+              <span class="triade-table__tag triade-table__tag--status"
+                >{{ item.label }}</span
+              ><span class="triade-table__code">{{ item.value }}</span>
+            </td>
+            <td>{{ item.total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="triade-section">
+    <div class="triade-section__header">
+      <h2 class="triade-section__title">DOCUMENTOS</h2>
+      <p class="triade-section__subtitle">
+        Status técnico do documento no TRIADE e decisão final retornada para
+        cada anexo reconciliado no lote.
+      </p>
+    </div>
+
+    <div class="triade-grid">
+      {% for card in documentos_cards %}
+      <div class="triade-card triade-card--{{ card.kind }}">
+        <span class="triade-card__kind">{{ card.kind_label }}</span>
+        <span class="triade-card__label">{{ card.label }}</span>
+        <div class="triade-card__value">{{ card.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="triade-chip-groups">
+      <div class="triade-chip-group triade-chip-group--status">
+        <h3>Status monitorados</h3>
+        <div class="triade-chip-list">
+          {% for item in catalog.documentos.status %}
+          <span class="triade-chip">{{ item.display }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="triade-chip-group triade-chip-group--decision">
+        <h3>Decisões monitoradas</h3>
+        <div class="triade-chip-list">
+          {% for item in catalog.documentos.decisoes %}
+          <span class="triade-chip">{{ item.display }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="triade-table-grid">
+      <div class="module triade-module triade-module--status">
+        <h3>Documentos por status</h3>
+        <table class="triade-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in documentos_por_status %}
+            <tr>
+              <td>
+                <span class="triade-table__tag triade-table__tag--status"
+                  >{{ item.label }}</span
+                ><span class="triade-table__code">{{ item.value }}</span>
+              </td>
+              <td>{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="module triade-module triade-module--decision">
+        <h3>Documentos por decisão</h3>
+        <table class="triade-table">
+          <thead>
+            <tr>
+              <th>Decisão</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in documentos_por_decisao %}
+            <tr>
+              <td>
+                <span class="triade-table__tag triade-table__tag--decision"
+                  >{{ item.label }}</span
+                ><span class="triade-table__code">{{ item.value }}</span>
+              </td>
+              <td>{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
